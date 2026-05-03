@@ -1,0 +1,36 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Test / coverage artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Notebook
+.ipynb_checkpoints/
+examples/out/
+examples/executed_*.ipynb
+
+# Local data
+data/
+*.csv
+!tests/**/*.csv
+
+# Built docs
+site/
