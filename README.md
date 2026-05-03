@@ -143,8 +143,6 @@ The metric layer never imports plotly, and the plot layer never touches the mode
 
 ## Roadmap
 
-See [SCOPING.md](SCOPING.md) for the full design notes.
-
 * **v0.1**: counts, importance, utilization, three ablation strategies, three sunburst plots. ✅
 * **v0.2**: bug-fix release for `auc_drop_map`. ✅
 * **v0.3 (current)**: concept-design diagnostics — block correlation matrices (feature, nullity, SHAP), joint-missing-rate sunburst, coherence-vs-importance scatter, regulatory-tag overlay. ✅
@@ -153,7 +151,7 @@ See [SCOPING.md](SCOPING.md) for the full design notes.
 * **v0.6**: protected-group disparity heatmap.
 * **v1.0**: DAG support (multi-parent concepts) with optional per-edge weights and Sankey rendering.
 
-See [PROPOSALS.md](PROPOSALS.md) for the locked decisions and per-proposal status.
+See the [roadmap page](https://wlazlod.github.io/concept-graph-xai/roadmap/) for milestone status and the locked cross-cutting decisions.
 
 ## Development
 

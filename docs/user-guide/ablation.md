@@ -114,4 +114,4 @@ risk = (drop[["path", "auc_drop_mean"]]
                 d["auc_drop_mean"] * d["joint_missing_rate"]))
 ```
 
-The package deliberately does **not** bake `realism_weighted` into `auc_drop` (decision **D2** in [`PROPOSALS.md`](https://github.com/wlazlod/concept-graph-xai/blob/main/PROPOSALS.md)) — different teams want different fusion rules, and the join is one line.
+The package deliberately does **not** bake `realism_weighted` into `auc_drop` (see decision **D2** in the [roadmap decision log](../roadmap.md#decision-log)) — different teams want different fusion rules, and the join is one line.
