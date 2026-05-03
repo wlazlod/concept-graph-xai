@@ -60,7 +60,9 @@ docs = [
 
 [project.urls]
 Homepage = "https://github.com/wlazlod/concept-graph-xai"
+Documentation = "https://wlazlod.github.io/concept-graph-xai/"
 Issues = "https://github.com/wlazlod/concept-graph-xai/issues"
+Changelog = "https://github.com/wlazlod/concept-graph-xai/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
@@ -74,7 +76,7 @@ include = [
     "src/concept_graph_xai",
     "README.md",
     "LICENSE",
-    "SCOPING.md",
+    "CHANGELOG.md",
 ]
 
 [tool.ruff]
