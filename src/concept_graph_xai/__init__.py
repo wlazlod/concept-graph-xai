@@ -19,7 +19,7 @@ from concept_graph_xai.plotting.auc_drop_map import auc_drop_map
 from concept_graph_xai.plotting.coherence_importance_scatter import (
     coherence_importance_scatter,
 )
-from concept_graph_xai.plotting.concept_beeswarm import concept_beeswarm
+from concept_graph_xai.plotting.concept_violin import concept_violin
 from concept_graph_xai.plotting.correlation_block import correlation_block
 from concept_graph_xai.plotting.joint_missing_map import joint_missing_map
 from concept_graph_xai.plotting.regulatory_tag_overlay import regulatory_tag_overlay
@@ -30,7 +30,7 @@ from concept_graph_xai.prediction_explainer import (
     ConceptPredictionExplainer,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "ConceptContribution",
@@ -43,7 +43,7 @@ __all__ = [
     "coherence_importance",
     "coherence_importance_scatter",
     "column_missing_rate",
-    "concept_beeswarm",
+    "concept_violin",
     "correlation_block",
     "feature_correlation",
     "feature_counts",

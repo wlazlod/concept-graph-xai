@@ -36,6 +36,7 @@ def regulatory_tag_overlay(
     palette: dict[str, str] | None = None,
     untagged_color: str = "#dddddd",
     value: str = "count",
+    hide_root: bool = True,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
 ) -> go.Figure:
@@ -55,9 +56,12 @@ def regulatory_tag_overlay(
         a default palette.
     untagged_color:
         Colour for nodes that carry no value under ``tag_key``.
+    hide_root:
+        When ``True`` (default) the root concept is omitted; pass ``False``
+        to keep the legacy root sector.
     """
 
-    arrays = graph_to_arrays(graph)
+    arrays = graph_to_arrays(graph, hide_root=hide_root)
     if df is None:
         from concept_graph_xai.metrics.counts import feature_counts
 
@@ -68,8 +72,11 @@ def regulatory_tag_overlay(
         raise KeyError(f"{value!r} column missing from DataFrame")
     sizes = ordered[value].fillna(0).to_numpy(dtype=float)
 
+    rendered_nodes = [
+        node for node in graph.nodes_in_order() if not (hide_root and node == graph.root)
+    ]
     tags: list[str] = []
-    for node in graph.nodes_in_order():
+    for node in rendered_nodes:
         meta = graph.view(node).metadata
         tag = meta.get(tag_key)
         tags.append(str(tag) if tag is not None else "")

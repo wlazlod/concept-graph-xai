@@ -22,6 +22,7 @@ def joint_missing_map(
     value: str = "joint_missing_rate",
     size: str = "feature_count",
     colorscale: str = "Reds",
+    hide_root: bool = True,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
 ) -> go.Figure:
@@ -29,7 +30,8 @@ def joint_missing_map(
 
     The DataFrame must come from :func:`joint_missing_rate`. Sector size uses
     ``feature_count`` so the shape matches the existing sunburst plots; colour
-    intensity uses ``joint_missing_rate``.
+    intensity uses ``joint_missing_rate``. Set ``hide_root=False`` to keep
+    the root sector visible.
     """
 
     if value not in df.columns:
@@ -37,7 +39,7 @@ def joint_missing_map(
     if size not in df.columns:
         raise KeyError(f"{size!r} not in DataFrame")
 
-    arrays = graph_to_arrays(graph)
+    arrays = graph_to_arrays(graph, hide_root=hide_root)
     ordered = reindex_to_paths(df, arrays["ids"])
 
     sizes = ordered[size].fillna(0).to_numpy(dtype=float)

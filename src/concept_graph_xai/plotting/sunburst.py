@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Any
+import warnings
+from collections.abc import Sequence
+from typing import Any, Literal
 
 import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.plotting._layout import (
+    branch_colors,
     graph_to_arrays,
     hover_text,
     reindex_to_paths,
 )
+
+ColorBy = Literal["auto", "branch", "value", "none"]
 
 
 def sunburst(
@@ -23,6 +28,9 @@ def sunburst(
     title: str | None = None,
     colorscale: str | None = None,
     color_value: str | None = None,
+    color_by: ColorBy = "auto",
+    branch_palette: Sequence[str] | None = None,
+    hide_root: bool = True,
     branchvalues: str = "total",
     extra_hover: list[str] | None = None,
     hover_fmt: dict[str, str] | None = None,
@@ -48,6 +56,20 @@ def sunburst(
     color_value:
         Column used for color intensity. Defaults to ``value`` when
         ``colorscale`` is set.
+    color_by:
+        How to colour sectors. ``"auto"`` (default) picks ``"value"`` when a
+        ``colorscale`` is given and ``"branch"`` otherwise. ``"branch"``
+        forces categorical-per-top-level-branch colouring (using
+        ``branch_palette``). ``"value"`` forces colorscale-based colouring
+        (raises if ``colorscale`` is not given). ``"none"`` disables per-sector
+        colour overrides (raw Plotly defaults).
+    branch_palette:
+        CSS color sequence used when colouring by branch. Defaults to the
+        Plotly qualitative palette.
+    hide_root:
+        When ``True`` (default) the root concept is omitted and its direct
+        children form the centre ring. Pass ``False`` to keep the legacy
+        rendering with the root sector visible.
     branchvalues:
         Plotly sunburst branchvalues (``"total"`` or ``"remainder"``).
     extra_hover:
@@ -58,25 +80,31 @@ def sunburst(
         Passed verbatim to ``fig.update_layout``.
     """
 
-    arrays = graph_to_arrays(graph)
+    arrays = graph_to_arrays(graph, hide_root=hide_root)
     ordered = reindex_to_paths(df, arrays["ids"])
     if value not in ordered.columns:
         raise KeyError(f"value column {value!r} not in DataFrame; have {list(ordered.columns)}")
 
     values = ordered[value].fillna(0).to_numpy(dtype=float)
 
+    resolved = _resolve_color_by(color_by, colorscale)
     marker: dict[str, Any] = {"line": {"width": 0.5, "color": "white"}}
-    if colorscale is not None:
+    if resolved == "value":
         cv = color_value or value
         if cv not in ordered.columns:
             raise KeyError(f"color_value column {cv!r} not in DataFrame")
+        cv_values = ordered[cv].fillna(0).to_numpy(dtype=float)
+        cv_min = float(ordered[cv].min())
+        cv_max = float(ordered[cv].max())
         marker.update(
-            colors=ordered[cv].fillna(0).to_numpy(dtype=float),
+            colors=cv_values,
             colorscale=colorscale,
             showscale=True,
-            cmid=0 if (ordered[cv].min() < 0 < ordered[cv].max()) else None,
+            cmid=0 if (cv_min < 0 < cv_max) else None,
             colorbar={"title": cv},
         )
+    elif resolved == "branch":
+        marker["colors"] = branch_colors(graph, arrays["ids"], palette=branch_palette)
 
     hover_columns = [value]
     for col in ("kind", "feature_count", "used_feature_count", "is_used"):
@@ -109,3 +137,21 @@ def sunburst(
     if layout_kwargs:
         fig.update_layout(**layout_kwargs)
     return fig
+
+
+def _resolve_color_by(color_by: ColorBy, colorscale: str | None) -> Literal["branch", "value", "none"]:
+    if color_by == "auto":
+        return "value" if colorscale is not None else "branch"
+    if color_by == "value":
+        if colorscale is None:
+            raise ValueError("color_by='value' requires a colorscale (e.g. colorscale='Viridis')")
+        return "value"
+    if color_by == "branch":
+        if colorscale is not None:
+            warnings.warn(
+                "color_by='branch' ignores the supplied colorscale", stacklevel=3
+            )
+        return "branch"
+    if color_by == "none":
+        return "none"
+    raise ValueError(f"unknown color_by={color_by!r}")
