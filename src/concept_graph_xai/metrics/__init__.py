@@ -5,6 +5,7 @@ consumes these DataFrames via :class:`~concept_graph_xai.graph.ConceptGraph`.
 """
 
 from concept_graph_xai.metrics.ablation import auc_drop
+from concept_graph_xai.metrics.bootstrap import bootstrap_importance
 from concept_graph_xai.metrics.coherence import coherence_importance
 from concept_graph_xai.metrics.correlation import (
     CorrelationResult,
@@ -20,6 +21,7 @@ from concept_graph_xai.metrics.utilization import utilization
 __all__ = [
     "CorrelationResult",
     "auc_drop",
+    "bootstrap_importance",
     "coherence_importance",
     "column_missing_rate",
     "feature_correlation",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics.ablation import auc_drop
+from concept_graph_xai.metrics.bootstrap import bootstrap_importance
 from concept_graph_xai.metrics.coherence import coherence_importance
 from concept_graph_xai.metrics.correlation import (
     CorrelationResult,
@@ -23,6 +24,7 @@ from concept_graph_xai.plotting.concept_violin import concept_violin
 from concept_graph_xai.plotting.correlation_block import correlation_block
 from concept_graph_xai.plotting.joint_missing_map import joint_missing_map
 from concept_graph_xai.plotting.regulatory_tag_overlay import regulatory_tag_overlay
+from concept_graph_xai.plotting.signed_concept_bar import signed_concept_bar
 from concept_graph_xai.plotting.sunburst import sunburst
 from concept_graph_xai.plotting.utilization_map import utilization_map
 from concept_graph_xai.prediction_explainer import (
@@ -40,6 +42,7 @@ __all__ = [
     "__version__",
     "auc_drop",
     "auc_drop_map",
+    "bootstrap_importance",
     "coherence_importance",
     "coherence_importance_scatter",
     "column_missing_rate",
@@ -53,6 +56,7 @@ __all__ = [
     "nullity_correlation",
     "regulatory_tag_overlay",
     "shap_correlation",
+    "signed_concept_bar",
     "sunburst",
     "utilization",
     "utilization_map",
