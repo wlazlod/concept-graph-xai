@@ -9,6 +9,7 @@ from concept_graph_xai.plotting.auc_drop_map import auc_drop_map
 from concept_graph_xai.plotting.coherence_importance_scatter import (
     coherence_importance_scatter,
 )
+from concept_graph_xai.plotting.concept_interaction_heatmap import concept_interaction_heatmap
 from concept_graph_xai.plotting.concept_violin import concept_violin
 from concept_graph_xai.plotting.correlation_block import correlation_block
 from concept_graph_xai.plotting.joint_missing_map import joint_missing_map
@@ -20,6 +21,7 @@ from concept_graph_xai.plotting.utilization_map import utilization_map
 __all__ = [
     "auc_drop_map",
     "coherence_importance_scatter",
+    "concept_interaction_heatmap",
     "concept_violin",
     "correlation_block",
     "joint_missing_map",
