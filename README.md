@@ -2,7 +2,7 @@
 
 Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation metrics.
 
-> Status: **alpha (v0.2.0)**. API may change between minor releases.
+> Status: **alpha (v0.4.0)**. API may change between minor releases.
 >
 > 📖 **Docs:** <https://wlazlod.github.io/concept-graph-xai/>
 
@@ -18,9 +18,8 @@ It gives you:
 
 | Plot | Question it answers |
 |---|---|
-| `sunburst(graph, feature_counts(...))` | How many features are mapped under each concept? |
-| `sunburst(graph, importance_sum(...), colorscale="Viridis")` | How much importance does each concept carry? |
-| `utilization_map(graph, utilization(...))` | Which parts of the graph does my model actually use? Unused branches are shown in grey. |
+| `sunburst(graph, importance_sum(...))` | How much importance does each concept carry? (hierarchical colour per top-level branch — sub-concepts are lighter shades) |
+| `utilization_map(graph, utilization(...))` | How many features are under each concept *and* which branches does my model actually use? Sector area = feature count; used branches are coloured by family with hierarchical shading; unused branches are grey. |
 | `auc_drop_map(graph, auc_drop(..., strategy="permutation"))` | How much AUC do I lose if a whole concept's data goes missing? |
 | `correlation_block(feature_correlation(graph, X))` | Are the supplied concepts internally coherent? Are concept boundaries leaky? |
 | `correlation_block(nullity_correlation(graph, X))` | Do features inside a concept go missing together? |
@@ -82,12 +81,12 @@ graph = ConceptGraph.from_dict({
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 model = GradientBoostingClassifier().fit(X_train, y_train)
 
-# 3. Counts and importances
-counts_df = feature_counts(graph)
+# 3. Importances
 imp_values, names = from_feature_importances_(model, list(X_train.columns))
 imp_df = importance_sum(graph, names, imp_values)
 
-# 4. Utilization (which concepts the model actually uses)
+# 4. Utilization (sector area = feature_count, used branches in branch hue,
+#    unused branches grey — subsumes the standalone feature-counts view)
 util_df = utilization(graph, names, imp_values, threshold=0.0)
 
 # 5. AUC loss per concept (3 strategies; pick what you need)
@@ -99,14 +98,17 @@ drop_df = auc_drop(
     random_state=42,
 )
 
-# 6. Render
-fig_counts = sunburst(graph, counts_df, value="count", title="Feature counts")
-fig_imp    = sunburst(graph, imp_df, value="importance_sum", colorscale="Viridis")
-fig_util   = utilization_map(graph, util_df)
+# 6. Render — root concept is hidden by default; pass hide_root=False to keep it.
+fig_imp    = sunburst(graph, imp_df, value="importance_sum")  # branch-coloured
+fig_util   = utilization_map(graph, util_df)                  # counts + utilization
 fig_drop   = auc_drop_map(graph, drop_df)
 
 fig_drop.write_image("auc_drop.png", scale=2)  # needs the [png] extra
 ```
+
+`sunburst()` colours by top-level branch when no `colorscale` is given. Pass
+`colorscale="Viridis"` (or `color_by="value"`) to fall back to a continuous
+colorscale on `value`.
 
 ## Three ablation strategies
 
@@ -145,9 +147,9 @@ The metric layer never imports plotly, and the plot layer never touches the mode
 
 * **v0.1**: counts, importance, utilization, three ablation strategies, three sunburst plots. ✅
 * **v0.2**: bug-fix release for `auc_drop_map`. ✅
-* **v0.3 (current)**: concept-design diagnostics — block correlation matrices (feature, nullity, SHAP), joint-missing-rate sunburst, coherence-vs-importance scatter, regulatory-tag overlay. ✅
-* **v0.4**: concept beeswarm, signed bar with bootstrap CIs, `ConceptPredictionExplainer.waterfall`.
-* **v0.5**: SHAP-interaction heatmap (C×C), concept Sankey, segment heatmap, segment Pareto, attribution drift line chart, drift delta sunburst.
+* **v0.3**: concept-design diagnostics — block correlation matrices (feature, nullity, SHAP), joint-missing-rate sunburst, coherence-vs-importance scatter, regulatory-tag overlay. ✅
+* **v0.4 (current)**: local explanations (`concept_violin`, `ConceptPredictionExplainer.waterfall`); rendering-default cleanups (root concept hidden by default; `sunburst` colours by branch by default; `utilization_map` subsumes the standalone feature-count sunburst with branch-hierarchical shading). ✅
+* **v0.5**: signed bar with bootstrap CIs, SHAP-interaction heatmap (C×C), concept Sankey, segment heatmap, segment Pareto, attribution drift line chart, drift delta sunburst.
 * **v0.6**: protected-group disparity heatmap.
 * **v1.0**: DAG support (multi-parent concepts) with optional per-edge weights and Sankey rendering.
 

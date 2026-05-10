@@ -9,7 +9,7 @@ import pytest
 from concept_graph_xai import (
     ConceptGraph,
     ConceptPredictionExplainer,
-    concept_beeswarm,
+    concept_violin,
 )
 
 
@@ -29,30 +29,30 @@ def shap_arr(graph: ConceptGraph) -> tuple[list[str], np.ndarray]:
     return names, arr
 
 
-def test_concept_beeswarm_emits_one_trace_per_concept(graph, shap_arr) -> None:
+def test_concept_violin_emits_one_trace_per_concept(graph, shap_arr) -> None:
     names, arr = shap_arr
-    fig = concept_beeswarm(graph, names, arr)
+    fig = concept_violin(graph, names, arr)
     assert fig.data
     n_concepts = len([c for c in graph.concepts() if c != graph.root])
     assert len(fig.data) == n_concepts
 
 
-def test_concept_beeswarm_respects_max_concepts(graph, shap_arr) -> None:
+def test_concept_violin_respects_max_concepts(graph, shap_arr) -> None:
     names, arr = shap_arr
-    fig = concept_beeswarm(graph, names, arr, max_concepts=2)
+    fig = concept_violin(graph, names, arr, max_concepts=2)
     assert len(fig.data) == 2
 
 
-def test_concept_beeswarm_with_features(graph, shap_arr) -> None:
+def test_concept_violin_with_features(graph, shap_arr) -> None:
     names, arr = shap_arr
-    fig = concept_beeswarm(graph, names, arr, only_concepts=False)
+    fig = concept_violin(graph, names, arr, only_concepts=False)
     assert len(fig.data) >= len(names)
 
 
-def test_concept_beeswarm_rejects_shape_mismatch(graph) -> None:
+def test_concept_violin_rejects_shape_mismatch(graph) -> None:
     arr = np.zeros((10, 3))
     with pytest.raises(ValueError, match="cols"):
-        concept_beeswarm(graph, ["x1", "x2", "y1", "y2", "y3"], arr)
+        concept_violin(graph, ["x1", "x2", "y1", "y2", "y3"], arr)
 
 
 def test_prediction_explainer_breakdown_has_one_row_per_concept(graph, shap_arr) -> None:

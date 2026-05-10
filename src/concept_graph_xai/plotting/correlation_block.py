@@ -64,7 +64,20 @@ def correlation_block(
     annotations: list[dict[str, Any]] = []
     stats_lookup = result.block_stats.set_index("concept_path").to_dict("index")
 
-    for path, start, end in result.blocks:
+    # Depth = number of slashes in concept_path. Root has depth 0; top-level
+    # concepts under root have depth 1; sub-concepts depth 2, etc. We stack
+    # block labels in horizontal rows below the heatmap, with the deepest
+    # concept closest to the heatmap and the top-level concepts furthest down.
+    # This stops nested blocks (e.g. "Behaviour" + "Delinquency") from writing
+    # their labels on top of each other.
+    block_depths = [path.count("/") for path, _s, _e in result.blocks]
+    skip_root = result.blocks and block_depths[0] == 0
+    visible_depths = [d for d in block_depths if d > 0]
+    max_depth = max(visible_depths) if visible_depths else 1
+    row_height = 1.0
+    label_top_y = -1.2  # closest to heatmap (deepest concepts)
+
+    for (path, start, end), depth in zip(result.blocks, block_depths, strict=True):
         # Diagonal block border
         shapes.append(
             {
@@ -79,17 +92,22 @@ def correlation_block(
                 "fillcolor": "rgba(0,0,0,0)",
             }
         )
-        if show_block_labels and end - start >= 1:
+        if show_block_labels and end - start >= 1 and depth >= 1:
             label = path.split("/")[-1]
+            # Deeper concepts → smaller magnitude y (closer to heatmap).
+            # Top-level branches (depth=1) → most negative y (further down).
+            row = max_depth - depth  # 0 for deepest, max_depth-1 for top-level
+            y_pos = label_top_y - row * row_height
+            font_size = 12 if depth == 1 else max(8, 11 - (depth - 1))
             annotations.append(
                 {
                     "x": (start + end - 1) / 2,
-                    "y": -1.2,
+                    "y": y_pos,
                     "xref": "x",
                     "yref": "y",
-                    "text": f"<b>{label}</b>",
+                    "text": f"<b>{label}</b>" if depth == 1 else label,
                     "showarrow": False,
-                    "font": {"size": 11},
+                    "font": {"size": font_size},
                 }
             )
         if annotate_mean_abs and end - start >= 2:
@@ -109,13 +127,21 @@ def correlation_block(
                     }
                 )
 
+    label_band = max(1, max_depth) * row_height + 0.5  # space reserved below heatmap
+    bottom_margin = int(60 + 22 * max_depth)
+    _ = skip_root  # kept for clarity; root block has no label
+
     fig.update_layout(
         title=title,
         xaxis={"side": "bottom", "tickangle": 45, "showgrid": False, "range": [-0.5, n - 0.5]},
-        yaxis={"autorange": "reversed", "showgrid": False, "range": [n - 0.5, -1.5]},
+        yaxis={
+            "autorange": "reversed",
+            "showgrid": False,
+            "range": [n - 0.5, label_top_y - label_band],
+        },
         shapes=shapes,
         annotations=annotations,
-        margin={"t": 40, "l": 40, "r": 40, "b": 80},
+        margin={"t": 40, "l": 40, "r": 40, "b": bottom_margin},
     )
     if layout_kwargs:
         fig.update_layout(**layout_kwargs)

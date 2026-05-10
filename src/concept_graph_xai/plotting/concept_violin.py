@@ -1,21 +1,26 @@
-"""Concept-level beeswarm / strip plot (P1).
+"""Concept-level violin plot of summed signed SHAP per sample (P1).
 
-Per concept, distribution of summed signed SHAP across samples. Reveals both
-direction (does the concept push predictions up or down?) and spread.
+One horizontal violin per concept. The width at each x is the kernel-density
+estimate of the per-sample summed SHAP across descendants. Compared to a
+strip / beeswarm plot, the violin shape conveys distribution shape (skew,
+multimodality) at a glance without the visual clutter of many points.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.plotting._layout import branch_colors
+
+ViolinPoints = Literal[False, "outliers", "all", "suspectedoutliers"]
 
 
-def concept_beeswarm(
+def concept_violin(
     graph: ConceptGraph,
     feature_names: Sequence[str],
     shap_values: np.ndarray,
@@ -24,16 +29,18 @@ def concept_beeswarm(
     sort_by_importance: bool = True,
     max_concepts: int | None = None,
     title: str | None = None,
-    point_size: int = 4,
-    point_opacity: float = 0.5,
+    points: ViolinPoints = "outliers",
+    box_visible: bool = True,
+    meanline_visible: bool = True,
+    branch_palette: Sequence[str] | None = None,
     layout_kwargs: dict[str, Any] | None = None,
 ) -> go.Figure:
-    """Render a concept-level beeswarm of summed signed SHAP per sample.
+    """Render a per-concept violin of summed signed SHAP across samples.
 
-    Each row is a concept (or feature, if ``only_concepts=False``); each point
-    is one sample. The ``x`` value is the **sum** of SHAP across the concept's
-    descendant features for that sample. Concept-level mean(|SHAP|) is shown
-    as a bar overlay on the right axis when sorting is enabled.
+    Each row is a concept (or feature, if ``only_concepts=False``); the violin
+    shape is the KDE of the per-sample sum of SHAP across the concept's
+    descendant features. A central box-and-whiskers and a mean line can be
+    overlaid via ``box_visible`` and ``meanline_visible``.
 
     Parameters
     ----------
@@ -51,16 +58,20 @@ def concept_beeswarm(
         Optionally cap the number of rows shown (top-K by importance).
     title:
         Figure title.
-    point_size:
-        Marker size for individual sample points.
-    point_opacity:
-        Marker opacity for individual sample points.
+    points:
+        Which raw points to overlay on the violin. ``"outliers"`` (default)
+        shows only points beyond the whiskers; ``"all"`` shows every sample
+        (slow for large N); ``False`` shows none.
+    box_visible:
+        Draw the box-and-whiskers inside each violin. Default ``True``.
+    meanline_visible:
+        Draw the mean as a dashed line inside each violin. Default ``True``.
+    branch_palette:
+        Custom palette for branch base hues (each violin is tinted by its
+        top-level branch with hierarchical shading). Defaults to the Plotly
+        qualitative palette.
     layout_kwargs:
         Passed verbatim to ``fig.update_layout``.
-
-    Returns
-    -------
-    plotly.graph_objects.Figure
     """
 
     arr = np.asarray(shap_values, dtype=float)
@@ -101,35 +112,43 @@ def concept_beeswarm(
     if max_concepts is not None:
         nodes = nodes[:max_concepts]
 
+    node_ids = ["/".join(graph.path(n)) for n in nodes]
+    colors = branch_colors(graph, node_ids, palette=branch_palette)
+
     fig = go.Figure()
-    for node in nodes:
+    for node, color in zip(nodes, colors, strict=True):
         s = summed[node]
         fig.add_trace(
-            go.Box(
+            go.Violin(
                 x=s,
                 y=[node] * len(s),
                 name=node,
                 orientation="h",
-                boxpoints="all",
-                jitter=0.5,
-                pointpos=0,
-                marker={"size": point_size, "opacity": point_opacity},
-                line={"width": 1},
-                fillcolor="rgba(0,0,0,0)",
+                points=points,
+                box_visible=box_visible,
+                meanline_visible=meanline_visible,
+                fillcolor=color,
+                line={"color": "rgba(0,0,0,0.6)", "width": 1},
+                opacity=0.85,
+                marker={"size": 3, "opacity": 0.5, "color": "rgba(0,0,0,0.5)"},
                 showlegend=False,
+                hoveron="violins+points",
                 hovertemplate="%{y}<br>SHAP: %{x:+.4f}<extra></extra>",
+                spanmode="hard",
             )
         )
 
     fig.add_vline(x=0.0, line={"color": "black", "width": 1, "dash": "dash"})
 
     fig.update_layout(
-        title=title or "Concept beeswarm — summed signed SHAP per sample",
+        title=title or "Concept SHAP distribution (violin)",
         xaxis_title="summed signed SHAP",
         yaxis_title="concept",
         yaxis={"autorange": "reversed"},
+        violingap=0.3,
+        violinmode="overlay",
         margin={"t": 60, "l": 160, "r": 30, "b": 60},
-        height=max(300, 30 * len(nodes) + 120),
+        height=max(300, 50 * len(nodes) + 120),
     )
     if layout_kwargs:
         fig.update_layout(**layout_kwargs)

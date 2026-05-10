@@ -21,10 +21,13 @@ This page is the high-level roadmap, summarising shipped milestones and planned 
 
 ## Planned
 
-### v0.4 — Direction, uncertainty, single-prediction
-- `concept_beeswarm` — distribution of summed signed SHAP per concept.
-- `bootstrap_importance` + `signed_concept_bar` — bar chart with bootstrap confidence intervals.
+### v0.4 — Direction, single-prediction, rendering polish (current)
+- `concept_violin` — per-concept horizontal violin (KDE) of summed signed SHAP per sample, branch-tinted.
 - `ConceptPredictionExplainer.waterfall(row=...)` — single-prediction waterfall rolled up to a chosen tree depth.
+- Rendering defaults: root concept hidden by default; `sunburst` colours by branch (hierarchical shading) when no colorscale is given; `utilization_map` subsumes the standalone feature-count sunburst; `correlation_block` stacks nested concept labels in depth-stratified rows.
+
+### Planned for v0.5
+- `bootstrap_importance` + `signed_concept_bar` — bar chart with bootstrap confidence intervals.
 
 ### v0.5 — Interactions, cohort, drift
 - `concept_interaction_matrix` + heatmap — concept × concept SHAP-interaction matrix.

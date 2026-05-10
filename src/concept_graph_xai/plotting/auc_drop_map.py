@@ -23,13 +23,15 @@ def auc_drop_map(
     value: str = "auc_drop_mean",
     size: str = "feature_count",
     colorscale: str = "Reds",
+    hide_root: bool = True,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
 ) -> go.Figure:
     """Render a sunburst where each concept is colored by its AUC drop.
 
     Sector area uses ``size`` (feature count by default), the colour intensity
-    uses ``value`` (mean AUC drop by default).
+    uses ``value`` (mean AUC drop by default). Set ``hide_root=False`` to
+    keep the root sector visible.
     """
 
     if value not in df.columns:
@@ -37,7 +39,7 @@ def auc_drop_map(
     if size not in df.columns:
         raise KeyError(f"{size!r} not in DataFrame")
 
-    arrays = graph_to_arrays(graph)
+    arrays = graph_to_arrays(graph, hide_root=hide_root)
     ordered = reindex_to_paths(df, arrays["ids"])
 
     sizes = ordered[size].fillna(0).to_numpy(dtype=float)
