@@ -16,6 +16,7 @@ from concept_graph_xai.metrics.counts import feature_counts
 from concept_graph_xai.metrics.importance import importance_sum
 from concept_graph_xai.metrics.interaction import concept_interaction_matrix
 from concept_graph_xai.metrics.missingness import column_missing_rate, joint_missing_rate
+from concept_graph_xai.metrics.segment import segment_importance
 from concept_graph_xai.metrics.utilization import utilization
 from concept_graph_xai.plotting.auc_drop_map import auc_drop_map
 from concept_graph_xai.plotting.coherence_importance_scatter import (
@@ -27,6 +28,7 @@ from concept_graph_xai.plotting.concept_violin import concept_violin
 from concept_graph_xai.plotting.correlation_block import correlation_block
 from concept_graph_xai.plotting.joint_missing_map import joint_missing_map
 from concept_graph_xai.plotting.regulatory_tag_overlay import regulatory_tag_overlay
+from concept_graph_xai.plotting.segment_concept_heatmap import segment_concept_heatmap
 from concept_graph_xai.plotting.signed_concept_bar import signed_concept_bar
 from concept_graph_xai.plotting.sunburst import sunburst
 from concept_graph_xai.plotting.utilization_map import utilization_map
@@ -61,6 +63,8 @@ __all__ = [
     "joint_missing_rate",
     "nullity_correlation",
     "regulatory_tag_overlay",
+    "segment_concept_heatmap",
+    "segment_importance",
     "shap_correlation",
     "signed_concept_bar",
     "sunburst",

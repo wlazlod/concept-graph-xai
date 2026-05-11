@@ -17,6 +17,7 @@ from concept_graph_xai.metrics.counts import feature_counts
 from concept_graph_xai.metrics.importance import importance_sum
 from concept_graph_xai.metrics.interaction import concept_interaction_matrix
 from concept_graph_xai.metrics.missingness import column_missing_rate, joint_missing_rate
+from concept_graph_xai.metrics.segment import segment_importance
 from concept_graph_xai.metrics.utilization import utilization
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "importance_sum",
     "joint_missing_rate",
     "nullity_correlation",
+    "segment_importance",
     "shap_correlation",
     "utilization",
 ]
