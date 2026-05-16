@@ -64,6 +64,18 @@ def test_traversal_order_is_deterministic() -> None:
     assert order_first[0] == "Root"
 
 
+def test_graph_property_is_a_snapshot() -> None:
+    graph = ConceptGraph.from_dict({"Root": {"A": ["f1", "f2"]}})
+    snapshot = graph.graph
+    # Mutate the snapshot — the original must be untouched.
+    snapshot.add_node("intruder", kind="feature", metadata={})
+    snapshot.add_edge("A", "intruder")
+    assert "intruder" not in graph
+    assert graph.features() == ["f1", "f2"]
+    # And the path cache must still be intact after re-querying.
+    assert graph.path("f1") == ("Root", "A", "f1")
+
+
 def test_yaml_roundtrip(tmp_path) -> None:
     from concept_graph_xai.io import dump_yaml, load_yaml
 

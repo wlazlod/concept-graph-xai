@@ -54,7 +54,14 @@ class ConceptGraph:
 
     @property
     def graph(self) -> nx.DiGraph:
-        return self._graph
+        """Return a snapshot copy of the underlying NetworkX DiGraph.
+
+        The copy preserves all node attributes (``kind``, ``metadata``) and
+        edges, but mutations to the returned object never reach back into
+        the ConceptGraph — preventing accidental cache / order corruption.
+        """
+
+        return self._graph.copy()
 
     def __len__(self) -> int:
         return int(self._graph.number_of_nodes())
