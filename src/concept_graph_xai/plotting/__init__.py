@@ -9,6 +9,7 @@ from concept_graph_xai.plotting.auc_drop_map import auc_drop_map
 from concept_graph_xai.plotting.coherence_importance_scatter import (
     coherence_importance_scatter,
 )
+from concept_graph_xai.plotting.concept_disparity_heatmap import concept_disparity_heatmap
 from concept_graph_xai.plotting.concept_drift_lines import concept_drift_lines
 from concept_graph_xai.plotting.concept_drift_sunburst import concept_drift_sunburst
 from concept_graph_xai.plotting.concept_interaction_heatmap import concept_interaction_heatmap
@@ -26,6 +27,7 @@ from concept_graph_xai.plotting.utilization_map import utilization_map
 __all__ = [
     "auc_drop_map",
     "coherence_importance_scatter",
+    "concept_disparity_heatmap",
     "concept_drift_lines",
     "concept_drift_sunburst",
     "concept_interaction_heatmap",
