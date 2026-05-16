@@ -50,8 +50,8 @@ def coherence_importance_scatter(
     if only_concepts and "kind" in plot_df.columns:
         plot_df = plot_df.loc[plot_df["kind"] == "concept"].copy()
 
-    coh_thr = float(plot_df.attrs.get("coherence_threshold", df.attrs.get("coherence_threshold", 0.0)))
-    imp_thr = float(plot_df.attrs.get("importance_threshold", df.attrs.get("importance_threshold", 0.0)))
+    coh_thr = float(df.attrs.get("coherence_threshold", 0.0))
+    imp_thr = float(df.attrs.get("importance_threshold", 0.0))
 
     fig = go.Figure()
     for quadrant, color in _QUADRANT_COLOR.items():

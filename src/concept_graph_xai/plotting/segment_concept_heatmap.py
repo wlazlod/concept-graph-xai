@@ -102,12 +102,13 @@ def segment_concept_heatmap(
 
     agg = df.attrs.get("agg", "mean_abs")
     z = pivot.to_numpy(dtype=float)
+    value_fmt = "+.4f" if agg == "mean_signed" else ".4f"
     heatmap_kwargs: dict[str, Any] = {
         "z": z,
         "x": list(pivot.columns),
         "y": list(pivot.index),
         "colorbar": {"title": agg},
-        "hovertemplate": "%{y} | %{x}<br>" + agg + ": %{z:.4f}<extra></extra>",
+        "hovertemplate": "%{y} | %{x}<br>" + agg + ": %{z:" + value_fmt + "}<extra></extra>",
         **heatmap_color_kwargs(z, agg=agg, colorscale=colorscale),
     }
 

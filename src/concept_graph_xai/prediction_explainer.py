@@ -198,9 +198,10 @@ class ConceptPredictionExplainer:
         """
 
         idx = self._resolve_row(row)
+        # breakdown() raises ValueError("no concepts at depth ...") on the
+        # only failure mode that produces an empty frame, so no defensive
+        # empty-check is needed here.
         df = self.breakdown(row, depth=depth)
-        if df.empty:
-            raise ValueError("breakdown returned no concepts; check the graph and feature names")
 
         labels = ["base", *df["name"].tolist(), "prediction"]
         values = [self.base_value, *df["shap_sum"].tolist(), 0.0]

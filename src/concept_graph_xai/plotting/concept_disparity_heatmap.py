@@ -23,7 +23,7 @@ def concept_disparity_heatmap(
     sort_by: SortBy | None = "max_abs",
     max_concepts: int | None = None,
     title: str | None = None,
-    colorscale: str = "RdBu",
+    colorscale: str = "RdBu_r",
     layout_kwargs: dict[str, Any] | None = None,
     include_root: bool | None = None,
 ) -> go.Figure:
@@ -62,7 +62,10 @@ def concept_disparity_heatmap(
         Figure title. Defaults to ``"Concept SHAP disparity vs
         <reference>"`` using the reference label from ``df.attrs``.
     colorscale:
-        Plotly diverging colorscale name. Default ``"RdBu"``.
+        Plotly diverging colorscale name. Default ``"RdBu_r"`` so a
+        positive gap (the model over-relies on this concept for the
+        protected group) renders red — same convention as
+        ``concept_drift_sunburst``.
     layout_kwargs:
         Passed verbatim to ``fig.update_layout``.
     """

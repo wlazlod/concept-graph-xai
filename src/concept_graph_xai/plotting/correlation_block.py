@@ -71,7 +71,6 @@ def correlation_block(
     # This stops nested blocks (e.g. "Behaviour" + "Delinquency") from writing
     # their labels on top of each other.
     block_depths = [path.count("/") for path, _s, _e in result.blocks]
-    skip_root = result.blocks and block_depths[0] == 0
     visible_depths = [d for d in block_depths if d > 0]
     max_depth = max(visible_depths) if visible_depths else 1
     row_height = 1.0
@@ -129,7 +128,6 @@ def correlation_block(
 
     label_band = max(1, max_depth) * row_height + 0.5  # space reserved below heatmap
     bottom_margin = int(60 + 22 * max_depth)
-    _ = skip_root  # kept for clarity; root block has no label
 
     fig.update_layout(
         title=title,

@@ -51,12 +51,13 @@ def concept_interaction_heatmap(
     n = z.shape[0]
     labels = list(matrix.index)
 
+    value_fmt = "+.4f" if agg == "mean_signed" else ".4f"
     heatmap_kwargs: dict[str, Any] = {
         "z": z,
         "x": labels,
         "y": labels,
         "colorbar": {"title": agg},
-        "hovertemplate": "%{y} ↔ %{x}<br>" + agg + ": %{z:.4f}<extra></extra>",
+        "hovertemplate": "%{y} ↔ %{x}<br>" + agg + ": %{z:" + value_fmt + "}<extra></extra>",
         **heatmap_color_kwargs(z, agg=agg, colorscale=colorscale),
     }
 
