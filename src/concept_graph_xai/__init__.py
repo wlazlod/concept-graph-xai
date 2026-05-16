@@ -41,7 +41,7 @@ from concept_graph_xai.prediction_explainer import (
     ConceptPredictionExplainer,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "ConceptContribution",

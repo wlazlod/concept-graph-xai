@@ -9,9 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- **v0.5** — direction & uncertainty (`bootstrap_importance` + `signed_concept_bar` — bar chart with bootstrap confidence intervals); interactions, cohort, drift (interaction matrix, concept Sankey, segment Pareto, attribution drift).
 - **v0.6** — fairness (concept-level disparity heatmap, protected-attribute API).
 - **v1.0** — DAG support with optional per-edge weights; backwards compatible for tree users.
+
+## [0.5.0] — 2026-05-16
+
+Uncertainty, interactions, cohort analysis, and drift monitoring.
+
+### Added — uncertainty
+
+- `bootstrap_importance(graph, feature_names, shap_values, n_bootstrap=200, ci=0.95, signed=True)` — resamples row indices with replacement, recomputes per-concept summed (signed or absolute) SHAP per resample, returns the mean plus percentile confidence-interval bounds.
+- `signed_concept_bar(graph, df)` — horizontal bar chart of per-concept mean signed SHAP with error bars from `ci_lo / ci_hi`. Branch-coloured via `branch_colors`, sorted by `|mean|` desc, symmetric x-axis with a dashed zero line.
+
+### Added — interactions
+
+- `concept_interaction_matrix(graph, feature_names, shap_interaction_values, agg="mean_abs"|"mean_signed")` — aggregates a `(N, F, F)` SHAP-interaction tensor (from `shap.TreeExplainer.shap_interaction_values`) into a symmetric concept × concept DataFrame. Diagonal cells carry within-concept self-interaction.
+- `concept_interaction_heatmap(matrix)` — `go.Heatmap` over the concept × concept matrix. Sequential `Reds` for `mean_abs`, diverging `RdBu` (centred at 0) for `mean_signed`. Top-K off-diagonal cells annotated by value.
+- `concept_sankey(graph, feature_names, shap_values, max_features_per_concept=None)` — multi-tier SHAP-flow Sankey that walks the **full** concept hierarchy: features → sub-concepts → … → top-level concepts → +/- outcome. Explicit per-node `(x, y)` so layout follows ontological grouping (siblings adjacent vertically, parents to the right of their children). Within-concept cancellation visibly narrows the band as you move toward the outcome side.
+
+### Added — cohort analysis
+
+- `segment_importance(graph, feature_names, shap_values, segments, *, X=None, agg="mean_abs"|"mean_signed")` — per-segment per-concept SHAP aggregate (long-form). `segments` accepts either a `pd.Series` aligned to the rows or a column-name string (then `X` must be provided).
+- `segment_concept_heatmap(graph, df)` — concept × segment `go.Heatmap`. Default sort by max-across-segments puts the most cohort-discriminating concepts at the top. Categorical / first-seen segment order preserved via `df.attrs["segment_order"]`.
+- `concept_pareto(graph, df)` — per-cohort Lorenz / Pareto curves of concept-importance concentration. One `go.Scatter` per cohort plus a dashed 45° equality reference; cohorts with all-zero importance are skipped silently.
+
+### Added — drift
+
+- `attribution_drift(graph, periods, *, agg="mean_abs"|"mean_signed")` — per-period per-concept SHAP aggregate (long-form). `periods` is an ordered list of `(period_label, shap_values, feature_names)` tuples; sample counts may differ across periods.
+- `concept_drift_lines(graph, df, top_k=10)` — one branch-coloured line per concept across periods. `top_k` filters to the K concepts with the largest max-across-periods value to avoid spaghetti.
+- `concept_drift_delta(graph, periods, baseline=None, target=None)` — two-period delta view. Defaults baseline = first, target = last. Returns wide DataFrame with `baseline`, `target`, `delta` (= target − baseline) columns.
+- `concept_drift_sunburst(graph, df)` — sunburst coloured by per-concept SHAP drift with a diverging `RdBu_r` palette centred at 0 (positive delta = red, negative = blue). Sector area uses `feature_count` (additive, safe under `branchvalues="total"`).
+
+### Notebook
+
+- Three new sections: **Part F** (uncertainty + interactions: F.1 bootstrap CI bar, F.2 SHAP interaction matrix with its own dedicated `TreeExplainer.shap_interaction_values` cell, F.3 multi-tier Sankey), **Part G** (cohort: G.1 segment heatmap, G.2 Pareto), **Part H** (drift: H.1 multi-period line chart, H.2 baseline → target delta sunburst).
+- Synthetic cohorts (`<30 / 30-50 / 50-65 / 65+`) cut from `X_test["age"]` and synthetic periods (3 random shards with `NaN` injected into `MonthlyIncome` for `period_3`) so the demo shows visible drift on a single-snapshot dataset.
 
 ## [0.4.0] — 2026-05-09
 
@@ -71,7 +103,8 @@ Minimum viable release.
 - Adapters: `from_shap_explanation`, `from_permutation_importance`, `from_feature_importances_`.
 - Tests, mypy strict, README quickstart, end-to-end notebook on the Give Me Some Credit Kaggle dataset.
 
-[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.4.0
 [0.3.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.3.0
 [0.2.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.2.0
