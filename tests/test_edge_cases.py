@@ -97,9 +97,7 @@ def test_concept_disparity_handles_single_feature_graph(single_feature_graph) ->
     names = ["solo"]
     arr = np.array([[0.5], [-0.1], [0.3], [0.0]])
     series = pd.Series(["A", "A", "B", "B"])
-    df = concept_disparity(
-        single_feature_graph, names, arr, series, reference="A"
-    )
+    df = concept_disparity(single_feature_graph, names, arr, series, reference="A")
     # Reference group's row is zero; B row is the difference.
     ref_rows = df[df["protected_group"] == "A"]
     assert (ref_rows["value"] == 0).all()
@@ -127,8 +125,7 @@ def test_concept_interaction_matrix_handles_single_concept_graph() -> None:
     graph = ConceptGraph.from_dict({"Risk": {"Only": ["solo"]}})
     rng = np.random.default_rng(0)
     arr = 0.5 * (
-        rng.standard_normal((10, 1, 1))
-        + rng.standard_normal((10, 1, 1)).transpose(0, 2, 1)
+        rng.standard_normal((10, 1, 1)) + rng.standard_normal((10, 1, 1)).transpose(0, 2, 1)
     )
     df = concept_interaction_matrix(graph, ["solo"], arr)
     assert df.shape == (1, 1)
