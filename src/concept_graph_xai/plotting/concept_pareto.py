@@ -32,11 +32,12 @@ def concept_pareto(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
+    hide_root: bool = True,
     segment_palette: Sequence[str] | None = None,
     show_equality_line: bool = True,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
+    include_root: bool | None = None,
 ) -> go.Figure:
     """Render per-segment Lorenz / Pareto curves of concept importance.
 
@@ -60,9 +61,10 @@ def concept_pareto(
         ``name``, ``kind``, ``segment``, ``value``.
     only_concepts:
         If ``True`` (default), drop feature leaves before ranking.
-    include_root:
-        If ``False`` (default), drop the root concept row (it aggregates
-        every feature and would distort the curve).
+    hide_root:
+        If ``True`` (default), drop the root concept row (it aggregates
+        every feature and would distort the curve). Renamed from
+        ``include_root`` for consistency with the sunburst family.
     segment_palette:
         Custom palette for per-segment colours. Defaults to the Plotly
         qualitative palette.
@@ -74,6 +76,16 @@ def concept_pareto(
         Passed verbatim to ``fig.update_layout``.
     """
 
+    if include_root is not None:
+        import warnings
+
+        warnings.warn(
+            "include_root is deprecated; pass hide_root=not include_root instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        hide_root = not include_root
+
     if df.empty:
         raise ValueError("DataFrame is empty; run segment_importance first")
     for col in ("name", "kind", "segment", "value"):
@@ -83,7 +95,7 @@ def concept_pareto(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     segment_order: list[str] = df.attrs.get("segment_order") or list(

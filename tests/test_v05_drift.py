@@ -98,15 +98,15 @@ def test_concept_drift_lines_renders(graph, periods) -> None:
 
 def test_concept_drift_lines_one_trace_per_concept(graph, periods) -> None:
     df = attribution_drift(graph, periods)
-    fig = concept_drift_lines(graph, df, top_k=None)
+    fig = concept_drift_lines(graph, df, max_concepts=None)
     # only_concepts=True default + root dropped -> 2 concepts in this graph
     assert len(fig.data) == 2
     assert {tr.name for tr in fig.data} == {"Income", "Behaviour"}
 
 
-def test_concept_drift_lines_top_k_caps(graph, periods) -> None:
+def test_concept_drift_lines_max_concepts_caps(graph, periods) -> None:
     df = attribution_drift(graph, periods)
-    fig = concept_drift_lines(graph, df, top_k=1)
+    fig = concept_drift_lines(graph, df, max_concepts=1)
     assert len(fig.data) == 1
 
 
@@ -115,6 +115,23 @@ def test_concept_drift_lines_x_axis_matches_period_order(graph, periods) -> None
     fig = concept_drift_lines(graph, df)
     for trace in fig.data:
         assert list(trace.x) == ["Q1", "Q2", "Q3"]
+
+
+def test_concept_drift_lines_deprecated_top_k_still_works(graph, periods) -> None:
+    df = attribution_drift(graph, periods)
+    with pytest.warns(DeprecationWarning, match="top_k"):
+        fig = concept_drift_lines(graph, df, top_k=1)
+    assert len(fig.data) == 1
+
+
+def test_concept_drift_lines_deprecated_include_root_still_works(graph, periods) -> None:
+    df = attribution_drift(graph, periods)
+    with pytest.warns(DeprecationWarning, match="include_root"):
+        fig = concept_drift_lines(graph, df, include_root=True)
+    # include_root=True -> hide_root=False -> root concept is now present in the
+    # legend on top of the regular concepts.
+    names = {tr.name for tr in fig.data}
+    assert graph.root in names
 
 
 def test_concept_drift_lines_rejects_missing_columns(graph) -> None:

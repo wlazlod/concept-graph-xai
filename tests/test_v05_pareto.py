@@ -124,7 +124,7 @@ def test_concept_pareto_drops_root_by_default(graph, shap_arr, segments_series) 
 def test_concept_pareto_includes_root_when_asked(graph, shap_arr, segments_series) -> None:
     names, arr = shap_arr
     df = segment_importance(graph, names, arr, segments_series)
-    fig = concept_pareto(graph, df, include_root=True)
+    fig = concept_pareto(graph, df, hide_root=False)
     found = False
     for trace in fig.data:
         if trace.name == "equality":

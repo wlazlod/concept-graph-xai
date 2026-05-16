@@ -16,12 +16,13 @@ def segment_concept_heatmap(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
+    hide_root: bool = True,
     sort_by: str | None = "max",
     max_concepts: int | None = None,
     title: str | None = None,
     colorscale: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
+    include_root: bool | None = None,
 ) -> go.Figure:
     """Render a concept × segment SHAP heatmap.
 
@@ -33,8 +34,10 @@ def segment_concept_heatmap(
         Long-form output of :func:`segment_importance`.
     only_concepts:
         If ``True`` (default), drop feature leaves.
-    include_root:
-        If ``False`` (default), drop the root concept row.
+    hide_root:
+        If ``True`` (default), drop the root concept row. Renamed from the
+        previous ``include_root`` flag for consistency with the sunburst
+        family.
     sort_by:
         ``"max"`` (default) orders concept rows by the maximum value across
         segments, descending. ``"depth"`` keeps graph DFS preorder.
@@ -50,6 +53,16 @@ def segment_concept_heatmap(
         Passed verbatim to ``fig.update_layout``.
     """
 
+    if include_root is not None:
+        import warnings
+
+        warnings.warn(
+            "include_root is deprecated; pass hide_root=not include_root instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        hide_root = not include_root
+
     if df.empty:
         raise ValueError("DataFrame is empty; run segment_importance first")
     for col in ("name", "kind", "segment", "value"):
@@ -59,7 +72,7 @@ def segment_concept_heatmap(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     segment_order = df.attrs.get("segment_order") or list(

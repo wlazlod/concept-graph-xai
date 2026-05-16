@@ -18,13 +18,14 @@ def concept_disparity_heatmap(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
+    hide_root: bool = True,
     include_reference: bool = True,
     sort_by: SortBy | None = "max_abs",
     max_concepts: int | None = None,
     title: str | None = None,
     colorscale: str = "RdBu",
     layout_kwargs: dict[str, Any] | None = None,
+    include_root: bool | None = None,
 ) -> go.Figure:
     """Render a concept × protected-group disparity heatmap.
 
@@ -41,8 +42,10 @@ def concept_disparity_heatmap(
         Long-form output of :func:`concept_disparity`.
     only_concepts:
         If ``True`` (default), drop feature leaves from the chart.
-    include_root:
-        If ``False`` (default), drop the root concept row.
+    hide_root:
+        If ``True`` (default), drop the root concept row. Renamed from
+        the previous ``include_root`` flag for consistency with the
+        sunburst family.
     include_reference:
         If ``True`` (default), keep the reference group's all-zero
         column as a visible baseline. Pass ``False`` to drop it for a
@@ -64,6 +67,16 @@ def concept_disparity_heatmap(
         Passed verbatim to ``fig.update_layout``.
     """
 
+    if include_root is not None:
+        import warnings
+
+        warnings.warn(
+            "include_root is deprecated; pass hide_root=not include_root instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        hide_root = not include_root
+
     if df.empty:
         raise ValueError("DataFrame is empty; run concept_disparity first")
     for col in ("name", "kind", "protected_group", "value"):
@@ -73,7 +86,7 @@ def concept_disparity_heatmap(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     reference_group = df.attrs.get("reference_group")
