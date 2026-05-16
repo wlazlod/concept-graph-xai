@@ -45,12 +45,28 @@ def test_bootstrap_importance_ci_sandwiches_mean(graph, shap_arr) -> None:
 def test_bootstrap_importance_unsigned_is_nonnegative(graph, shap_arr) -> None:
     names, arr = shap_arr
     df = bootstrap_importance(
-        graph, names, arr, n_bootstrap=50, random_state=0, signed=False
+        graph, names, arr, n_bootstrap=50, random_state=0, agg="mean_abs"
     )
     assert "mean_abs_shap" in df.columns
     rows = df[df["feature_count"] > 0]
     assert (rows["mean_abs_shap"] >= 0).all()
     assert (rows["ci_lo"] >= 0).all()
+
+
+def test_bootstrap_importance_deprecated_signed_still_works(graph, shap_arr) -> None:
+    names, arr = shap_arr
+    with pytest.warns(DeprecationWarning, match="signed"):
+        df = bootstrap_importance(
+            graph, names, arr, n_bootstrap=50, random_state=0, signed=False
+        )
+    assert "mean_abs_shap" in df.columns
+    assert df.attrs["agg"] == "mean_abs"
+
+
+def test_bootstrap_importance_rejects_unknown_agg(graph, shap_arr) -> None:
+    names, arr = shap_arr
+    with pytest.raises(ValueError, match="agg"):
+        bootstrap_importance(graph, names, arr, agg="median")  # type: ignore[arg-type]
 
 
 def test_bootstrap_importance_root_aggregates_all_features(graph, shap_arr) -> None:
