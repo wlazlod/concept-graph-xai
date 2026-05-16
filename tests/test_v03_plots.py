@@ -48,7 +48,11 @@ def test_correlation_block_renders_for_feature_correlation(graph, X) -> None:
     fig = correlation_block(res, title="features")
     assert fig.data
     assert fig.data[0].type == "heatmap"
-    assert fig.data[0].z.shape == (5, 5)
+    z = np.asarray(fig.data[0].z, dtype=float)
+    assert z.shape == (5, 5)
+    # Correlations must live in [-1, 1] and the diagonal should be 1.
+    assert ((z >= -1.0) & (z <= 1.0)).all()
+    np.testing.assert_allclose(np.diag(z), 1.0, atol=1e-9)
 
 
 def test_correlation_block_renders_for_nullity_correlation(graph, X) -> None:
@@ -58,6 +62,8 @@ def test_correlation_block_renders_for_nullity_correlation(graph, X) -> None:
     fig = correlation_block(res, title="nullity")
     assert fig.data
     assert fig.data[0].type == "heatmap"
+    z = np.asarray(fig.data[0].z, dtype=float)
+    assert ((z >= -1.0) & (z <= 1.0)).all()
 
 
 def test_correlation_block_renders_for_shap_correlation(graph, X) -> None:
@@ -67,6 +73,9 @@ def test_correlation_block_renders_for_shap_correlation(graph, X) -> None:
     fig = correlation_block(res, title="shap")
     assert fig.data
     assert fig.data[0].type == "heatmap"
+    z = np.asarray(fig.data[0].z, dtype=float)
+    assert ((z >= -1.0) & (z <= 1.0)).all()
+    np.testing.assert_allclose(np.diag(z), 1.0, atol=1e-9)
 
 
 def test_joint_missing_map_uses_rate_for_color(graph, X) -> None:
