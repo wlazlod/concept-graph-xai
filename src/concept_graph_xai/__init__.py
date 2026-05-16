@@ -13,6 +13,7 @@ from concept_graph_xai.metrics.correlation import (
     shap_correlation,
 )
 from concept_graph_xai.metrics.counts import feature_counts
+from concept_graph_xai.metrics.disparity import concept_disparity
 from concept_graph_xai.metrics.drift import attribution_drift, concept_drift_delta
 from concept_graph_xai.metrics.importance import importance_sum
 from concept_graph_xai.metrics.interaction import concept_interaction_matrix
@@ -23,6 +24,7 @@ from concept_graph_xai.plotting.auc_drop_map import auc_drop_map
 from concept_graph_xai.plotting.coherence_importance_scatter import (
     coherence_importance_scatter,
 )
+from concept_graph_xai.plotting.concept_disparity_heatmap import concept_disparity_heatmap
 from concept_graph_xai.plotting.concept_drift_lines import concept_drift_lines
 from concept_graph_xai.plotting.concept_drift_sunburst import concept_drift_sunburst
 from concept_graph_xai.plotting.concept_interaction_heatmap import concept_interaction_heatmap
@@ -41,7 +43,7 @@ from concept_graph_xai.prediction_explainer import (
     ConceptPredictionExplainer,
 )
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     "ConceptContribution",
@@ -56,6 +58,8 @@ __all__ = [
     "coherence_importance",
     "coherence_importance_scatter",
     "column_missing_rate",
+    "concept_disparity",
+    "concept_disparity_heatmap",
     "concept_drift_delta",
     "concept_drift_lines",
     "concept_drift_sunburst",

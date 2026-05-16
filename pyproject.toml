@@ -1,6 +1,6 @@
 [project]
 name = "concept-graph-xai"
-version = "0.5.0"
+version = "0.6.0"
 description = "Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation metrics."
 readme = "README.md"
 license = { text = "MIT" }
