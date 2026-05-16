@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 
+import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
@@ -117,6 +118,39 @@ def _lighten(hex_color: str, factor: float) -> str:
     factor = max(0.0, min(1.0, factor))
     r, g, b = hex_to_rgb(hex_color)
     return rgb_to_hex(r + (1.0 - r) * factor, g + (1.0 - g) * factor, b + (1.0 - b) * factor)
+
+
+def heatmap_color_kwargs(
+    z: np.ndarray,
+    *,
+    agg: str = "mean_abs",
+    colorscale: str | None = None,
+) -> dict[str, object]:
+    """Return Plotly heatmap colour kwargs for a concept-derived ``z`` matrix.
+
+    Encapsulates the "diverging RdBu for signed, sequential Reds for
+    absolute" convention used by every concept × group heatmap in the
+    library (``segment_concept_heatmap``, ``concept_interaction_heatmap``,
+    ``concept_disparity_heatmap``).
+
+    * ``agg="mean_signed"`` → diverging palette (default ``"RdBu"``) with
+      ``zmid=0`` and symmetric ``zmin / zmax = ±max(|z|)``.
+    * ``agg="mean_abs"`` (or anything else) → sequential palette (default
+      ``"Reds"``) with ``zmin=0`` and ``zmax=max(z)``.
+
+    Always returns a dict with ``colorscale``, ``zmin``, ``zmax`` and
+    (for signed) ``zmid`` keys; callers spread it into their
+    ``go.Heatmap`` keyword arguments.
+    """
+
+    if agg == "mean_signed":
+        if colorscale is None:
+            colorscale = "RdBu"
+        cabs = float(np.nanmax(np.abs(z))) or 1e-9
+        return {"colorscale": colorscale, "zmid": 0.0, "zmin": -cabs, "zmax": cabs}
+    if colorscale is None:
+        colorscale = "Reds"
+    return {"colorscale": colorscale, "zmin": 0.0, "zmax": float(np.nanmax(z)) or 1e-9}
 
 
 def branch_colors(

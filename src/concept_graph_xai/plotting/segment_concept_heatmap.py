@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.plotting._layout import heatmap_color_kwargs
 
 
 def segment_concept_heatmap(
@@ -102,22 +102,14 @@ def segment_concept_heatmap(
 
     agg = df.attrs.get("agg", "mean_abs")
     z = pivot.to_numpy(dtype=float)
-    if colorscale is None:
-        colorscale = "RdBu" if agg == "mean_signed" else "Reds"
-
     heatmap_kwargs: dict[str, Any] = {
         "z": z,
         "x": list(pivot.columns),
         "y": list(pivot.index),
-        "colorscale": colorscale,
         "colorbar": {"title": agg},
         "hovertemplate": "%{y} | %{x}<br>" + agg + ": %{z:.4f}<extra></extra>",
+        **heatmap_color_kwargs(z, agg=agg, colorscale=colorscale),
     }
-    if agg == "mean_signed":
-        cabs = float(np.nanmax(np.abs(z))) or 1e-9
-        heatmap_kwargs.update(zmid=0.0, zmin=-cabs, zmax=cabs)
-    else:
-        heatmap_kwargs.update(zmin=0.0, zmax=float(np.nanmax(z)) or 1e-9)
 
     fig = go.Figure(go.Heatmap(**heatmap_kwargs))
 

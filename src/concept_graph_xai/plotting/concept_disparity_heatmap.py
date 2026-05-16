@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.plotting._layout import heatmap_color_kwargs
 
 SortBy = Literal["max_abs", "depth"]
 
@@ -120,7 +120,10 @@ def concept_disparity_heatmap(
 
     agg = df.attrs.get("agg", "mean_abs")
     z = pivot.to_numpy(dtype=float)
-    cmax = float(np.nanmax(np.abs(z))) or 1e-9
+    # Disparity is always signed — force diverging behaviour regardless of
+    # df.attrs["agg"], because a magnitude-vs-magnitude gap can still go
+    # negative (group < reference) and deserves a centred palette.
+    color_kwargs = heatmap_color_kwargs(z, agg="mean_signed", colorscale=colorscale)
 
     auto_title = f"Concept SHAP disparity vs {reference_group}" if reference_group else "Concept SHAP disparity"
     auto_title += f" ({agg})"
@@ -130,12 +133,9 @@ def concept_disparity_heatmap(
             z=z,
             x=list(pivot.columns),
             y=list(pivot.index),
-            colorscale=colorscale,
-            zmid=0.0,
-            zmin=-cmax,
-            zmax=cmax,
             colorbar={"title": f"{agg} gap"},
             hovertemplate="%{y} | %{x}<br>gap: %{z:+.4f}<extra></extra>",
+            **color_kwargs,
         )
     )
 
