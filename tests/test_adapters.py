@@ -59,3 +59,31 @@ def test_from_feature_importances_reads_attribute() -> None:
     values, names = from_feature_importances_(_Model(), ["a", "b"])
     assert names == ["a", "b"]
     assert np.allclose(values, [0.2, 0.8])
+
+
+def test_from_shap_explanation_rejects_nan() -> None:
+    values = np.array([[0.1, float("nan")], [0.3, 0.4]])
+    exp = _FakeExplanation(values=values, feature_names=["a", "b"])
+    with pytest.raises(ValueError, match="NaN or Inf"):
+        from_shap_explanation(exp)
+
+
+def test_from_shap_explanation_rejects_inf() -> None:
+    values = np.array([[0.1, 0.2], [float("inf"), 0.4]])
+    exp = _FakeExplanation(values=values, feature_names=["a", "b"])
+    with pytest.raises(ValueError, match="NaN or Inf"):
+        from_shap_explanation(exp)
+
+
+def test_from_permutation_importance_rejects_nan() -> None:
+    bunch = _FakeBunch(np.array([0.1, float("nan"), 0.0]))
+    with pytest.raises(ValueError, match="NaN or Inf"):
+        from_permutation_importance(bunch, ["a", "b", "c"])
+
+
+def test_from_feature_importances_rejects_inf() -> None:
+    class _Model:
+        feature_importances_ = np.array([0.2, float("inf")])
+
+    with pytest.raises(ValueError, match="NaN or Inf"):
+        from_feature_importances_(_Model(), ["a", "b"])

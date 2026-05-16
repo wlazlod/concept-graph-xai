@@ -52,5 +52,9 @@ def from_shap_explanation(
         raise ValueError(
             f"shape mismatch: values has {arr.shape[-1]} features, names has {len(names)}"
         )
+    if not np.all(np.isfinite(arr)):
+        raise ValueError(
+            "SHAP values contain NaN or Inf; check the explainer output"
+        )
 
     return arr, names
