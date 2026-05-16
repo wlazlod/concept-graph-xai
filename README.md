@@ -2,7 +2,7 @@
 
 Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation metrics.
 
-> Status: **alpha (v0.4.0)**. API may change between minor releases.
+> Status: **alpha (v0.5.0)**. API may change between minor releases.
 >
 > 📖 **Docs:** <https://wlazlod.github.io/concept-graph-xai/>
 
@@ -27,6 +27,13 @@ It gives you:
 | `coherence_importance_scatter(coherence_importance(...))` | Quadrant chart: which concepts are well-designed, kitchen sinks, redundant, or noise? |
 | `correlation_block(shap_correlation(graph, names, shap_values))` | Which features does the model treat as substitutable, regardless of raw correlation? |
 | `regulatory_tag_overlay(graph, tag_key="tag")` | How much of the model's decision flows through PII / financial / behavioural concepts? |
+| `signed_concept_bar(graph, bootstrap_importance(...))` | What's the direction of each concept's SHAP, with bootstrap confidence intervals? |
+| `concept_interaction_heatmap(concept_interaction_matrix(...))` | Which concept pairs interact (using SHAP interaction values)? |
+| `concept_sankey(graph, feature_names, shap_values)` | How does SHAP flow from features through every concept tier to +/− outcomes? |
+| `segment_concept_heatmap(graph, segment_importance(...))` | Which concepts matter more in which cohort? |
+| `concept_pareto(graph, segment_importance(...))` | How concentrated is each cohort's SHAP across concepts? |
+| `concept_drift_lines(graph, attribution_drift(...))` | How does concept importance shift across periods? |
+| `concept_drift_sunburst(graph, concept_drift_delta(...))` | Which concepts changed the most between a baseline and a target period? |
 
 The metric layer (`concept_graph_xai.metrics.*`) returns plain `pandas.DataFrame`s and never imports plotly. The plot layer takes those DataFrames and a `ConceptGraph` and returns `plotly.graph_objects.Figure`s, exportable to PNG via `kaleido`.
 
@@ -148,8 +155,8 @@ The metric layer never imports plotly, and the plot layer never touches the mode
 * **v0.1**: counts, importance, utilization, three ablation strategies, three sunburst plots. ✅
 * **v0.2**: bug-fix release for `auc_drop_map`. ✅
 * **v0.3**: concept-design diagnostics — block correlation matrices (feature, nullity, SHAP), joint-missing-rate sunburst, coherence-vs-importance scatter, regulatory-tag overlay. ✅
-* **v0.4 (current)**: local explanations (`concept_violin`, `ConceptPredictionExplainer.waterfall`); rendering-default cleanups (root concept hidden by default; `sunburst` colours by branch by default; `utilization_map` subsumes the standalone feature-count sunburst with branch-hierarchical shading). ✅
-* **v0.5**: signed bar with bootstrap CIs, SHAP-interaction heatmap (C×C), concept Sankey, segment heatmap, segment Pareto, attribution drift line chart, drift delta sunburst.
+* **v0.4**: local explanations (`concept_violin`, `ConceptPredictionExplainer.waterfall`); rendering-default cleanups (root concept hidden by default; `sunburst` colours by branch by default; `utilization_map` subsumes the standalone feature-count sunburst with branch-hierarchical shading). ✅
+* **v0.5 (current)**: uncertainty (`bootstrap_importance` + `signed_concept_bar`), interactions (`concept_interaction_matrix` + heatmap, `concept_sankey`), cohort (`segment_importance` + heatmap, `concept_pareto`), drift (`attribution_drift` + `concept_drift_lines`, `concept_drift_delta` + `concept_drift_sunburst`). ✅
 * **v0.6**: protected-group disparity heatmap.
 * **v1.0**: DAG support (multi-parent concepts) with optional per-edge weights and Sankey rendering.
 

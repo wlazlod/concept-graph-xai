@@ -19,23 +19,18 @@ This page is the high-level roadmap, summarising shipped milestones and planned 
 - New plots: `correlation_block`, `joint_missing_map`, `coherence_importance_scatter`, `regulatory_tag_overlay`.
 - Cross-cutting decisions locked: switchable correlation method (Spearman default), `joint_missing_rate` is a standalone metric (no implicit fusion into `auc_drop`), `shap` stays an optional extra.
 
-## Planned
-
-### v0.4 — Direction, single-prediction, rendering polish (current)
+### v0.4 — Direction, single-prediction, rendering polish
 - `concept_violin` — per-concept horizontal violin (KDE) of summed signed SHAP per sample, branch-tinted.
 - `ConceptPredictionExplainer.waterfall(row=...)` — single-prediction waterfall rolled up to a chosen tree depth.
 - Rendering defaults: root concept hidden by default; `sunburst` colours by branch (hierarchical shading) when no colorscale is given; `utilization_map` subsumes the standalone feature-count sunburst; `correlation_block` stacks nested concept labels in depth-stratified rows.
 
-### Planned for v0.5
-- `bootstrap_importance` + `signed_concept_bar` — bar chart with bootstrap confidence intervals.
+### v0.5 — Uncertainty, interactions, cohort, drift (current)
+- Uncertainty: `bootstrap_importance` + `signed_concept_bar` — bar chart with bootstrap confidence intervals.
+- Interactions: `concept_interaction_matrix` + `concept_interaction_heatmap` — concept × concept SHAP-interaction matrix; `concept_sankey` — multi-tier SHAP flow diagram with explicit ontological grouping.
+- Cohort: `segment_importance` + `segment_concept_heatmap` — concept × cohort heatmap; `concept_pareto` — faceted Lorenz curves per cohort.
+- Drift: `attribution_drift` + `concept_drift_lines` — multi-period attribution monitoring; `concept_drift_delta` + `concept_drift_sunburst` — period-to-period delta sunburst.
 
-### v0.5 — Interactions, cohort, drift
-- `concept_interaction_matrix` + heatmap — concept × concept SHAP-interaction matrix.
-- `concept_sankey` — three-tier SHAP flow diagram.
-- `segment_importance` + `segment_concept_heatmap` — concept × cohort heatmap.
-- `concept_pareto` — faceted Lorenz curves per cohort.
-- `attribution_drift` + `concept_drift_lines` — multi-period attribution monitoring.
-- `concept_drift_sunburst` — period-to-period delta sunburst.
+## Planned
 
 ### v0.6 — Fairness
 - `concept_disparity` + `concept_disparity_heatmap` — concept × protected-group disparity matrix.
