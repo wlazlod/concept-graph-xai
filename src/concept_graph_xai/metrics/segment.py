@@ -9,50 +9,22 @@ import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import align_features, empty_concept_frame
+from concept_graph_xai.metrics._common import (
+    align_features,
+    empty_concept_frame,
+    grouping_order,
+    per_sample_per_concept,
+    resolve_grouping,
+)
 
 SegmentAgg = Literal["mean_abs", "mean_signed"]
 
 
-def _resolve_segments(
-    segments: pd.Series | str,
-    X: pd.DataFrame | None,
-    n_rows: int,
-) -> pd.Series:
-    """Coerce ``segments`` to a Series aligned to the row index of ``shap_values``."""
-
-    if isinstance(segments, str):
-        if X is None:
-            raise ValueError(
-                "segments is a column-name string; pass X=... so we can pull the column"
-            )
-        if segments not in X.columns:
-            raise KeyError(f"segments column {segments!r} not in X.columns")
-        series = X[segments]
-    elif isinstance(segments, pd.Series):
-        series = segments
-    else:
-        raise TypeError(
-            f"segments must be a pandas Series or column-name str, got {type(segments).__name__}"
-        )
-
-    if len(series) != n_rows:
-        raise ValueError(
-            f"segments has {len(series)} rows but shap_values has {n_rows}"
-        )
-    return series.reset_index(drop=True)
-
-
-def _segment_order(series: pd.Series) -> list[str]:
-    """Stable ordering: categorical ordering when available, else first-seen."""
-
-    if isinstance(series.dtype, pd.CategoricalDtype) and series.cat.ordered:
-        return [str(c) for c in series.cat.categories]
-    seen: list[str] = []
-    for value in series.dropna().astype(str):
-        if value not in seen:
-            seen.append(value)
-    return seen
+# Back-compat aliases for v0.6 importers (e.g. concept_disparity used to
+# pull these from metrics.segment). Will be removed once we're sure no
+# external code imports them.
+_resolve_segments = resolve_grouping
+_segment_order = grouping_order
 
 
 def segment_importance(
@@ -108,8 +80,8 @@ def segment_importance(
             f"shap_values has {arr.shape[1]} cols but feature_names has {len(feature_names)}"
         )
 
-    seg_series = _resolve_segments(segments, X, arr.shape[0])
-    segment_order = _segment_order(seg_series)
+    seg_series = resolve_grouping(segments, X, arr.shape[0], param_name="segments")
+    segment_order = grouping_order(seg_series)
     if not segment_order:
         raise ValueError("segments must contain at least one non-NA category")
 
@@ -118,15 +90,7 @@ def segment_importance(
 
     nodes = graph.nodes_in_order()
     base = empty_concept_frame(graph)
-    feature_counts = np.zeros(len(nodes), dtype=int)
-    per_sample_per_node = np.zeros((arr.shape[0], len(nodes)), dtype=float)
-    for k, node in enumerate(nodes):
-        feats = [f for f in graph.descendant_features(node) if f in name_to_idx]
-        feature_counts[k] = len(feats)
-        if not feats:
-            continue
-        cols = [name_to_idx[f] for f in feats]
-        per_sample_per_node[:, k] = arr[:, cols].sum(axis=1)
+    per_sample_per_node, feature_counts = per_sample_per_concept(graph, arr, name_to_idx)
 
     notna_mask = seg_series.notna().to_numpy()
     seg_strings = seg_series.astype(str)

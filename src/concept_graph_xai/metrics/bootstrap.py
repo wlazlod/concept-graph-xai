@@ -9,7 +9,11 @@ import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import align_features, empty_concept_frame
+from concept_graph_xai.metrics._common import (
+    align_features,
+    empty_concept_frame,
+    per_sample_per_concept,
+)
 
 BootstrapAgg = Literal["mean_signed", "mean_abs"]
 
@@ -98,18 +102,11 @@ def bootstrap_importance(
 
     nodes = graph.nodes_in_order()
     n_samples, _ = arr.shape
-    per_sample_per_node = np.zeros((n_samples, len(nodes)), dtype=float)
-    feature_counts = np.zeros(len(nodes), dtype=int)
-    for k, node in enumerate(nodes):
-        feats = [f for f in graph.descendant_features(node) if f in name_to_idx]
-        feature_counts[k] = len(feats)
-        if not feats:
-            continue
-        idxs = [name_to_idx[f] for f in feats]
-        sub = arr[:, idxs]
-        if agg == "mean_abs":
-            sub = np.abs(sub)
-        per_sample_per_node[:, k] = sub.sum(axis=1)
+    # For mean_abs we want |SHAP| summed (cancellation does NOT shrink), so
+    # we feed the absolute array into the per-sample helper. For mean_signed
+    # we feed the signed array.
+    source = np.abs(arr) if agg == "mean_abs" else arr
+    per_sample_per_node, feature_counts = per_sample_per_concept(graph, source, name_to_idx)
 
     rng = np.random.default_rng(random_state)
     boot_means = np.empty((n_bootstrap, len(nodes)), dtype=float)
