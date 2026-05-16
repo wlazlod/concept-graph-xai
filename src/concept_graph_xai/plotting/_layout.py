@@ -120,6 +120,72 @@ def _lighten(hex_color: str, factor: float) -> str:
     return rgb_to_hex(r + (1.0 - r) * factor, g + (1.0 - g) * factor, b + (1.0 - b) * factor)
 
 
+def sunburst_layout(
+    graph: ConceptGraph,
+    df: pd.DataFrame,
+    *,
+    value: str,
+    hide_root: bool = True,
+) -> tuple[dict[str, list[str]], pd.DataFrame, np.ndarray]:
+    """Run the per-sunburst preamble: graph_to_arrays + reindex + sizes vector.
+
+    Every sunburst plot wants ``(arrays, ordered_df, sizes)`` aligned to
+    each other before it computes its marker. Returned ``sizes`` is the
+    fillna(0).to_numpy(float) of ``df[value]`` reindexed to ``arrays["ids"]``.
+    """
+
+    arrays = graph_to_arrays(graph, hide_root=hide_root)
+    ordered = reindex_to_paths(df, arrays["ids"])
+    if value not in ordered.columns:
+        raise KeyError(f"value column {value!r} not in DataFrame; have {list(ordered.columns)}")
+    sizes = ordered[value].fillna(0).to_numpy(dtype=float)
+    return arrays, ordered, sizes
+
+
+def build_sunburst_figure(
+    arrays: dict[str, list[str]],
+    values: np.ndarray,
+    marker: dict[str, object],
+    *,
+    hover: Sequence[str] | None = None,
+    title: str | None = None,
+    branchvalues: str = "total",
+    layout_kwargs: dict[str, object] | None = None,
+) -> object:
+    """Assemble the standard Plotly Sunburst figure used across the library.
+
+    Returns a ``plotly.graph_objects.Figure`` — typed as ``object`` to avoid
+    forcing a plotly import at module load. The marker dict is passed
+    through verbatim except for adding the library's default white sector
+    borders if the caller didn't set ``marker['line']``.
+    """
+
+    import plotly.graph_objects as go
+
+    marker.setdefault("line", {"width": 0.5, "color": "white"})
+
+    kwargs: dict[str, object] = {
+        "ids": arrays["ids"],
+        "labels": arrays["labels"],
+        "parents": arrays["parents"],
+        "values": values,
+        "branchvalues": branchvalues,
+        "marker": marker,
+        "insidetextorientation": "radial",
+    }
+    if hover is not None:
+        kwargs["hovertext"] = list(hover)
+        kwargs["hovertemplate"] = "<b>%{label}</b><br>%{hovertext}<extra></extra>"
+    else:
+        kwargs["hovertemplate"] = "<b>%{label}</b><br>%{value}<extra></extra>"
+
+    fig = go.Figure(go.Sunburst(**kwargs))
+    fig.update_layout(title=title, margin={"t": 40, "l": 0, "r": 0, "b": 0})
+    if layout_kwargs:
+        fig.update_layout(**layout_kwargs)
+    return fig
+
+
 def heatmap_color_kwargs(
     z: np.ndarray,
     *,

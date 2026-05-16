@@ -12,9 +12,9 @@ import plotly.graph_objects as go
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.plotting._layout import (
     branch_colors,
-    graph_to_arrays,
+    build_sunburst_figure,
     hover_text,
-    reindex_to_paths,
+    sunburst_layout,
 )
 
 ColorBy = Literal["auto", "branch", "value", "none"]
@@ -80,15 +80,10 @@ def sunburst(
         Passed verbatim to ``fig.update_layout``.
     """
 
-    arrays = graph_to_arrays(graph, hide_root=hide_root)
-    ordered = reindex_to_paths(df, arrays["ids"])
-    if value not in ordered.columns:
-        raise KeyError(f"value column {value!r} not in DataFrame; have {list(ordered.columns)}")
-
-    values = ordered[value].fillna(0).to_numpy(dtype=float)
+    arrays, ordered, sizes = sunburst_layout(graph, df, value=value, hide_root=hide_root)
 
     resolved = _resolve_color_by(color_by, colorscale)
-    marker: dict[str, Any] = {"line": {"width": 0.5, "color": "white"}}
+    marker: dict[str, Any] = {}
     if resolved == "value":
         cv = color_value or value
         if cv not in ordered.columns:
@@ -117,29 +112,20 @@ def sunburst(
 
     hover = hover_text(ordered, hover_columns, fmt=hover_fmt)
 
-    fig = go.Figure(
-        go.Sunburst(
-            ids=arrays["ids"],
-            labels=arrays["labels"],
-            parents=arrays["parents"],
-            values=values,
-            branchvalues=branchvalues,
-            marker=marker,
-            hovertext=hover,
-            hovertemplate="<b>%{label}</b><br>%{hovertext}<extra></extra>",
-            insidetextorientation="radial",
-        )
-    )
-    fig.update_layout(
+    return build_sunburst_figure(
+        arrays,
+        sizes,
+        marker=marker,
+        hover=hover,
         title=title,
-        margin={"t": 40, "l": 0, "r": 0, "b": 0},
+        branchvalues=branchvalues,
+        layout_kwargs=layout_kwargs,
     )
-    if layout_kwargs:
-        fig.update_layout(**layout_kwargs)
-    return fig
 
 
-def _resolve_color_by(color_by: ColorBy, colorscale: str | None) -> Literal["branch", "value", "none"]:
+def _resolve_color_by(
+    color_by: ColorBy, colorscale: str | None
+) -> Literal["branch", "value", "none"]:
     if color_by == "auto":
         return "value" if colorscale is not None else "branch"
     if color_by == "value":

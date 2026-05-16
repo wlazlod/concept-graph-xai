@@ -17,9 +17,9 @@ import plotly.graph_objects as go
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.plotting._layout import (
     branch_colors,
-    graph_to_arrays,
+    build_sunburst_figure,
     hover_text,
-    reindex_to_paths,
+    sunburst_layout,
 )
 
 
@@ -62,12 +62,7 @@ def utilization_map(
     if "is_used" not in df.columns:
         raise KeyError("utilization_map expects DataFrame from metrics.utilization (no is_used col)")
 
-    arrays = graph_to_arrays(graph, hide_root=hide_root)
-    ordered = reindex_to_paths(df, arrays["ids"])
-
-    if value not in ordered.columns:
-        raise KeyError(f"value column {value!r} not in DataFrame")
-    values = ordered[value].fillna(0).to_numpy(dtype=float)
+    arrays, ordered, sizes = sunburst_layout(graph, df, value=value, hide_root=hide_root)
 
     is_used = ordered["is_used"].to_numpy()
     if used_color is None:
@@ -76,31 +71,16 @@ def utilization_map(
     else:
         colors = [used_color if bool(u) else unused_color for u in is_used]
 
-    hover_cols = [value, "is_used", "used_feature_count", "feature_count", "importance_sum"]
-    hover_cols = [c for c in hover_cols if c in ordered.columns]
-    hover = hover_text(
-        ordered,
-        hover_cols,
-        fmt={"importance_sum": ".4f"},
-    )
+    hover_cols = [c for c in (value, "is_used", "used_feature_count",
+                              "feature_count", "importance_sum")
+                  if c in ordered.columns]
+    hover = hover_text(ordered, hover_cols, fmt={"importance_sum": ".4f"})
 
-    fig = go.Figure(
-        go.Sunburst(
-            ids=arrays["ids"],
-            labels=arrays["labels"],
-            parents=arrays["parents"],
-            values=values,
-            branchvalues="total",
-            marker={"colors": colors, "line": {"width": 0.5, "color": "white"}},
-            hovertext=hover,
-            hovertemplate="<b>%{label}</b><br>%{hovertext}<extra></extra>",
-            insidetextorientation="radial",
-        )
-    )
-    fig.update_layout(
+    return build_sunburst_figure(
+        arrays,
+        sizes,
+        marker={"colors": colors},
+        hover=hover,
         title=title or "Concept utilization (grey = unused)",
-        margin={"t": 40, "l": 0, "r": 0, "b": 0},
+        layout_kwargs=layout_kwargs,
     )
-    if layout_kwargs:
-        fig.update_layout(**layout_kwargs)
-    return fig
