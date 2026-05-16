@@ -17,6 +17,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First-class `ProtectedAttribute` object on the graph with per-node sensitive-flag metadata.
 - Multiple-reference baselines (compare every group against the population mean instead of one group).
 
+## [0.6.1] — 2026-05-17
+
+Internal refactor + API consistency pass — no new features. All public
+API changes ship with deprecation aliases so v0.6.0 callers keep working.
+
+### Fixed
+
+- `ConceptGraph.graph` property now returns a defensive copy. Previously
+  external code could mutate the internal `nx.DiGraph` and silently
+  corrupt the path cache + DFS order.
+- `metrics.column_missing_rate` returns `NaN` (not `0.0`) for empty input
+  — `0.0` falsely meant "nothing missing" on a zero-row DataFrame.
+- `metrics.feature_correlation` accepts both `pd.DataFrame` and
+  `np.ndarray` (with `feature_names=`), matching `shap_correlation`.
+- `plotting.concept_drift_sunburst` now raises `ValueError` when every
+  delta is NaN, instead of silently rendering a neutral colorbar with
+  `cmax=1.0`.
+- All three adapters (`from_shap_explanation`, `from_permutation_importance`,
+  `from_feature_importances_`) now reject NaN / Inf at the boundary with
+  a clear error. Previously a zero-variance feature could push NaN
+  through the entire pipeline silently.
+
+### Changed (API, with deprecation aliases — non-breaking)
+
+- `bootstrap_importance` now takes `agg: "mean_signed" | "mean_abs"` matching
+  the rest of the v0.5/v0.6 SHAP-aggregation family. The previous
+  `signed: bool = True` argument is kept as a deprecated alias that emits
+  `DeprecationWarning`.
+- The four heatmap plots (`segment_concept_heatmap`,
+  `concept_disparity_heatmap`, `concept_pareto`, `concept_drift_lines`)
+  now take `hide_root: bool = True` for consistency with the sunburst
+  family. The previous `include_root: bool = False` flag is kept as a
+  deprecated alias.
+- `concept_drift_lines` now takes `max_concepts: int | None = None`
+  matching every other concept-cap knob in the library. The previous
+  `top_k: int | None = 10` argument is kept as a deprecated alias —
+  note the **default also changes**: the old default silently capped to
+  10 concepts, the new default shows every concept (callers can cap
+  explicitly).
+- `concept_disparity_heatmap` default colorscale is now `"RdBu_r"`
+  (was `"RdBu"`) so positive gap renders red, matching
+  `concept_drift_sunburst`'s "growing magnitude = red" convention.
+
+### Changed (internal — no caller-visible effect)
+
+- `_layout._hex_to_rgb` / `_rgb_to_hex` promoted to public
+  `hex_to_rgb` / `rgb_to_hex` — `concept_sankey` already imported them
+  across the privacy boundary.
+- Six sunburst plots now share a common skeleton via `_layout.sunburst_layout`
+  + `_layout.build_sunburst_figure`. Three heatmaps share their
+  colorscale + zmid logic via `_layout.heatmap_color_kwargs`. Four
+  metrics share the per-sample-per-concept aggregation via
+  `metrics._common.per_sample_per_concept`. Two grouping helpers
+  (`_resolve_segments`, `_segment_order`) promoted to `_common` as
+  `resolve_grouping` / `grouping_order`. Net effect: ~−400 lines of
+  duplication, single source of truth for each pattern.
+- Dead `_ = skip_root` no-op removed from `correlation_block`.
+- Confusing double `.attrs.get()` fallback simplified to a single call
+  in `coherence_importance_scatter`.
+- Hover-format inconsistency fixed: signed columns use `+.4f`,
+  magnitude-only columns use `.4f` (`segment_concept_heatmap`,
+  `concept_interaction_heatmap`).
+- Redundant empty-check after `breakdown()` removed from
+  `prediction_explainer.waterfall`.
+
+### Tooling
+
+- `pyproject.toml` ruff config now enforces the 100-char line limit
+  (`E501` dropped from the ignore list); ran `ruff format .` across
+  the codebase as a one-time wrapping pass.
+- `kaleido` pin loosened from `==0.2.1` to `>=0.2.1,<1` (stays on the
+  0.x line; avoids the 1.x process-model breaking change).
+
+### Tests
+
+- New `tests/test_edge_cases.py` parametrises every public
+  SHAP-aggregation metric over the unhappy paths (empty input,
+  single sample, all-NaN segments, single-feature concepts,
+  single-period drift, all-zero SHAP).
+- New adapter NaN/Inf-rejection tests.
+- `test_regulatory_tag_overlay` gains an explicit tag-to-colour mapping
+  test (was only checking "at least 2 distinct colours").
+- Three new deprecation-alias tests confirm `signed=`, `include_root=`,
+  and `top_k=` still work and emit `DeprecationWarning`.
+
 ## [0.6.0] — 2026-05-16
 
 Fairness — concept-level disparity vs a reference protected group.
@@ -125,7 +210,8 @@ Minimum viable release.
 - Adapters: `from_shap_explanation`, `from_permutation_importance`, `from_feature_importances_`.
 - Tests, mypy strict, README quickstart, end-to-end notebook on the Give Me Some Credit Kaggle dataset.
 
-[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.6.1
 [0.6.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.6.0
 [0.5.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.4.0
