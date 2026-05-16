@@ -2,7 +2,7 @@
 
 Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation metrics.
 
-> Status: **alpha (v0.5.0)**. API may change between minor releases.
+> Status: **alpha (v0.6.0)**. API may change between minor releases.
 >
 > 📖 **Docs:** <https://wlazlod.github.io/concept-graph-xai/>
 
@@ -34,6 +34,7 @@ It gives you:
 | `concept_pareto(graph, segment_importance(...))` | How concentrated is each cohort's SHAP across concepts? |
 | `concept_drift_lines(graph, attribution_drift(...))` | How does concept importance shift across periods? |
 | `concept_drift_sunburst(graph, concept_drift_delta(...))` | Which concepts changed the most between a baseline and a target period? |
+| `concept_disparity_heatmap(graph, concept_disparity(..., reference=...))` | How much does the model rely on each concept differently across protected groups vs a reference group? |
 
 The metric layer (`concept_graph_xai.metrics.*`) returns plain `pandas.DataFrame`s and never imports plotly. The plot layer takes those DataFrames and a `ConceptGraph` and returns `plotly.graph_objects.Figure`s, exportable to PNG via `kaleido`.
 
@@ -156,8 +157,8 @@ The metric layer never imports plotly, and the plot layer never touches the mode
 * **v0.2**: bug-fix release for `auc_drop_map`. ✅
 * **v0.3**: concept-design diagnostics — block correlation matrices (feature, nullity, SHAP), joint-missing-rate sunburst, coherence-vs-importance scatter, regulatory-tag overlay. ✅
 * **v0.4**: local explanations (`concept_violin`, `ConceptPredictionExplainer.waterfall`); rendering-default cleanups (root concept hidden by default; `sunburst` colours by branch by default; `utilization_map` subsumes the standalone feature-count sunburst with branch-hierarchical shading). ✅
-* **v0.5 (current)**: uncertainty (`bootstrap_importance` + `signed_concept_bar`), interactions (`concept_interaction_matrix` + heatmap, `concept_sankey`), cohort (`segment_importance` + heatmap, `concept_pareto`), drift (`attribution_drift` + `concept_drift_lines`, `concept_drift_delta` + `concept_drift_sunburst`). ✅
-* **v0.6**: protected-group disparity heatmap.
+* **v0.5**: uncertainty (`bootstrap_importance` + `signed_concept_bar`), interactions (`concept_interaction_matrix` + heatmap, `concept_sankey`), cohort (`segment_importance` + heatmap, `concept_pareto`), drift (`attribution_drift` + `concept_drift_lines`, `concept_drift_delta` + `concept_drift_sunburst`). ✅
+* **v0.6 (current)**: fairness — `concept_disparity` + `concept_disparity_heatmap` (additive gap vs reference protected group). ✅
 * **v1.0**: DAG support (multi-parent concepts) with optional per-edge weights and Sankey rendering.
 
 See the [roadmap page](https://wlazlod.github.io/concept-graph-xai/roadmap/) for milestone status and the locked cross-cutting decisions.

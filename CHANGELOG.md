@@ -9,8 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- **v0.6** — fairness (concept-level disparity heatmap, protected-attribute API).
 - **v1.0** — DAG support with optional per-edge weights; backwards compatible for tree users.
+
+### Possible v0.6.x follow-ups (filed; no commitment)
+
+- Intersection protected attributes (`gender × age_band`).
+- First-class `ProtectedAttribute` object on the graph with per-node sensitive-flag metadata.
+- Multiple-reference baselines (compare every group against the population mean instead of one group).
+
+## [0.6.0] — 2026-05-16
+
+Fairness — concept-level disparity vs a reference protected group.
+
+### Added
+
+- `concept_disparity(graph, feature_names, shap_values, protected, *, reference, X=None, agg="mean_abs"|"mean_signed")` — per-concept additive SHAP gap (`value_group - value_reference`) per protected group. `protected` accepts a `pd.Series` aligned to the rows or a column-name string (with `X` provided); `reference` is the label of the baseline group. Returns long-form DataFrame with columns `name, kind, depth, parent, path, protected_group, value, reference_value, feature_count` and `df.attrs["reference_group"]` / `protected_order`. The reference group's row is kept in the output with `value=0` so the heatmap can show it as the visible baseline.
+- `concept_disparity_heatmap(graph, df)` — concept × protected-group heatmap with a diverging `RdBu` palette centred at 0. Default sort puts the most disparate concepts (max `|gap|`) at the top; `include_reference=False` drops the all-zero reference column for a tighter chart. Title auto-includes the reference label.
+
+### Design
+
+- **Protected-attribute API design pass** (`PROPOSALS.md` §9 + §12) locked at **minimal**: a single attribute per call, mirroring the `segment_importance` shape. Intersections, graph-level metadata, and multiple-reference baselines are intentionally deferred until a real request lands.
+
+### Notebook
+
+- New **Part I — Fairness** section. Synthesises a protected attribute from `X_test["age"]` (`senior >= 65` vs `non_senior < 65`, reference = `non_senior`) and renders `concept_disparity_heatmap` on the held-out SHAP values. Outline and PNG export list updated.
 
 ## [0.5.0] — 2026-05-16
 
@@ -103,7 +125,8 @@ Minimum viable release.
 - Adapters: `from_shap_explanation`, `from_permutation_importance`, `from_feature_importances_`.
 - Tests, mypy strict, README quickstart, end-to-end notebook on the Give Me Some Credit Kaggle dataset.
 
-[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.6.0
 [0.5.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.4.0
 [0.3.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.3.0
