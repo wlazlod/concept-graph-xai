@@ -161,6 +161,25 @@ def aggregate_per_feature(
     raise ValueError(f"unknown agg {agg!r}; expected 'mean' or 'sum'")
 
 
+def aligned_index_map(
+    graph: ConceptGraph,
+    feature_names: Sequence[str],
+    *,
+    on_unknown: str = "warn",
+) -> dict[str, int]:
+    """Return ``{graph_feature: index_in_feature_names}`` for matched features.
+
+    Convenience wrapper over :func:`align_features` for callers that only
+    need the lookup dict (and not the matched-names list or the unknown-
+    names list). Used by every metric that builds a per-sample-per-concept
+    aggregate from a (N, F) array — five call sites were each constructing
+    this dict inline.
+    """
+
+    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
+    return {name: idx for name, idx in zip(matched, indices, strict=True)}
+
+
 def align_features(
     graph: ConceptGraph,
     feature_names: Sequence[str],

@@ -10,7 +10,7 @@ import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics._common import (
-    align_features,
+    aligned_index_map,
     deprecated_kwarg_or,
     empty_concept_frame,
     per_sample_per_concept,
@@ -96,8 +96,7 @@ def bootstrap_importance(
     if n_bootstrap < 1:
         raise ValueError(f"n_bootstrap must be >= 1; got {n_bootstrap}")
 
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
     nodes = graph.nodes_in_order()
     n_samples, _ = arr.shape

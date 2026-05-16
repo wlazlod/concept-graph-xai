@@ -11,21 +11,12 @@ import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics._common import deprecated_kwarg_or
+from concept_graph_xai.plotting._layout import DEFAULT_QUALITATIVE_PALETTE
 
-# Plotly qualitative palette, inlined so a Pareto chart's segment colours
-# are independent of the branch palette (segments != tree branches).
-_DEFAULT_SEGMENT_PALETTE: tuple[str, ...] = (
-    "#636EFA",
-    "#EF553B",
-    "#00CC96",
-    "#AB63FA",
-    "#FFA15A",
-    "#19D3F3",
-    "#FF6692",
-    "#B6E880",
-    "#FF97FF",
-    "#FECB52",
-)
+# Segments and tree branches are conceptually different axes, but both
+# use the same default qualitative palette. Share the constant so future
+# palette tweaks land in one place.
+_DEFAULT_SEGMENT_PALETTE = DEFAULT_QUALITATIVE_PALETTE
 
 
 def concept_pareto(

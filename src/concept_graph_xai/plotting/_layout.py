@@ -10,8 +10,10 @@ import pandas as pd
 from concept_graph_xai.graph import ConceptGraph
 
 # Plotly qualitative.Plotly palette, inlined so we don't pay a plotly.colors
-# import at metric-import time. Used as the default branch palette.
-_DEFAULT_BRANCH_PALETTE: tuple[str, ...] = (
+# import at metric-import time. Shared between every plot that needs a
+# qualitative categorical palette — currently `branch_colors` (sunbursts,
+# violin, signed bar, sankey) and `concept_pareto`'s per-segment colours.
+DEFAULT_QUALITATIVE_PALETTE: tuple[str, ...] = (
     "#636EFA",
     "#EF553B",
     "#00CC96",
@@ -23,6 +25,9 @@ _DEFAULT_BRANCH_PALETTE: tuple[str, ...] = (
     "#FF97FF",
     "#FECB52",
 )
+
+# Back-compat alias for the original name. Drop in a future cleanup.
+_DEFAULT_BRANCH_PALETTE = DEFAULT_QUALITATIVE_PALETTE
 
 _ROOT_FALLBACK_COLOR: str = "#cccccc"
 

@@ -10,7 +10,7 @@ import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics._common import (
-    align_features,
+    aligned_index_map,
     empty_concept_frame,
     grouping_order,
     per_sample_per_concept,
@@ -85,8 +85,7 @@ def segment_importance(
     if not segment_order:
         raise ValueError("segments must contain at least one non-NA category")
 
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
     nodes = graph.nodes_in_order()
     base = empty_concept_frame(graph)

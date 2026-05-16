@@ -18,7 +18,7 @@ import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics._common import (
-    align_features,
+    aligned_index_map,
     empty_concept_frame,
     per_sample_per_concept,
 )
@@ -47,8 +47,7 @@ def _aggregate_period(
             f"shap_values for period {period_label!r} has {arr.shape[1]} cols "
             f"but feature_names has {len(feature_names)}"
         )
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
     per_sample, feature_counts = per_sample_per_concept(graph, arr, name_to_idx)
     if agg == "mean_abs":
