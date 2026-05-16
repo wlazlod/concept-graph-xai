@@ -174,9 +174,7 @@ def concept_drift_delta(
     if target_label not in period_labels:
         raise KeyError(f"target period {target_label!r} not in periods: {period_labels}")
     if baseline_label == target_label:
-        raise ValueError(
-            f"baseline and target must differ; both set to {baseline_label!r}"
-        )
+        raise ValueError(f"baseline and target must differ; both set to {baseline_label!r}")
 
     long_df = attribution_drift(graph, periods, agg=agg, on_unknown=on_unknown)
     base_df = long_df[long_df["period"] == baseline_label].set_index("path")

@@ -56,10 +56,19 @@ def test_concept_sankey_includes_intermediate_concepts() -> None:
     fig = concept_sankey(graph, names, arr)
     labels = list(fig.data[0].node.label)
     # All hierarchy levels must be present: features + sub-concepts + top-level
-    for required in ("age", "dep", "d1", "d2",
-                     "Age", "Family", "Delinquency",
-                     "Demographics", "Behaviour",
-                     "+ outcome", "- outcome"):
+    for required in (
+        "age",
+        "dep",
+        "d1",
+        "d2",
+        "Age",
+        "Family",
+        "Delinquency",
+        "Demographics",
+        "Behaviour",
+        "+ outcome",
+        "- outcome",
+    ):
         assert required in labels, f"missing {required!r}"
 
 
@@ -123,9 +132,7 @@ def test_concept_sankey_outcome_split_matches_signed_flow(graph, shap_arr) -> No
 def test_concept_sankey_subconcept_outflow_lte_inflow_under_cancellation() -> None:
     # Sub-concept Delinquency wraps two features that perfectly anti-correlate.
     # Inflow = sum |SHAP[d1]| + sum |SHAP[d2]|; outflow = sum |SHAP[d1] + SHAP[d2]| ≈ 0.
-    graph = ConceptGraph.from_dict(
-        {"Risk": {"Behaviour": {"Delinquency": ["d1", "d2"]}}}
-    )
+    graph = ConceptGraph.from_dict({"Risk": {"Behaviour": {"Delinquency": ["d1", "d2"]}}})
     names = ["d1", "d2"]
     arr = np.array([[1.0, -1.0], [2.0, -2.0], [-1.5, 1.5]])
     fig = concept_sankey(graph, names, arr)
@@ -136,7 +143,11 @@ def test_concept_sankey_subconcept_outflow_lte_inflow_under_cancellation() -> No
     delinq_idx = labels.index("Delinquency")
     behav_idx = labels.index("Behaviour")
     inflow = sum(v for s, t, v in zip(sources, targets, values, strict=True) if t == delinq_idx)
-    outflow = sum(v for s, t, v in zip(sources, targets, values, strict=True) if s == delinq_idx and t == behav_idx)
+    outflow = sum(
+        v
+        for s, t, v in zip(sources, targets, values, strict=True)
+        if s == delinq_idx and t == behav_idx
+    )
     assert outflow < inflow, "cancelling features must shrink the sub-concept outflow"
     assert outflow == pytest.approx(0.0, abs=1e-9)
 
@@ -213,9 +224,7 @@ def test_concept_sankey_pins_explicit_node_positions() -> None:
 def test_concept_sankey_concept_tiers_deepest_first() -> None:
     # Sub-concepts (depth 2) must come BEFORE top-level concepts (depth 1)
     # in the node array so Plotly snaps them to a tier left of the top-level.
-    graph = ConceptGraph.from_dict(
-        {"Risk": {"Demographics": {"Age": ["age"], "Family": ["dep"]}}}
-    )
+    graph = ConceptGraph.from_dict({"Risk": {"Demographics": {"Age": ["age"], "Family": ["dep"]}}})
     names = ["age", "dep"]
     arr = np.random.default_rng(0).standard_normal((10, 2))
     fig = concept_sankey(graph, names, arr)

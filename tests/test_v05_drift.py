@@ -67,9 +67,7 @@ def test_attribution_drift_matches_analytic(graph, periods) -> None:
     df = attribution_drift(graph, periods, agg="mean_abs")
     # Behaviour @ Q1: mean_n |y1+y2+y3| over Q1's 40 rows
     expected = float(np.abs(q1_arr[:, 2:].sum(axis=1)).mean())
-    behav_q1 = df.loc[
-        (df["name"] == "Behaviour") & (df["period"] == "Q1"), "value"
-    ].iloc[0]
+    behav_q1 = df.loc[(df["name"] == "Behaviour") & (df["period"] == "Q1"), "value"].iloc[0]
     assert behav_q1 == pytest.approx(expected)
 
 

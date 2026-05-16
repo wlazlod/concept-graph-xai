@@ -106,9 +106,11 @@ def concept_disparity_heatmap(
     pivot = pivot.reindex(columns=[g for g in protected_order if g in pivot.columns])
 
     if sort_by == "max_abs":
-        pivot = pivot.assign(_max=pivot.abs().max(axis=1)).sort_values(
-            "_max", ascending=False
-        ).drop(columns="_max")
+        pivot = (
+            pivot.assign(_max=pivot.abs().max(axis=1))
+            .sort_values("_max", ascending=False)
+            .drop(columns="_max")
+        )
     elif sort_by == "depth":
         dfs_order = [n for n in graph.nodes_in_order() if n in set(pivot.index)]
         pivot = pivot.reindex(index=dfs_order)
@@ -128,7 +130,11 @@ def concept_disparity_heatmap(
     # negative (group < reference) and deserves a centred palette.
     color_kwargs = heatmap_color_kwargs(z, agg="mean_signed", colorscale=colorscale)
 
-    auto_title = f"Concept SHAP disparity vs {reference_group}" if reference_group else "Concept SHAP disparity"
+    auto_title = (
+        f"Concept SHAP disparity vs {reference_group}"
+        if reference_group
+        else "Concept SHAP disparity"
+    )
     auto_title += f" ({agg})"
 
     fig = go.Figure(

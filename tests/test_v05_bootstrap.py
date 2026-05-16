@@ -26,7 +26,16 @@ def shap_arr() -> tuple[list[str], np.ndarray]:
 def test_bootstrap_importance_columns_and_attrs(graph, shap_arr) -> None:
     names, arr = shap_arr
     df = bootstrap_importance(graph, names, arr, n_bootstrap=50, random_state=0)
-    for col in ("name", "kind", "depth", "parent", "mean_signed_shap", "ci_lo", "ci_hi", "feature_count"):
+    for col in (
+        "name",
+        "kind",
+        "depth",
+        "parent",
+        "mean_signed_shap",
+        "ci_lo",
+        "ci_hi",
+        "feature_count",
+    ):
         assert col in df.columns, f"missing {col}"
     assert len(df) == len(graph)
     assert df.attrs["ci"] == 0.95
@@ -44,9 +53,7 @@ def test_bootstrap_importance_ci_sandwiches_mean(graph, shap_arr) -> None:
 
 def test_bootstrap_importance_unsigned_is_nonnegative(graph, shap_arr) -> None:
     names, arr = shap_arr
-    df = bootstrap_importance(
-        graph, names, arr, n_bootstrap=50, random_state=0, agg="mean_abs"
-    )
+    df = bootstrap_importance(graph, names, arr, n_bootstrap=50, random_state=0, agg="mean_abs")
     assert "mean_abs_shap" in df.columns
     rows = df[df["feature_count"] > 0]
     assert (rows["mean_abs_shap"] >= 0).all()
@@ -56,9 +63,7 @@ def test_bootstrap_importance_unsigned_is_nonnegative(graph, shap_arr) -> None:
 def test_bootstrap_importance_deprecated_signed_still_works(graph, shap_arr) -> None:
     names, arr = shap_arr
     with pytest.warns(DeprecationWarning, match="signed"):
-        df = bootstrap_importance(
-            graph, names, arr, n_bootstrap=50, random_state=0, signed=False
-        )
+        df = bootstrap_importance(graph, names, arr, n_bootstrap=50, random_state=0, signed=False)
     assert "mean_abs_shap" in df.columns
     assert df.attrs["agg"] == "mean_abs"
 

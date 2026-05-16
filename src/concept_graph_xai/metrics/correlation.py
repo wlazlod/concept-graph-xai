@@ -104,9 +104,7 @@ def feature_correlation(
         df_X = X
     elif isinstance(X, np.ndarray):
         if feature_names is None:
-            raise ValueError(
-                "feature_correlation needs feature_names= when X is a numpy array"
-            )
+            raise ValueError("feature_correlation needs feature_names= when X is a numpy array")
         arr = np.asarray(X, dtype=float)
         if arr.ndim != 2:
             raise ValueError(f"X must be 2D (N, F); got shape {arr.shape}")

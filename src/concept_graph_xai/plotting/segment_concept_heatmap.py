@@ -79,15 +79,15 @@ def segment_concept_heatmap(
         dict.fromkeys(work["segment"].astype(str))
     )
 
-    pivot = work.pivot_table(
-        index="name", columns="segment", values="value", aggfunc="mean"
-    )
+    pivot = work.pivot_table(index="name", columns="segment", values="value", aggfunc="mean")
     pivot = pivot.reindex(columns=[s for s in segment_order if s in pivot.columns])
 
     if sort_by == "max":
-        pivot = pivot.assign(_max=pivot.max(axis=1)).sort_values(
-            "_max", ascending=False
-        ).drop(columns="_max")
+        pivot = (
+            pivot.assign(_max=pivot.max(axis=1))
+            .sort_values("_max", ascending=False)
+            .drop(columns="_max")
+        )
     elif sort_by == "depth":
         dfs_order = [n for n in graph.nodes_in_order() if n in set(pivot.index)]
         pivot = pivot.reindex(index=dfs_order)

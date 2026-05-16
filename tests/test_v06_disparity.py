@@ -88,9 +88,7 @@ def test_concept_disparity_string_form_requires_X(graph, shap_arr, protected_ser
     with pytest.raises(ValueError, match="X="):
         concept_disparity(graph, names, arr, "cohort", reference="A")
     with pytest.raises(KeyError, match="cohort"):
-        concept_disparity(
-            graph, names, arr, "cohort", X=X.drop(columns="cohort"), reference="A"
-        )
+        concept_disparity(graph, names, arr, "cohort", X=X.drop(columns="cohort"), reference="A")
 
 
 def test_concept_disparity_unknown_reference_raises(graph, shap_arr, protected_series) -> None:
@@ -99,11 +97,11 @@ def test_concept_disparity_unknown_reference_raises(graph, shap_arr, protected_s
         concept_disparity(graph, names, arr, protected_series, reference="Z")
 
 
-def test_concept_disparity_mean_signed_allows_negative_gap(graph, shap_arr, protected_series) -> None:
+def test_concept_disparity_mean_signed_allows_negative_gap(
+    graph, shap_arr, protected_series
+) -> None:
     names, arr = shap_arr
-    df = concept_disparity(
-        graph, names, arr, protected_series, reference="A", agg="mean_signed"
-    )
+    df = concept_disparity(graph, names, arr, protected_series, reference="A", agg="mean_signed")
     assert df.attrs["agg"] == "mean_signed"
     # Non-reference rows must include some negative gaps on random N(0,1) input.
     non_ref = df[df["protected_group"] != "A"]
@@ -117,9 +115,7 @@ def test_concept_disparity_rejects_bad_input(graph, shap_arr, protected_series) 
     with pytest.raises(ValueError, match="cols"):
         concept_disparity(graph, names[:2], arr, protected_series, reference="A")
     with pytest.raises(ValueError, match=r"\d+ rows"):
-        concept_disparity(
-            graph, names, arr, protected_series.iloc[:10], reference="A"
-        )
+        concept_disparity(graph, names, arr, protected_series.iloc[:10], reference="A")
 
 
 def test_concept_disparity_heatmap_renders(graph, shap_arr, protected_series) -> None:
@@ -156,9 +152,7 @@ def test_concept_disparity_heatmap_diverging_centred_at_zero(
     assert fig.data[0].zmin == -fig.data[0].zmax
 
 
-def test_concept_disparity_heatmap_sort_by_max_abs(
-    graph, shap_arr, protected_series
-) -> None:
+def test_concept_disparity_heatmap_sort_by_max_abs(graph, shap_arr, protected_series) -> None:
     names, arr = shap_arr
     df = concept_disparity(graph, names, arr, protected_series, reference="A")
     fig = concept_disparity_heatmap(graph, df, sort_by="max_abs")
@@ -167,9 +161,7 @@ def test_concept_disparity_heatmap_sort_by_max_abs(
     assert (np.diff(abs_max) <= 1e-9).all(), "rows should be sorted by max(|gap|) desc"
 
 
-def test_concept_disparity_heatmap_max_concepts_caps(
-    graph, shap_arr, protected_series
-) -> None:
+def test_concept_disparity_heatmap_max_concepts_caps(graph, shap_arr, protected_series) -> None:
     names, arr = shap_arr
     df = concept_disparity(graph, names, arr, protected_series, reference="A")
     fig = concept_disparity_heatmap(graph, df, max_concepts=1)

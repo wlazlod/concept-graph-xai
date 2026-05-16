@@ -106,7 +106,12 @@ def concept_interaction_heatmap(
     fig.update_layout(
         title=title or f"Concept × concept SHAP interaction ({agg})",
         xaxis={"side": "bottom", "tickangle": 45, "showgrid": False, "constrain": "domain"},
-        yaxis={"autorange": "reversed", "showgrid": False, "scaleanchor": "x", "constrain": "domain"},
+        yaxis={
+            "autorange": "reversed",
+            "showgrid": False,
+            "scaleanchor": "x",
+            "constrain": "domain",
+        },
         shapes=shapes,
         annotations=annotations,
         margin={"t": 60, "l": 140, "r": 30, "b": 120},

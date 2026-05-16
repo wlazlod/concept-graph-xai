@@ -99,9 +99,7 @@ def test_interaction_heatmap_signed_uses_diverging_palette(graph, interaction_ar
 
 def test_interaction_heatmap_annotations_capped() -> None:
     # Larger graph so we have several off-diagonal cells
-    graph = ConceptGraph.from_dict(
-        {"Risk": {"A": ["a1"], "B": ["b1"], "C": ["c1"], "D": ["d1"]}}
-    )
+    graph = ConceptGraph.from_dict({"Risk": {"A": ["a1"], "B": ["b1"], "C": ["c1"], "D": ["d1"]}})
     names = ["a1", "b1", "c1", "d1"]
     rng = np.random.default_rng(0)
     raw = rng.standard_normal((30, 4, 4))

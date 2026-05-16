@@ -65,9 +65,7 @@ def test_prediction_explainer_breakdown_has_one_row_per_concept(graph, shap_arr)
 
 
 def test_prediction_explainer_breakdown_depth_with_subconcepts() -> None:
-    graph = ConceptGraph.from_dict(
-        {"Risk": {"Demographics": {"Age": ["age"], "Family": ["dep"]}}}
-    )
+    graph = ConceptGraph.from_dict({"Risk": {"Demographics": {"Age": ["age"], "Family": ["dep"]}}})
     names = ["age", "dep"]
     arr = np.array([[0.5, -0.2], [0.1, 0.3]])
     X = pd.DataFrame(arr, columns=names)

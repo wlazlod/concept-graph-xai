@@ -74,9 +74,7 @@ def resolve_grouping(
         )
 
     if len(series) != n_rows:
-        raise ValueError(
-            f"{param_name} has {len(series)} rows but the data has {n_rows}"
-        )
+        raise ValueError(f"{param_name} has {len(series)} rows but the data has {n_rows}")
     return series.reset_index(drop=True)
 
 

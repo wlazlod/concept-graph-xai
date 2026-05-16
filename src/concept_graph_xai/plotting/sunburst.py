@@ -134,9 +134,7 @@ def _resolve_color_by(
         return "value"
     if color_by == "branch":
         if colorscale is not None:
-            warnings.warn(
-                "color_by='branch' ignores the supplied colorscale", stacklevel=3
-            )
+            warnings.warn("color_by='branch' ignores the supplied colorscale", stacklevel=3)
         return "branch"
     if color_by == "none":
         return "none"

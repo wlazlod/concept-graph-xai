@@ -48,8 +48,14 @@ def auc_drop_map(
 
     hover_cols = [
         c
-        for c in (value, "auc_drop_std", "ablated_score_mean",
-                  "baseline_score", "feature_count", "strategy")
+        for c in (
+            value,
+            "auc_drop_std",
+            "ablated_score_mean",
+            "baseline_score",
+            "feature_count",
+            "strategy",
+        )
         if c in ordered.columns
     ]
     hover = hover_text(

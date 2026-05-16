@@ -30,7 +30,9 @@ def segments_series() -> pd.Series:
     return pd.Series(rng.choice(["A", "B", "C"], size=60))
 
 
-def test_concept_pareto_one_trace_per_segment_plus_equality(graph, shap_arr, segments_series) -> None:
+def test_concept_pareto_one_trace_per_segment_plus_equality(
+    graph, shap_arr, segments_series
+) -> None:
     names, arr = shap_arr
     df = segment_importance(graph, names, arr, segments_series)
     fig = concept_pareto(graph, df)
@@ -42,7 +44,9 @@ def test_concept_pareto_one_trace_per_segment_plus_equality(graph, shap_arr, seg
         assert seg in names_in_legend
 
 
-def test_concept_pareto_curves_are_monotonic_and_end_at_one(graph, shap_arr, segments_series) -> None:
+def test_concept_pareto_curves_are_monotonic_and_end_at_one(
+    graph, shap_arr, segments_series
+) -> None:
     names, arr = shap_arr
     df = segment_importance(graph, names, arr, segments_series)
     fig = concept_pareto(graph, df)

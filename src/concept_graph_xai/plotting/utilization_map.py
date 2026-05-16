@@ -60,7 +60,9 @@ def utilization_map(
     """
 
     if "is_used" not in df.columns:
-        raise KeyError("utilization_map expects DataFrame from metrics.utilization (no is_used col)")
+        raise KeyError(
+            "utilization_map expects DataFrame from metrics.utilization (no is_used col)"
+        )
 
     arrays, ordered, sizes = sunburst_layout(graph, df, value=value, hide_root=hide_root)
 
@@ -71,9 +73,11 @@ def utilization_map(
     else:
         colors = [used_color if bool(u) else unused_color for u in is_used]
 
-    hover_cols = [c for c in (value, "is_used", "used_feature_count",
-                              "feature_count", "importance_sum")
-                  if c in ordered.columns]
+    hover_cols = [
+        c
+        for c in (value, "is_used", "used_feature_count", "feature_count", "importance_sum")
+        if c in ordered.columns
+    ]
     hover = hover_text(ordered, hover_cols, fmt={"importance_sum": ".4f"})
 
     return build_sunburst_figure(

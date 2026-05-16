@@ -16,9 +16,7 @@ from concept_graph_xai import (
 
 @pytest.fixture
 def graph_with_missing() -> tuple[ConceptGraph, pd.DataFrame]:
-    graph = ConceptGraph.from_dict(
-        {"Root": {"A": ["a1", "a2"], "B": ["b1", "b2"]}}
-    )
+    graph = ConceptGraph.from_dict({"Root": {"A": ["a1", "a2"], "B": ["b1", "b2"]}})
     rng = np.random.default_rng(0)
     n = 100
     X = pd.DataFrame(rng.standard_normal((n, 4)), columns=["a1", "a2", "b1", "b2"])
@@ -59,9 +57,7 @@ def test_joint_missing_rate_for_features_equals_column_rate(graph_with_missing) 
 
 
 def test_coherence_importance_assigns_quadrants() -> None:
-    graph = ConceptGraph.from_dict(
-        {"Root": {"Coherent": ["c1", "c2"], "Incoherent": ["i1", "i2"]}}
-    )
+    graph = ConceptGraph.from_dict({"Root": {"Coherent": ["c1", "c2"], "Incoherent": ["i1", "i2"]}})
     rng = np.random.default_rng(0)
     n = 200
     base = rng.standard_normal(n)

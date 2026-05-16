@@ -88,9 +88,7 @@ def concept_drift_lines(
         dict.fromkeys(work["period"].astype(str))
     )
 
-    pivot = work.pivot_table(
-        index="name", columns="period", values="value", aggfunc="mean"
-    )
+    pivot = work.pivot_table(index="name", columns="period", values="value", aggfunc="mean")
     pivot = pivot.reindex(columns=[p for p in period_order if p in pivot.columns])
 
     # Always sort by max-across-periods desc so the legend lists the most
@@ -118,9 +116,7 @@ def concept_drift_lines(
                 line={"color": color, "width": 2},
                 marker={"size": 7, "color": color},
                 name=str(name),
-                hovertemplate=(
-                    f"{name}<br>period: %{{x}}<br>{agg}: %{{y:.4f}}<extra></extra>"
-                ),
+                hovertemplate=(f"{name}<br>period: %{{x}}<br>{agg}: %{{y:.4f}}<extra></extra>"),
             )
         )
 
@@ -131,7 +127,12 @@ def concept_drift_lines(
     )
     fig.update_layout(
         title=title or f"Concept SHAP drift across periods ({agg}){suffix}",
-        xaxis={"title": "period", "type": "category", "categoryorder": "array", "categoryarray": list(pivot.columns)},
+        xaxis={
+            "title": "period",
+            "type": "category",
+            "categoryorder": "array",
+            "categoryarray": list(pivot.columns),
+        },
         yaxis={"title": agg},
         legend={"title": "concept"},
         margin={"t": 60, "l": 70, "r": 30, "b": 60},

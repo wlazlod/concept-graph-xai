@@ -31,14 +31,14 @@ dependencies = [
 shap = ["shap>=0.45"]
 lightgbm = ["lightgbm>=4.3"]
 xgboost = ["xgboost>=2.0"]
-png = ["kaleido==0.2.1"]
+png = ["kaleido>=0.2.1,<1"]
 notebook = [
     "jupyter>=1.0",
     "ipykernel>=6.29",
     "kagglehub>=0.3",
     "shap>=0.45",
     "lightgbm>=4.3",
-    "kaleido==0.2.1",
+    "kaleido>=0.2.1,<1",
 ]
 dev = [
     "pytest>=8.0",
@@ -47,7 +47,7 @@ dev = [
     "mypy>=1.10",
     "types-PyYAML>=6.0",
     "pandas-stubs>=2.0",
-    "kaleido==0.2.1",
+    "kaleido>=0.2.1,<1",
     "shap>=0.45",
     "lightgbm>=4.3",
 ]
@@ -86,7 +86,7 @@ extend-exclude = ["examples", "dist", "build"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
-ignore = ["E501", "N803", "N806", "RUF001", "RUF002"]
+ignore = ["N803", "N806", "RUF001", "RUF002"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["N802"]

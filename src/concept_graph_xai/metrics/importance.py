@@ -49,7 +49,9 @@ def importance_sum(
             f"importance length {per_feature.shape[0]} != len(feature_names) {len(feature_names)}"
         )
     matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_value = {name: float(per_feature[idx]) for name, idx in zip(matched, indices, strict=True)}
+    name_to_value = {
+        name: float(per_feature[idx]) for name, idx in zip(matched, indices, strict=True)
+    }
 
     df = empty_concept_frame(graph)
     sums: list[float] = []

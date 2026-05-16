@@ -66,9 +66,7 @@ def concept_interaction_matrix(
 
     arr = np.asarray(shap_interaction_values, dtype=float)
     if arr.ndim != 3:
-        raise ValueError(
-            f"shap_interaction_values must be 3D (N, F, F); got shape {arr.shape}"
-        )
+        raise ValueError(f"shap_interaction_values must be 3D (N, F, F); got shape {arr.shape}")
     if arr.shape[1] != arr.shape[2]:
         raise ValueError(
             f"shap_interaction_values must have square last two dims; got {arr.shape[1:]}"

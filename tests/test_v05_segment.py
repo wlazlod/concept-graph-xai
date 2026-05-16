@@ -45,9 +45,7 @@ def test_segment_importance_long_form_columns(graph, shap_arr, segments_series) 
 
 def test_segment_importance_string_form_requires_X(graph, shap_arr) -> None:
     names, arr = shap_arr
-    X = pd.DataFrame(arr, columns=names).assign(
-        cohort=np.tile(["young", "old"], 30)
-    )
+    X = pd.DataFrame(arr, columns=names).assign(cohort=np.tile(["young", "old"], 30))
     df = segment_importance(graph, names, arr, "cohort", X=X)
     assert set(df["segment"]) == {"young", "old"}
     # string without X -> error
@@ -92,9 +90,7 @@ def test_segment_importance_matches_analytic(graph, shap_arr) -> None:
     df = segment_importance(graph, names, arr, series, agg="mean_abs")
     # Income concept under "A": mean_n |x1+x2| over the first 30 rows
     expected_income_A = float(np.abs(arr[:30, :2].sum(axis=1)).mean())
-    income_A = df.loc[
-        (df["name"] == "Income") & (df["segment"] == "A"), "value"
-    ].iloc[0]
+    income_A = df.loc[(df["name"] == "Income") & (df["segment"] == "A"), "value"].iloc[0]
     assert income_A == pytest.approx(expected_income_A)
 
 

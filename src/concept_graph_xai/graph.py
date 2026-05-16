@@ -186,7 +186,9 @@ class ConceptGraph:
         if isinstance(value, list):
             for leaf in value:
                 if not isinstance(leaf, str):
-                    raise ValueError(f"Feature leaf under {parent!r} must be a string, got {leaf!r}")
+                    raise ValueError(
+                        f"Feature leaf under {parent!r} must be a string, got {leaf!r}"
+                    )
                 if leaf in graph:
                     raise ValueError(f"Duplicate node name: {leaf!r}")
                 graph.add_node(leaf, kind="feature", metadata={})
@@ -200,7 +202,9 @@ class ConceptGraph:
                 graph.add_edge(parent, name)
                 ConceptGraph._build_subtree(graph, name, sub)
             return
-        raise ValueError(f"Subtree under {parent!r} must be a mapping or a list, got {type(value).__name__}")
+        raise ValueError(
+            f"Subtree under {parent!r} must be a mapping or a list, got {type(value).__name__}"
+        )
 
     # ------------------------------------------------------------------ #
     # Validation

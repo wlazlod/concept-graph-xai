@@ -57,9 +57,7 @@ def signed_concept_bar(
                 value = candidate
                 break
         if value is None:
-            raise KeyError(
-                "no value column found; expected 'mean_signed_shap' or 'mean_abs_shap'"
-            )
+            raise KeyError("no value column found; expected 'mean_signed_shap' or 'mean_abs_shap'")
     for required in (value, "ci_lo", "ci_hi"):
         if required not in df.columns:
             raise KeyError(f"required column {required!r} missing from DataFrame")
@@ -68,9 +66,11 @@ def signed_concept_bar(
     if only_concepts:
         work = work[(work["kind"] == "concept") & (work["name"] != graph.root)]
     if sort:
-        work = work.assign(_abs=work[value].abs()).sort_values(
-            "_abs", ascending=False
-        ).drop(columns="_abs")
+        work = (
+            work.assign(_abs=work[value].abs())
+            .sort_values("_abs", ascending=False)
+            .drop(columns="_abs")
+        )
     if max_concepts is not None:
         work = work.head(max_concepts)
 

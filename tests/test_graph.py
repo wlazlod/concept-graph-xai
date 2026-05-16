@@ -8,9 +8,7 @@ from concept_graph_xai import ConceptGraph
 
 
 def test_from_dict_simple_tree() -> None:
-    graph = ConceptGraph.from_dict(
-        {"Root": {"A": ["f1", "f2"], "B": ["f3"]}}
-    )
+    graph = ConceptGraph.from_dict({"Root": {"A": ["f1", "f2"], "B": ["f3"]}})
     assert graph.root == "Root"
     assert set(graph.features()) == {"f1", "f2", "f3"}
     assert set(graph.concepts()) == {"Root", "A", "B"}
@@ -48,16 +46,12 @@ def test_validation_feature_must_be_leaf() -> None:
 
 
 def test_path_uses_full_root_chain() -> None:
-    graph = ConceptGraph.from_dict(
-        {"Root": {"A": {"B": ["leaf"]}}}
-    )
+    graph = ConceptGraph.from_dict({"Root": {"A": {"B": ["leaf"]}}})
     assert graph.path("leaf") == ("Root", "A", "B", "leaf")
 
 
 def test_traversal_order_is_deterministic() -> None:
-    graph = ConceptGraph.from_dict(
-        {"Root": {"A": ["f1", "f2"], "B": ["f3"]}}
-    )
+    graph = ConceptGraph.from_dict({"Root": {"A": ["f1", "f2"], "B": ["f3"]}})
     order_first = graph.nodes_in_order()
     order_second = graph.nodes_in_order()
     assert order_first == order_second
