@@ -19,8 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.6.1] — 2026-05-17
 
-Internal refactor + API consistency pass — no new features. All public
-API changes ship with deprecation aliases so v0.6.0 callers keep working.
+Internal refactor + API polish. The package has a single consumer
+(this repo's notebook), so the parameter renames listed under
+**Changed (API)** below are **straight breaking changes** — no
+deprecation aliases. Callers of the previous parameter names will get
+a `TypeError`.
 
 ### Fixed
 
@@ -34,28 +37,28 @@ API changes ship with deprecation aliases so v0.6.0 callers keep working.
 - `plotting.concept_drift_sunburst` now raises `ValueError` when every
   delta is NaN, instead of silently rendering a neutral colorbar with
   `cmax=1.0`.
+- `plotting.concept_drift_lines` title suffix now reports "top K of N
+  concepts" honestly. The previous check compared `max_concepts`
+  against `len(pivot)` *after* `pivot.head(max_concepts)`, so the
+  suffix never rendered.
 - All three adapters (`from_shap_explanation`, `from_permutation_importance`,
   `from_feature_importances_`) now reject NaN / Inf at the boundary with
   a clear error. Previously a zero-variance feature could push NaN
   through the entire pipeline silently.
 
-### Changed (API, with deprecation aliases — non-breaking)
+### Changed (API — BREAKING)
 
-- `bootstrap_importance` now takes `agg: "mean_signed" | "mean_abs"` matching
-  the rest of the v0.5/v0.6 SHAP-aggregation family. The previous
-  `signed: bool = True` argument is kept as a deprecated alias that emits
-  `DeprecationWarning`.
-- The four heatmap plots (`segment_concept_heatmap`,
-  `concept_disparity_heatmap`, `concept_pareto`, `concept_drift_lines`)
-  now take `hide_root: bool = True` for consistency with the sunburst
-  family. The previous `include_root: bool = False` flag is kept as a
-  deprecated alias.
-- `concept_drift_lines` now takes `max_concepts: int | None = None`
-  matching every other concept-cap knob in the library. The previous
-  `top_k: int | None = 10` argument is kept as a deprecated alias —
-  note the **default also changes**: the old default silently capped to
-  10 concepts, the new default shows every concept (callers can cap
-  explicitly).
+- `bootstrap_importance(signed: bool = True)` → `agg: "mean_signed" | "mean_abs" = "mean_signed"`.
+  `df.attrs["signed"]` is gone; use `df.attrs["agg"]`.
+- `segment_concept_heatmap(include_root: bool = False)` →
+  `hide_root: bool = True`.
+- `concept_disparity_heatmap(include_root: bool = False)` →
+  `hide_root: bool = True`.
+- `concept_pareto(include_root: bool = False)` →
+  `hide_root: bool = True`.
+- `concept_drift_lines(include_root: bool = False, top_k: int | None = 10)` →
+  `hide_root: bool = True, max_concepts: int | None = None`. The new
+  default shows every concept; the old default silently capped to 10.
 - `concept_disparity_heatmap` default colorscale is now `"RdBu_r"`
   (was `"RdBu"`) so positive gap renders red, matching
   `concept_drift_sunburst`'s "growing magnitude = red" convention.
@@ -65,14 +68,17 @@ API changes ship with deprecation aliases so v0.6.0 callers keep working.
 - `_layout._hex_to_rgb` / `_rgb_to_hex` promoted to public
   `hex_to_rgb` / `rgb_to_hex` — `concept_sankey` already imported them
   across the privacy boundary.
-- Six sunburst plots now share a common skeleton via `_layout.sunburst_layout`
+- Six sunburst plots share a common skeleton via `_layout.sunburst_layout`
   + `_layout.build_sunburst_figure`. Three heatmaps share their
   colorscale + zmid logic via `_layout.heatmap_color_kwargs`. Four
   metrics share the per-sample-per-concept aggregation via
   `metrics._common.per_sample_per_concept`. Two grouping helpers
   (`_resolve_segments`, `_segment_order`) promoted to `_common` as
-  `resolve_grouping` / `grouping_order`. Net effect: ~−400 lines of
-  duplication, single source of truth for each pattern.
+  `resolve_grouping` / `grouping_order`. The repeated
+  `name_to_idx` dict comprehension after `align_features` is now a
+  single `aligned_index_map(...)` call. `DEFAULT_QUALITATIVE_PALETTE`
+  in `_layout` replaces a byte-identical private copy in
+  `concept_pareto`. Net effect: ~−500 lines of duplication.
 - Dead `_ = skip_root` no-op removed from `correlation_block`.
 - Confusing double `.attrs.get()` fallback simplified to a single call
   in `coherence_importance_scatter`.
@@ -99,8 +105,14 @@ API changes ship with deprecation aliases so v0.6.0 callers keep working.
 - New adapter NaN/Inf-rejection tests.
 - `test_regulatory_tag_overlay` gains an explicit tag-to-colour mapping
   test (was only checking "at least 2 distinct colours").
-- Three new deprecation-alias tests confirm `signed=`, `include_root=`,
-  and `top_k=` still work and emit `DeprecationWarning`.
+- `simple_graph`, `shap_arr`, and `segments_series` fixtures hoisted to
+  `tests/conftest.py` (were duplicated across 7–10 files); local
+  `graph` fixtures renamed to `simple_graph` so they no longer shadow
+  the conftest's session-scoped credit-risk `graph`.
+- Three plotting smoke tests strengthened with real numeric
+  assertions (colorscale + marker counts; correlation `z ∈ [-1, 1]`;
+  `diag(z) == 1`).
+- New regression test for the drift-lines "top K of N" title suffix.
 
 ## [0.6.0] — 2026-05-16
 
