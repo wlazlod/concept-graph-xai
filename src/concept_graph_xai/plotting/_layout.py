@@ -99,12 +99,12 @@ def hover_text(
     return out
 
 
-def _hex_to_rgb(h: str) -> tuple[float, float, float]:
+def hex_to_rgb(h: str) -> tuple[float, float, float]:
     h = h.lstrip("#")
     return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0)
 
 
-def _rgb_to_hex(r: float, g: float, b: float) -> str:
+def rgb_to_hex(r: float, g: float, b: float) -> str:
     ri = max(0, min(255, round(r * 255)))
     gi = max(0, min(255, round(g * 255)))
     bi = max(0, min(255, round(b * 255)))
@@ -115,8 +115,8 @@ def _lighten(hex_color: str, factor: float) -> str:
     """Linear blend of ``hex_color`` toward white by ``factor`` ∈ [0, 1]."""
 
     factor = max(0.0, min(1.0, factor))
-    r, g, b = _hex_to_rgb(hex_color)
-    return _rgb_to_hex(r + (1.0 - r) * factor, g + (1.0 - g) * factor, b + (1.0 - b) * factor)
+    r, g, b = hex_to_rgb(hex_color)
+    return rgb_to_hex(r + (1.0 - r) * factor, g + (1.0 - g) * factor, b + (1.0 - b) * factor)
 
 
 def branch_colors(

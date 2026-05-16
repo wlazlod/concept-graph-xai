@@ -9,11 +9,11 @@ import numpy as np
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.plotting._layout import _hex_to_rgb, branch_colors
+from concept_graph_xai.plotting._layout import branch_colors, hex_to_rgb
 
 
 def _rgba(hex_color: str, alpha: float) -> str:
-    r, g, b = _hex_to_rgb(hex_color)
+    r, g, b = hex_to_rgb(hex_color)
     return f"rgba({round(r * 255)},{round(g * 255)},{round(b * 255)},{alpha:.2f})"
 
 
