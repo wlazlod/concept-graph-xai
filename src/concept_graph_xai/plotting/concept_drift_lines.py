@@ -95,6 +95,10 @@ def concept_drift_lines(
     # prominent concepts first; then cap to max_concepts if requested.
     max_per_concept = pivot.max(axis=1, skipna=True)
     pivot = pivot.loc[max_per_concept.sort_values(ascending=False).index]
+    # Remember the pre-cap row count so the title suffix can say
+    # "top K of N" honestly. After head(K), len(pivot) == K, which would
+    # always trip the `max_concepts < len(pivot)` check to False.
+    n_total = len(pivot)
     if max_concepts is not None and max_concepts > 0:
         pivot = pivot.head(max_concepts)
 
@@ -121,8 +125,8 @@ def concept_drift_lines(
         )
 
     suffix = (
-        f" — top {max_concepts} concepts"
-        if max_concepts is not None and max_concepts < len(pivot)
+        f" — top {max_concepts} of {n_total} concepts"
+        if max_concepts is not None and max_concepts < n_total
         else ""
     )
     fig.update_layout(

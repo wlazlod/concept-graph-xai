@@ -98,6 +98,14 @@ def test_concept_drift_lines_max_concepts_caps(simple_graph, periods) -> None:
     df = attribution_drift(simple_graph, periods)
     fig = concept_drift_lines(simple_graph, df, max_concepts=1)
     assert len(fig.data) == 1
+    # The title should mention the cap honestly: "top K of N concepts".
+    assert "top 1 of 2 concepts" in fig.layout.title.text
+
+
+def test_concept_drift_lines_title_omits_cap_when_no_filter(simple_graph, periods) -> None:
+    df = attribution_drift(simple_graph, periods)
+    fig = concept_drift_lines(simple_graph, df, max_concepts=None)
+    assert "top" not in fig.layout.title.text
 
 
 def test_concept_drift_lines_x_axis_matches_period_order(simple_graph, periods) -> None:
