@@ -10,6 +10,7 @@ from concept_graph_xai.plotting.coherence_importance_scatter import (
     coherence_importance_scatter,
 )
 from concept_graph_xai.plotting.concept_drift_lines import concept_drift_lines
+from concept_graph_xai.plotting.concept_drift_sunburst import concept_drift_sunburst
 from concept_graph_xai.plotting.concept_interaction_heatmap import concept_interaction_heatmap
 from concept_graph_xai.plotting.concept_pareto import concept_pareto
 from concept_graph_xai.plotting.concept_sankey import concept_sankey
@@ -26,6 +27,7 @@ __all__ = [
     "auc_drop_map",
     "coherence_importance_scatter",
     "concept_drift_lines",
+    "concept_drift_sunburst",
     "concept_interaction_heatmap",
     "concept_pareto",
     "concept_sankey",

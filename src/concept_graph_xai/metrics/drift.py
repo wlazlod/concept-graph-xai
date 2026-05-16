@@ -127,3 +127,72 @@ def attribution_drift(
     df.attrs["agg"] = agg
     df.attrs["period_order"] = period_labels
     return df
+
+
+def concept_drift_delta(
+    graph: ConceptGraph,
+    periods: Sequence[PeriodSpec],
+    *,
+    baseline: str | None = None,
+    target: str | None = None,
+    agg: DriftAgg = "mean_abs",
+    on_unknown: str = "warn",
+) -> pd.DataFrame:
+    """Per-concept baseline / target / delta between two periods.
+
+    Convenience wrapper around :func:`attribution_drift` for the
+    two-period delta view consumed by :func:`concept_drift_sunburst`.
+
+    Parameters
+    ----------
+    graph:
+        The ConceptGraph.
+    periods:
+        Same as :func:`attribution_drift` — list of
+        ``(period_label, shap_values, feature_names)`` tuples.
+    baseline:
+        Period label to treat as the reference. Defaults to the first
+        period.
+    target:
+        Period label to compare against. Defaults to the last period.
+    agg:
+        Aggregation passed through to :func:`attribution_drift`.
+    on_unknown:
+        Pass-through.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Indexed by concept path, columns ``name``, ``kind``, ``depth``,
+        ``parent``, ``baseline``, ``target``, ``delta``,
+        ``feature_count``. ``df.attrs`` carries the ``agg``,
+        ``baseline_period``, ``target_period`` strings.
+    """
+
+    if not periods:
+        raise ValueError("periods must contain at least one entry")
+    period_labels = [str(p[0]) for p in periods]
+    baseline_label = period_labels[0] if baseline is None else str(baseline)
+    target_label = period_labels[-1] if target is None else str(target)
+    if baseline_label not in period_labels:
+        raise KeyError(f"baseline period {baseline_label!r} not in periods: {period_labels}")
+    if target_label not in period_labels:
+        raise KeyError(f"target period {target_label!r} not in periods: {period_labels}")
+    if baseline_label == target_label:
+        raise ValueError(
+            f"baseline and target must differ; both set to {baseline_label!r}"
+        )
+
+    long_df = attribution_drift(graph, periods, agg=agg, on_unknown=on_unknown)
+    base_df = long_df[long_df["period"] == baseline_label].set_index("path")
+    targ_df = long_df[long_df["period"] == target_label].set_index("path")
+
+    base = empty_concept_frame(graph)
+    base["baseline"] = base_df["value"].reindex(base.index).to_numpy(dtype=float)
+    base["target"] = targ_df["value"].reindex(base.index).to_numpy(dtype=float)
+    base["delta"] = base["target"] - base["baseline"]
+    base["feature_count"] = base_df["feature_count"].reindex(base.index).to_numpy(dtype=int)
+    base.attrs["agg"] = agg
+    base.attrs["baseline_period"] = baseline_label
+    base.attrs["target_period"] = target_label
+    return base

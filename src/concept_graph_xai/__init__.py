@@ -13,7 +13,7 @@ from concept_graph_xai.metrics.correlation import (
     shap_correlation,
 )
 from concept_graph_xai.metrics.counts import feature_counts
-from concept_graph_xai.metrics.drift import attribution_drift
+from concept_graph_xai.metrics.drift import attribution_drift, concept_drift_delta
 from concept_graph_xai.metrics.importance import importance_sum
 from concept_graph_xai.metrics.interaction import concept_interaction_matrix
 from concept_graph_xai.metrics.missingness import column_missing_rate, joint_missing_rate
@@ -24,6 +24,7 @@ from concept_graph_xai.plotting.coherence_importance_scatter import (
     coherence_importance_scatter,
 )
 from concept_graph_xai.plotting.concept_drift_lines import concept_drift_lines
+from concept_graph_xai.plotting.concept_drift_sunburst import concept_drift_sunburst
 from concept_graph_xai.plotting.concept_interaction_heatmap import concept_interaction_heatmap
 from concept_graph_xai.plotting.concept_pareto import concept_pareto
 from concept_graph_xai.plotting.concept_sankey import concept_sankey
@@ -55,7 +56,9 @@ __all__ = [
     "coherence_importance",
     "coherence_importance_scatter",
     "column_missing_rate",
+    "concept_drift_delta",
     "concept_drift_lines",
+    "concept_drift_sunburst",
     "concept_interaction_heatmap",
     "concept_interaction_matrix",
     "concept_pareto",
