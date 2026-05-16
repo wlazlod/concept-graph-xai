@@ -33,7 +33,7 @@ def test_bootstrap_importance_columns_and_attrs(simple_graph, shap_arr) -> None:
     assert len(df) == len(simple_graph)
     assert df.attrs["ci"] == 0.95
     assert df.attrs["n_bootstrap"] == 50
-    assert df.attrs["signed"] is True
+    assert df.attrs["agg"] == "mean_signed"
 
 
 def test_bootstrap_importance_ci_sandwiches_mean(simple_graph, shap_arr) -> None:
@@ -53,16 +53,6 @@ def test_bootstrap_importance_unsigned_is_nonnegative(simple_graph, shap_arr) ->
     rows = df[df["feature_count"] > 0]
     assert (rows["mean_abs_shap"] >= 0).all()
     assert (rows["ci_lo"] >= 0).all()
-
-
-def test_bootstrap_importance_deprecated_signed_still_works(simple_graph, shap_arr) -> None:
-    names, arr = shap_arr
-    with pytest.warns(DeprecationWarning, match="signed"):
-        df = bootstrap_importance(
-            simple_graph, names, arr, n_bootstrap=50, random_state=0, signed=False
-        )
-    assert "mean_abs_shap" in df.columns
-    assert df.attrs["agg"] == "mean_abs"
 
 
 def test_bootstrap_importance_rejects_unknown_agg(simple_graph, shap_arr) -> None:

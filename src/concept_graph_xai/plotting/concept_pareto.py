@@ -10,7 +10,6 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import deprecated_kwarg_or
 from concept_graph_xai.plotting._layout import DEFAULT_QUALITATIVE_PALETTE
 
 # Segments and tree branches are conceptually different axes, but both
@@ -29,7 +28,6 @@ def concept_pareto(
     show_equality_line: bool = True,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
-    include_root: bool | None = None,
 ) -> go.Figure:
     """Render per-segment Lorenz / Pareto curves of concept importance.
 
@@ -55,8 +53,7 @@ def concept_pareto(
         If ``True`` (default), drop feature leaves before ranking.
     hide_root:
         If ``True`` (default), drop the root concept row (it aggregates
-        every feature and would distort the curve). Renamed from
-        ``include_root`` for consistency with the sunburst family.
+        every feature and would distort the curve).
     segment_palette:
         Custom palette for per-segment colours. Defaults to the Plotly
         qualitative palette.
@@ -67,10 +64,6 @@ def concept_pareto(
     layout_kwargs:
         Passed verbatim to ``fig.update_layout``.
     """
-
-    hide_root = deprecated_kwarg_or(
-        include_root, hide_root, old="include_root", new="hide_root", transform=lambda v: not v
-    )
 
     if df.empty:
         raise ValueError("DataFrame is empty; run segment_importance first")

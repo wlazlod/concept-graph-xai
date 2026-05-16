@@ -8,7 +8,6 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import deprecated_kwarg_or
 from concept_graph_xai.plotting._layout import heatmap_color_kwargs
 
 
@@ -23,7 +22,6 @@ def segment_concept_heatmap(
     title: str | None = None,
     colorscale: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
-    include_root: bool | None = None,
 ) -> go.Figure:
     """Render a concept × segment SHAP heatmap.
 
@@ -36,9 +34,7 @@ def segment_concept_heatmap(
     only_concepts:
         If ``True`` (default), drop feature leaves.
     hide_root:
-        If ``True`` (default), drop the root concept row. Renamed from the
-        previous ``include_root`` flag for consistency with the sunburst
-        family.
+        If ``True`` (default), drop the root concept row.
     sort_by:
         ``"max"`` (default) orders concept rows by the maximum value across
         segments, descending. ``"depth"`` keeps graph DFS preorder.
@@ -53,10 +49,6 @@ def segment_concept_heatmap(
     layout_kwargs:
         Passed verbatim to ``fig.update_layout``.
     """
-
-    hide_root = deprecated_kwarg_or(
-        include_root, hide_root, old="include_root", new="hide_root", transform=lambda v: not v
-    )
 
     if df.empty:
         raise ValueError("DataFrame is empty; run segment_importance first")

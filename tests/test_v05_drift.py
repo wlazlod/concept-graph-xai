@@ -115,23 +115,6 @@ def test_concept_drift_lines_x_axis_matches_period_order(simple_graph, periods) 
         assert list(trace.x) == ["Q1", "Q2", "Q3"]
 
 
-def test_concept_drift_lines_deprecated_top_k_still_works(simple_graph, periods) -> None:
-    df = attribution_drift(simple_graph, periods)
-    with pytest.warns(DeprecationWarning, match="top_k"):
-        fig = concept_drift_lines(simple_graph, df, top_k=1)
-    assert len(fig.data) == 1
-
-
-def test_concept_drift_lines_deprecated_include_root_still_works(simple_graph, periods) -> None:
-    df = attribution_drift(simple_graph, periods)
-    with pytest.warns(DeprecationWarning, match="include_root"):
-        fig = concept_drift_lines(simple_graph, df, include_root=True)
-    # include_root=True -> hide_root=False -> root concept is now present in the
-    # legend on top of the regular concepts.
-    names = {tr.name for tr in fig.data}
-    assert simple_graph.root in names
-
-
 def test_concept_drift_lines_rejects_missing_columns(simple_graph) -> None:
     import pandas as pd
 

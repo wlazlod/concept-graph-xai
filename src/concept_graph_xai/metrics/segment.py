@@ -20,13 +20,6 @@ from concept_graph_xai.metrics._common import (
 SegmentAgg = Literal["mean_abs", "mean_signed"]
 
 
-# Back-compat aliases for v0.6 importers (e.g. concept_disparity used to
-# pull these from metrics.segment). Will be removed once we're sure no
-# external code imports them.
-_resolve_segments = resolve_grouping
-_segment_order = grouping_order
-
-
 def segment_importance(
     graph: ConceptGraph,
     feature_names: Sequence[str],

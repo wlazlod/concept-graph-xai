@@ -9,7 +9,6 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import deprecated_kwarg_or
 from concept_graph_xai.plotting._layout import branch_colors
 
 
@@ -23,8 +22,6 @@ def concept_drift_lines(
     branch_palette: Sequence[str] | None = None,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
-    include_root: bool | None = None,
-    top_k: int | None = None,
 ) -> go.Figure:
     """Render one line per concept across periods.
 
@@ -37,14 +34,11 @@ def concept_drift_lines(
     only_concepts:
         If ``True`` (default), drop feature leaves.
     hide_root:
-        If ``True`` (default), drop the root concept row. Renamed from
-        ``include_root`` for consistency with the sunburst family.
+        If ``True`` (default), drop the root concept row.
     max_concepts:
         If set, keep only the K concepts with the highest
         max-across-periods value to avoid spaghetti charts. Default
-        ``None`` shows every concept. Renamed from ``top_k`` for
-        consistency with the rest of the library; ``top_k`` is still
-        accepted as a deprecated alias.
+        ``None`` shows every concept.
     branch_palette:
         Custom palette for branch base hues. Defaults to the Plotly
         qualitative palette.
@@ -53,13 +47,6 @@ def concept_drift_lines(
     layout_kwargs:
         Passed verbatim to ``fig.update_layout``.
     """
-
-    hide_root = deprecated_kwarg_or(
-        include_root, hide_root, old="include_root", new="hide_root", transform=lambda v: not v
-    )
-    max_concepts = deprecated_kwarg_or(
-        top_k, max_concepts, old="top_k", new="max_concepts"
-    )
 
     if df.empty:
         raise ValueError("DataFrame is empty; run attribution_drift first")

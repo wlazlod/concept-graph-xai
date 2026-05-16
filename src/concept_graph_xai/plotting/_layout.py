@@ -26,9 +26,6 @@ DEFAULT_QUALITATIVE_PALETTE: tuple[str, ...] = (
     "#FECB52",
 )
 
-# Back-compat alias for the original name. Drop in a future cleanup.
-_DEFAULT_BRANCH_PALETTE = DEFAULT_QUALITATIVE_PALETTE
-
 _ROOT_FALLBACK_COLOR: str = "#cccccc"
 
 
@@ -245,7 +242,7 @@ def branch_colors(
     ``hide_root=False``) get ``root_color``.
     """
 
-    pal: tuple[str, ...] = tuple(palette) if palette else _DEFAULT_BRANCH_PALETTE
+    pal: tuple[str, ...] = tuple(palette) if palette else DEFAULT_QUALITATIVE_PALETTE
     if not pal:
         raise ValueError("palette must contain at least one color")
 

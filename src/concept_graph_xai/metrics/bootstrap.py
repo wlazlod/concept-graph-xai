@@ -11,7 +11,6 @@ import pandas as pd
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics._common import (
     aligned_index_map,
-    deprecated_kwarg_or,
     empty_concept_frame,
     per_sample_per_concept,
 )
@@ -29,7 +28,6 @@ def bootstrap_importance(
     random_state: int | None = None,
     agg: BootstrapAgg = "mean_signed",
     on_unknown: str = "warn",
-    signed: bool | None = None,
 ) -> pd.DataFrame:
     """Bootstrap-resampled per-concept SHAP with percentile CI.
 
@@ -61,10 +59,6 @@ def bootstrap_importance(
         ``attribution_drift``, ``concept_interaction_matrix``).
     on_unknown:
         Behaviour when ``feature_names`` contains entries not in the graph.
-    signed:
-        **Deprecated.** Pass ``agg="mean_signed"`` (when ``signed=True``) or
-        ``agg="mean_abs"`` (when ``signed=False``). Kept as an alias for
-        v0.6 callers; will be removed in a future release.
 
     Returns
     -------
@@ -74,13 +68,6 @@ def bootstrap_importance(
         ``mean_abs_shap``), ``ci_lo``, ``ci_hi``, ``feature_count``.
     """
 
-    agg = deprecated_kwarg_or(
-        signed,
-        agg,
-        old="signed",
-        new="agg",
-        transform=lambda v: "mean_signed" if v else "mean_abs",
-    )
     if agg not in ("mean_signed", "mean_abs"):
         raise ValueError(f"unknown agg {agg!r}; expected 'mean_signed' or 'mean_abs'")
 
@@ -126,6 +113,4 @@ def bootstrap_importance(
     df.attrs["ci"] = ci
     df.attrs["n_bootstrap"] = n_bootstrap
     df.attrs["agg"] = agg
-    # Back-compat: keep df.attrs["signed"] for one release.
-    df.attrs["signed"] = agg == "mean_signed"
     return df
