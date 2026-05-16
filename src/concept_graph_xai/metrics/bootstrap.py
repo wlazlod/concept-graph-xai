@@ -11,6 +11,7 @@ import pandas as pd
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.metrics._common import (
     align_features,
+    deprecated_kwarg_or,
     empty_concept_frame,
     per_sample_per_concept,
 )
@@ -73,15 +74,13 @@ def bootstrap_importance(
         ``mean_abs_shap``), ``ci_lo``, ``ci_hi``, ``feature_count``.
     """
 
-    if signed is not None:
-        import warnings
-
-        warnings.warn(
-            "signed= is deprecated; pass agg='mean_signed' or agg='mean_abs' instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        agg = "mean_signed" if signed else "mean_abs"
+    agg = deprecated_kwarg_or(
+        signed,
+        agg,
+        old="signed",
+        new="agg",
+        transform=lambda v: "mean_signed" if v else "mean_abs",
+    )
     if agg not in ("mean_signed", "mean_abs"):
         raise ValueError(f"unknown agg {agg!r}; expected 'mean_signed' or 'mean_abs'")
 

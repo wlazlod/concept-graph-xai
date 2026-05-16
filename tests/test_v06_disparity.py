@@ -175,3 +175,13 @@ def test_concept_disparity_heatmap_rejects_missing_columns(simple_graph) -> None
     bad_df = pd.DataFrame({"name": ["a"], "kind": ["concept"], "value": [1.0]})
     with pytest.raises(KeyError, match="protected_group"):
         concept_disparity_heatmap(simple_graph, bad_df)
+
+
+def test_concept_disparity_heatmap_deprecated_include_root_still_works(
+    simple_graph, shap_arr, protected_series
+) -> None:
+    names, arr = shap_arr
+    df = concept_disparity(simple_graph, names, arr, protected_series, reference="A")
+    with pytest.warns(DeprecationWarning, match="include_root"):
+        fig = concept_disparity_heatmap(simple_graph, df, include_root=True)
+    assert simple_graph.root in list(fig.data[0].y)

@@ -2,12 +2,50 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import warnings
+from collections.abc import Callable, Sequence
+from typing import cast
 
 import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
+
+
+def deprecated_kwarg_or[D, R](
+    deprecated_value: D | None,
+    current_value: R,
+    *,
+    old: str,
+    new: str,
+    transform: Callable[[D], R] | None = None,
+    stacklevel: int = 3,
+) -> R:
+    """Pick between a deprecated kwarg and the current one, warning when used.
+
+    If ``deprecated_value`` is ``None`` the caller didn't pass the
+    deprecated kwarg and ``current_value`` is returned unchanged. Otherwise
+    a ``DeprecationWarning`` is emitted and (a possibly transformed)
+    ``deprecated_value`` wins, mirroring the original "deprecated arg
+    overrides" semantics each call site implemented inline.
+
+    Used by every kwarg-only deprecation alias in the library
+    (``signed=`` on ``bootstrap_importance``, ``include_root=`` on the
+    four heatmap plots, ``top_k=`` on ``concept_drift_lines``).
+    """
+
+    if deprecated_value is None:
+        return current_value
+    suggestion = f"{new}=not {old}" if transform else f"{new}"
+    warnings.warn(
+        f"{old}= is deprecated; pass {suggestion} instead",
+        DeprecationWarning,
+        stacklevel=stacklevel,
+    )
+    if transform is not None:
+        return transform(deprecated_value)
+    # Callers that pass no transform implicitly assert D == R.
+    return cast(R, deprecated_value)
 
 
 def per_sample_per_concept(

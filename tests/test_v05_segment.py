@@ -128,3 +128,13 @@ def test_segment_concept_heatmap_max_concepts_caps(simple_graph, shap_arr, segme
     df = segment_importance(simple_graph, names, arr, segments_series)
     fig = segment_concept_heatmap(simple_graph, df, max_concepts=1)
     assert len(fig.data[0].y) == 1
+
+
+def test_segment_concept_heatmap_deprecated_include_root_still_works(
+    simple_graph, shap_arr, segments_series
+) -> None:
+    names, arr = shap_arr
+    df = segment_importance(simple_graph, names, arr, segments_series)
+    with pytest.warns(DeprecationWarning, match="include_root"):
+        fig = segment_concept_heatmap(simple_graph, df, include_root=True)
+    assert simple_graph.root in list(fig.data[0].y)

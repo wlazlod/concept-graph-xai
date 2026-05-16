@@ -10,6 +10,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.metrics._common import deprecated_kwarg_or
 
 # Plotly qualitative palette, inlined so a Pareto chart's segment colours
 # are independent of the branch palette (segments != tree branches).
@@ -76,15 +77,9 @@ def concept_pareto(
         Passed verbatim to ``fig.update_layout``.
     """
 
-    if include_root is not None:
-        import warnings
-
-        warnings.warn(
-            "include_root is deprecated; pass hide_root=not include_root instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        hide_root = not include_root
+    hide_root = deprecated_kwarg_or(
+        include_root, hide_root, old="include_root", new="hide_root", transform=lambda v: not v
+    )
 
     if df.empty:
         raise ValueError("DataFrame is empty; run segment_importance first")
