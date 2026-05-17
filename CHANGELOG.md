@@ -113,6 +113,23 @@ a `TypeError`.
   assertions (colorscale + marker counts; correlation `z ∈ [-1, 1]`;
   `diag(z) == 1`).
 - New regression test for the drift-lines "top K of N" title suffix.
+- Test files renamed to drop the `_v0X_` release-version prefix
+  (`test_v05_bootstrap.py` → `test_bootstrap.py`, etc) — they now
+  describe what they test, not when they were added.
+
+### Notebook
+
+- Reorganised `examples/01_credit_risk_walkthrough.ipynb` from
+  history-order (Part A setup, B global, C diagnostics, D local, F
+  uncertainty, G cohort, H drift, I fairness, E export — tacked-on as
+  features landed) into workflow-order: A setup → B structure (the
+  former feature_count / utilization / sunburst trio merged into a
+  single section with bootstrap CIs) → C composition (interaction
+  matrix + Sankey) → D per-prediction → E concept-design diagnostics
+  → F cohort → G fairness → H robustness & drift (AUC ablation lives
+  here now, not under "global", since it's a what-if question) → I
+  static PNG export. No new content; same figures, sensible reading
+  order.
 
 ## [0.6.0] — 2026-05-16
 
