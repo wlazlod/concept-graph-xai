@@ -36,6 +36,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Tour: tour.md
   - Getting Started: getting-started.md
   - User Guide:
     - Concept Graphs: user-guide/concept-graphs.md
