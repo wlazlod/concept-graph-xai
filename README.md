@@ -2,7 +2,7 @@
 
 Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation metrics.
 
-> Status: **alpha (v0.6.0)**. API may change between minor releases.
+> Status: **alpha (v0.6.1)**. API may change between minor releases.
 >
 > 📖 **Docs:** <https://wlazlod.github.io/concept-graph-xai/>
 
@@ -14,29 +14,23 @@ You give it:
 2. a fitted **tree model** (LightGBM / XGBoost / CatBoost / sklearn) and its **per-feature importances** (or per-sample SHAP values);
 3. a held-out test set and a target.
 
-It gives you:
+It gives you concept-level versions of every per-feature
+interpretability signal — importance and utilization sunbursts, SHAP
+interaction matrices, feature → concept → ±outcome Sankey,
+per-prediction concept waterfalls, segment / cohort / protected-group
+heatmaps, whole-branch ablation under three strategies, and across-
+period drift. Plus the diagnostic chart that says whether your tree
+is even well-designed (coherence vs importance scatter).
 
-| Plot | Question it answers |
-|---|---|
-| `sunburst(graph, importance_sum(...))` | How much importance does each concept carry? (hierarchical colour per top-level branch — sub-concepts are lighter shades) |
-| `utilization_map(graph, utilization(...))` | How many features are under each concept *and* which branches does my model actually use? Sector area = feature count; used branches are coloured by family with hierarchical shading; unused branches are grey. |
-| `auc_drop_map(graph, auc_drop(..., strategy="permutation"))` | How much AUC do I lose if a whole concept's data goes missing? |
-| `correlation_block(feature_correlation(graph, X))` | Are the supplied concepts internally coherent? Are concept boundaries leaky? |
-| `correlation_block(nullity_correlation(graph, X))` | Do features inside a concept go missing together? |
-| `joint_missing_map(graph, joint_missing_rate(graph, X))` | How often does a *whole branch* go missing in production? |
-| `coherence_importance_scatter(coherence_importance(...))` | Quadrant chart: which concepts are well-designed, kitchen sinks, redundant, or noise? |
-| `correlation_block(shap_correlation(graph, names, shap_values))` | Which features does the model treat as substitutable, regardless of raw correlation? |
-| `regulatory_tag_overlay(graph, tag_key="tag")` | How much of the model's decision flows through PII / financial / behavioural concepts? |
-| `signed_concept_bar(graph, bootstrap_importance(...))` | What's the direction of each concept's SHAP, with bootstrap confidence intervals? |
-| `concept_interaction_heatmap(concept_interaction_matrix(...))` | Which concept pairs interact (using SHAP interaction values)? |
-| `concept_sankey(graph, feature_names, shap_values)` | How does SHAP flow from features through every concept tier to +/− outcomes? |
-| `segment_concept_heatmap(graph, segment_importance(...))` | Which concepts matter more in which cohort? |
-| `concept_pareto(graph, segment_importance(...))` | How concentrated is each cohort's SHAP across concepts? |
-| `concept_drift_lines(graph, attribution_drift(...))` | How does concept importance shift across periods? |
-| `concept_drift_sunburst(graph, concept_drift_delta(...))` | Which concepts changed the most between a baseline and a target period? |
-| `concept_disparity_heatmap(graph, concept_disparity(..., reference=...))` | How much does the model rely on each concept differently across protected groups vs a reference group? |
+The metric layer (`concept_graph_xai.metrics.*`) returns plain
+`pandas.DataFrame`s and never imports plotly. The plot layer takes
+those DataFrames and a `ConceptGraph` and returns
+`plotly.graph_objects.Figure`s, exportable to PNG via `kaleido`.
 
-The metric layer (`concept_graph_xai.metrics.*`) returns plain `pandas.DataFrame`s and never imports plotly. The plot layer takes those DataFrames and a `ConceptGraph` and returns `plotly.graph_objects.Figure`s, exportable to PNG via `kaleido`.
+📖 The [**Tour**](https://wlazlod.github.io/concept-graph-xai/tour/)
+walks one realistic credit-risk scenario end-to-end. The
+[**User Guide**](https://wlazlod.github.io/concept-graph-xai/user-guide/concept-graphs/)
+indexes the workflow as one page per question.
 
 ## Install
 
@@ -153,15 +147,15 @@ The metric layer never imports plotly, and the plot layer never touches the mode
 
 ## Roadmap
 
-* **v0.1**: counts, importance, utilization, three ablation strategies, three sunburst plots. ✅
-* **v0.2**: bug-fix release for `auc_drop_map`. ✅
-* **v0.3**: concept-design diagnostics — block correlation matrices (feature, nullity, SHAP), joint-missing-rate sunburst, coherence-vs-importance scatter, regulatory-tag overlay. ✅
-* **v0.4**: local explanations (`concept_violin`, `ConceptPredictionExplainer.waterfall`); rendering-default cleanups (root concept hidden by default; `sunburst` colours by branch by default; `utilization_map` subsumes the standalone feature-count sunburst with branch-hierarchical shading). ✅
-* **v0.5**: uncertainty (`bootstrap_importance` + `signed_concept_bar`), interactions (`concept_interaction_matrix` + heatmap, `concept_sankey`), cohort (`segment_importance` + heatmap, `concept_pareto`), drift (`attribution_drift` + `concept_drift_lines`, `concept_drift_delta` + `concept_drift_sunburst`). ✅
-* **v0.6 (current)**: fairness — `concept_disparity` + `concept_disparity_heatmap` (additive gap vs reference protected group). ✅
-* **v1.0**: DAG support (multi-parent concepts) with optional per-edge weights and Sankey rendering.
+v0.1 through v0.6 shipped (counts and importance, concept-design
+diagnostics, local explanations, uncertainty, interactions, cohort,
+drift, fairness). **v0.6.1** is an internal refactor with no API
+changes. **v1.0** will add DAG support with optional per-edge
+weights.
 
-See the [roadmap page](https://wlazlod.github.io/concept-graph-xai/roadmap/) for milestone status and the locked cross-cutting decisions.
+See the
+[roadmap page](https://wlazlod.github.io/concept-graph-xai/roadmap/)
+for the full milestone list and the locked cross-cutting decisions.
 
 ## Development
 

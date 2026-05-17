@@ -30,9 +30,14 @@ This page is the high-level roadmap, summarising shipped milestones and planned 
 - Cohort: `segment_importance` + `segment_concept_heatmap` — concept × cohort heatmap; `concept_pareto` — faceted Lorenz curves per cohort.
 - Drift: `attribution_drift` + `concept_drift_lines` — multi-period attribution monitoring; `concept_drift_delta` + `concept_drift_sunburst` — period-to-period delta sunburst.
 
-### v0.6 — Fairness (current)
+### v0.6 — Fairness
 - `concept_disparity` + `concept_disparity_heatmap` — concept × protected-group additive-gap matrix vs a reference group. `protected` accepts a `pd.Series` or column-name string (mirrors `segment_importance`).
 - Protected-attribute API locked at **minimal** (one attribute per call, explicit `reference`). Intersections, first-class `ProtectedAttribute` metadata on graph nodes, and multiple-reference baselines are filed for v0.6.x / v1.0.
+
+### v0.6.1 — Internal refactor (current)
+- No API changes. Shared helpers extracted (`aligned_index_map`, `per_sample_per_concept`, `branch_colors`, default qualitative palette). Drift-lines title now honestly reports "top K of N". All deprecation aliases removed (single-user package, no back-compat needed).
+- Test suite cleanup: drop the `_v0X_` release-version prefix from test file names; hoist common fixtures into `conftest.py`.
+- Docs: full rewrite to story-first landing + guided Tour mirroring the notebook + question-shaped User Guide pages.
 
 ## Planned
 
@@ -41,7 +46,7 @@ This page is the high-level roadmap, summarising shipped milestones and planned 
 - First-class `ProtectedAttribute` object on the graph with per-node sensitive-flag metadata.
 - Multiple-reference baselines (compare every group to the population mean instead of one reference group).
 
-### v1.0 — DAG support
+### v1.0 — DAG support (next)
 - Optional per-edge weights for multi-parent concepts.
 - Sankey rendering for the DAG case.
 - Backwards-compatible: tree users see no change.
