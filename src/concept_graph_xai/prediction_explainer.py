@@ -70,9 +70,7 @@ class ConceptPredictionExplainer:
         if arr.ndim != 2:
             raise ValueError(f"shap_values must be 2D (N, F); got {arr.shape}")
         if arr.shape[0] != len(X):
-            raise ValueError(
-                f"shap_values has {arr.shape[0]} rows but X has {len(X)}"
-            )
+            raise ValueError(f"shap_values has {arr.shape[0]} rows but X has {len(X)}")
 
         names = list(feature_names) if feature_names is not None else list(X.columns)
         if arr.shape[1] != len(names):
@@ -198,9 +196,10 @@ class ConceptPredictionExplainer:
         """
 
         idx = self._resolve_row(row)
+        # breakdown() raises ValueError("no concepts at depth ...") on the
+        # only failure mode that produces an empty frame, so no defensive
+        # empty-check is needed here.
         df = self.breakdown(row, depth=depth)
-        if df.empty:
-            raise ValueError("breakdown returned no concepts; check the graph and feature names")
 
         labels = ["base", *df["name"].tolist(), "prediction"]
         values = [self.base_value, *df["shap_sum"].tolist(), 0.0]
@@ -229,8 +228,7 @@ class ConceptPredictionExplainer:
         )
 
         subtitle = (
-            f"row={row}  ·  base={self.base_value:+.3f}  "
-            f"·  predicted logit={prediction_logit:+.3f}"
+            f"row={row}  ·  base={self.base_value:+.3f}  ·  predicted logit={prediction_logit:+.3f}"
         )
         if not np.isnan(proba):
             subtitle += f"  ·  P(y=1)={proba:.3f}"

@@ -17,7 +17,11 @@ import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import align_features, empty_concept_frame
+from concept_graph_xai.metrics._common import (
+    aligned_index_map,
+    empty_concept_frame,
+    per_sample_per_concept,
+)
 
 DriftAgg = Literal["mean_abs", "mean_signed"]
 PeriodSpec = tuple[str, np.ndarray, Sequence[str]]
@@ -43,26 +47,16 @@ def _aggregate_period(
             f"shap_values for period {period_label!r} has {arr.shape[1]} cols "
             f"but feature_names has {len(feature_names)}"
         )
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
-    nodes = graph.nodes_in_order()
-    values = np.zeros(len(nodes), dtype=float)
-    feature_counts = np.zeros(len(nodes), dtype=int)
-    for k, node in enumerate(nodes):
-        feats = [f for f in graph.descendant_features(node) if f in name_to_idx]
-        feature_counts[k] = len(feats)
-        if not feats:
-            continue
-        cols = [name_to_idx[f] for f in feats]
-        s = arr[:, cols].sum(axis=1)
-        if agg == "mean_abs":
-            values[k] = float(np.abs(s).mean())
-        elif agg == "mean_signed":
-            values[k] = float(s.mean())
-        else:
-            raise ValueError(f"unknown agg {agg!r}; expected 'mean_abs' or 'mean_signed'")
-    return values, feature_counts
+    per_sample, feature_counts = per_sample_per_concept(graph, arr, name_to_idx)
+    if agg == "mean_abs":
+        values = np.abs(per_sample).mean(axis=0)
+    elif agg == "mean_signed":
+        values = per_sample.mean(axis=0)
+    else:
+        raise ValueError(f"unknown agg {agg!r}; expected 'mean_abs' or 'mean_signed'")
+    return values.astype(float), feature_counts
 
 
 def attribution_drift(
@@ -179,9 +173,7 @@ def concept_drift_delta(
     if target_label not in period_labels:
         raise KeyError(f"target period {target_label!r} not in periods: {period_labels}")
     if baseline_label == target_label:
-        raise ValueError(
-            f"baseline and target must differ; both set to {baseline_label!r}"
-        )
+        raise ValueError(f"baseline and target must differ; both set to {baseline_label!r}")
 
     long_df = attribution_drift(graph, periods, agg=agg, on_unknown=on_unknown)
     base_df = long_df[long_df["period"] == baseline_label].set_index("path")

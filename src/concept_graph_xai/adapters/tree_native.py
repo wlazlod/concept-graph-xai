@@ -24,4 +24,6 @@ def from_feature_importances_(
         raise ValueError(
             f"shape mismatch: values has {values.shape[0]} entries, names has {len(names)}"
         )
+    if not np.all(np.isfinite(values)):
+        raise ValueError("feature_importances_ contains NaN or Inf")
     return values, names

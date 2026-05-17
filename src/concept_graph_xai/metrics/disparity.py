@@ -22,8 +22,13 @@ import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import align_features, empty_concept_frame
-from concept_graph_xai.metrics.segment import _resolve_segments, _segment_order
+from concept_graph_xai.metrics._common import (
+    aligned_index_map,
+    empty_concept_frame,
+    grouping_order,
+    per_sample_per_concept,
+    resolve_grouping,
+)
 
 DisparityAgg = Literal["mean_abs", "mean_signed"]
 
@@ -90,8 +95,8 @@ def concept_disparity(
             f"shap_values has {arr.shape[1]} cols but feature_names has {len(feature_names)}"
         )
 
-    series = _resolve_segments(protected, X, arr.shape[0])
-    observed = _segment_order(series)
+    series = resolve_grouping(protected, X, arr.shape[0], param_name="protected")
+    observed = grouping_order(series)
     if not observed:
         raise ValueError("protected must contain at least one non-NA category")
     if reference not in observed:
@@ -101,20 +106,11 @@ def concept_disparity(
     # Stable order: reference first, then the rest in input order.
     protected_order = [reference, *(g for g in observed if g != reference)]
 
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
     nodes = graph.nodes_in_order()
     base = empty_concept_frame(graph)
-    feature_counts = np.zeros(len(nodes), dtype=int)
-    per_sample_per_node = np.zeros((arr.shape[0], len(nodes)), dtype=float)
-    for k, node in enumerate(nodes):
-        feats = [f for f in graph.descendant_features(node) if f in name_to_idx]
-        feature_counts[k] = len(feats)
-        if not feats:
-            continue
-        cols = [name_to_idx[f] for f in feats]
-        per_sample_per_node[:, k] = arr[:, cols].sum(axis=1)
+    per_sample_per_node, feature_counts = per_sample_per_concept(graph, arr, name_to_idx)
 
     notna_mask = series.notna().to_numpy()
     seg_strings = series.astype(str).to_numpy()

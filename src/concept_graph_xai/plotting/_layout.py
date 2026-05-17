@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 
+import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
 
 # Plotly qualitative.Plotly palette, inlined so we don't pay a plotly.colors
-# import at metric-import time. Used as the default branch palette.
-_DEFAULT_BRANCH_PALETTE: tuple[str, ...] = (
+# import at metric-import time. Shared between every plot that needs a
+# qualitative categorical palette — currently `branch_colors` (sunbursts,
+# violin, signed bar, sankey) and `concept_pareto`'s per-segment colours.
+DEFAULT_QUALITATIVE_PALETTE: tuple[str, ...] = (
     "#636EFA",
     "#EF553B",
     "#00CC96",
@@ -99,12 +102,12 @@ def hover_text(
     return out
 
 
-def _hex_to_rgb(h: str) -> tuple[float, float, float]:
+def hex_to_rgb(h: str) -> tuple[float, float, float]:
     h = h.lstrip("#")
     return (int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0)
 
 
-def _rgb_to_hex(r: float, g: float, b: float) -> str:
+def rgb_to_hex(r: float, g: float, b: float) -> str:
     ri = max(0, min(255, round(r * 255)))
     gi = max(0, min(255, round(g * 255)))
     bi = max(0, min(255, round(b * 255)))
@@ -115,8 +118,107 @@ def _lighten(hex_color: str, factor: float) -> str:
     """Linear blend of ``hex_color`` toward white by ``factor`` ∈ [0, 1]."""
 
     factor = max(0.0, min(1.0, factor))
-    r, g, b = _hex_to_rgb(hex_color)
-    return _rgb_to_hex(r + (1.0 - r) * factor, g + (1.0 - g) * factor, b + (1.0 - b) * factor)
+    r, g, b = hex_to_rgb(hex_color)
+    return rgb_to_hex(r + (1.0 - r) * factor, g + (1.0 - g) * factor, b + (1.0 - b) * factor)
+
+
+def sunburst_layout(
+    graph: ConceptGraph,
+    df: pd.DataFrame,
+    *,
+    value: str,
+    hide_root: bool = True,
+) -> tuple[dict[str, list[str]], pd.DataFrame, np.ndarray]:
+    """Run the per-sunburst preamble: graph_to_arrays + reindex + sizes vector.
+
+    Every sunburst plot wants ``(arrays, ordered_df, sizes)`` aligned to
+    each other before it computes its marker. Returned ``sizes`` is the
+    fillna(0).to_numpy(float) of ``df[value]`` reindexed to ``arrays["ids"]``.
+    """
+
+    arrays = graph_to_arrays(graph, hide_root=hide_root)
+    ordered = reindex_to_paths(df, arrays["ids"])
+    if value not in ordered.columns:
+        raise KeyError(f"value column {value!r} not in DataFrame; have {list(ordered.columns)}")
+    sizes = ordered[value].fillna(0).to_numpy(dtype=float)
+    return arrays, ordered, sizes
+
+
+def build_sunburst_figure(
+    arrays: dict[str, list[str]],
+    values: np.ndarray,
+    marker: dict[str, object],
+    *,
+    hover: Sequence[str] | None = None,
+    title: str | None = None,
+    branchvalues: str = "total",
+    layout_kwargs: dict[str, object] | None = None,
+) -> object:
+    """Assemble the standard Plotly Sunburst figure used across the library.
+
+    Returns a ``plotly.graph_objects.Figure`` — typed as ``object`` to avoid
+    forcing a plotly import at module load. The marker dict is passed
+    through verbatim except for adding the library's default white sector
+    borders if the caller didn't set ``marker['line']``.
+    """
+
+    import plotly.graph_objects as go
+
+    marker.setdefault("line", {"width": 0.5, "color": "white"})
+
+    kwargs: dict[str, object] = {
+        "ids": arrays["ids"],
+        "labels": arrays["labels"],
+        "parents": arrays["parents"],
+        "values": values,
+        "branchvalues": branchvalues,
+        "marker": marker,
+        "insidetextorientation": "radial",
+    }
+    if hover is not None:
+        kwargs["hovertext"] = list(hover)
+        kwargs["hovertemplate"] = "<b>%{label}</b><br>%{hovertext}<extra></extra>"
+    else:
+        kwargs["hovertemplate"] = "<b>%{label}</b><br>%{value}<extra></extra>"
+
+    fig = go.Figure(go.Sunburst(**kwargs))
+    fig.update_layout(title=title, margin={"t": 40, "l": 0, "r": 0, "b": 0})
+    if layout_kwargs:
+        fig.update_layout(**layout_kwargs)
+    return fig
+
+
+def heatmap_color_kwargs(
+    z: np.ndarray,
+    *,
+    agg: str = "mean_abs",
+    colorscale: str | None = None,
+) -> dict[str, object]:
+    """Return Plotly heatmap colour kwargs for a concept-derived ``z`` matrix.
+
+    Encapsulates the "diverging RdBu for signed, sequential Reds for
+    absolute" convention used by every concept × group heatmap in the
+    library (``segment_concept_heatmap``, ``concept_interaction_heatmap``,
+    ``concept_disparity_heatmap``).
+
+    * ``agg="mean_signed"`` → diverging palette (default ``"RdBu"``) with
+      ``zmid=0`` and symmetric ``zmin / zmax = ±max(|z|)``.
+    * ``agg="mean_abs"`` (or anything else) → sequential palette (default
+      ``"Reds"``) with ``zmin=0`` and ``zmax=max(z)``.
+
+    Always returns a dict with ``colorscale``, ``zmin``, ``zmax`` and
+    (for signed) ``zmid`` keys; callers spread it into their
+    ``go.Heatmap`` keyword arguments.
+    """
+
+    if agg == "mean_signed":
+        if colorscale is None:
+            colorscale = "RdBu"
+        cabs = float(np.nanmax(np.abs(z))) or 1e-9
+        return {"colorscale": colorscale, "zmid": 0.0, "zmin": -cabs, "zmax": cabs}
+    if colorscale is None:
+        colorscale = "Reds"
+    return {"colorscale": colorscale, "zmin": 0.0, "zmax": float(np.nanmax(z)) or 1e-9}
 
 
 def branch_colors(
@@ -140,7 +242,7 @@ def branch_colors(
     ``hide_root=False``) get ``root_color``.
     """
 
-    pal: tuple[str, ...] = tuple(palette) if palette else _DEFAULT_BRANCH_PALETTE
+    pal: tuple[str, ...] = tuple(palette) if palette else DEFAULT_QUALITATIVE_PALETTE
     if not pal:
         raise ValueError("palette must contain at least one color")
 

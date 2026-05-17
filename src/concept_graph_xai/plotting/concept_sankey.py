@@ -9,11 +9,11 @@ import numpy as np
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.plotting._layout import _hex_to_rgb, branch_colors
+from concept_graph_xai.plotting._layout import branch_colors, hex_to_rgb
 
 
 def _rgba(hex_color: str, alpha: float) -> str:
-    r, g, b = _hex_to_rgb(hex_color)
+    r, g, b = hex_to_rgb(hex_color)
     return f"rgba({round(r * 255)},{round(g * 255)},{round(b * 255)},{alpha:.2f})"
 
 
@@ -146,11 +146,7 @@ def concept_sankey(
     #    top-level→outcome signed splits.
     concept_signed_per_sample: dict[str, np.ndarray] = {}
     for concept in seen_concepts:
-        feats = [
-            f
-            for f in graph.descendant_features(concept)
-            if f in feature_magnitude
-        ]
+        feats = [f for f in graph.descendant_features(concept) if f in feature_magnitude]
         if not feats:
             continue
         cols = [name_to_col[f] for f in feats]
@@ -177,9 +173,7 @@ def concept_sankey(
 
     dfs_order = graph.nodes_in_order()
     feature_set = set(feature_magnitude)
-    max_concept_depth = max(
-        (len(graph.path(c)) - 1 for c in seen_concepts), default=1
-    )
+    max_concept_depth = max((len(graph.path(c)) - 1 for c in seen_concepts), default=1)
     # Tier x-positions in (0, 1), strictly increasing left -> right:
     # tier 0 = features, tiers 1..max_concept_depth = concepts (deepest -> top),
     # final tier = outcomes.
@@ -195,9 +189,7 @@ def concept_sankey(
     concept_tiers: dict[int, list[str]] = {}
     for current_depth in range(max_concept_depth, 0, -1):
         concept_tiers[current_depth] = [
-            n
-            for n in dfs_order
-            if n in seen_concepts and len(graph.path(n)) - 1 == current_depth
+            n for n in dfs_order if n in seen_concepts and len(graph.path(n)) - 1 == current_depth
         ]
 
     # Map depth -> tier index. tier 0 = features; tier t (1..max_concept_depth)

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.plotting._layout import heatmap_color_kwargs
 
 
 def segment_concept_heatmap(
@@ -16,7 +16,7 @@ def segment_concept_heatmap(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
+    hide_root: bool = True,
     sort_by: str | None = "max",
     max_concepts: int | None = None,
     title: str | None = None,
@@ -33,8 +33,8 @@ def segment_concept_heatmap(
         Long-form output of :func:`segment_importance`.
     only_concepts:
         If ``True`` (default), drop feature leaves.
-    include_root:
-        If ``False`` (default), drop the root concept row.
+    hide_root:
+        If ``True`` (default), drop the root concept row.
     sort_by:
         ``"max"`` (default) orders concept rows by the maximum value across
         segments, descending. ``"depth"`` keeps graph DFS preorder.
@@ -59,22 +59,22 @@ def segment_concept_heatmap(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     segment_order = df.attrs.get("segment_order") or list(
         dict.fromkeys(work["segment"].astype(str))
     )
 
-    pivot = work.pivot_table(
-        index="name", columns="segment", values="value", aggfunc="mean"
-    )
+    pivot = work.pivot_table(index="name", columns="segment", values="value", aggfunc="mean")
     pivot = pivot.reindex(columns=[s for s in segment_order if s in pivot.columns])
 
     if sort_by == "max":
-        pivot = pivot.assign(_max=pivot.max(axis=1)).sort_values(
-            "_max", ascending=False
-        ).drop(columns="_max")
+        pivot = (
+            pivot.assign(_max=pivot.max(axis=1))
+            .sort_values("_max", ascending=False)
+            .drop(columns="_max")
+        )
     elif sort_by == "depth":
         dfs_order = [n for n in graph.nodes_in_order() if n in set(pivot.index)]
         pivot = pivot.reindex(index=dfs_order)
@@ -89,22 +89,15 @@ def segment_concept_heatmap(
 
     agg = df.attrs.get("agg", "mean_abs")
     z = pivot.to_numpy(dtype=float)
-    if colorscale is None:
-        colorscale = "RdBu" if agg == "mean_signed" else "Reds"
-
+    value_fmt = "+.4f" if agg == "mean_signed" else ".4f"
     heatmap_kwargs: dict[str, Any] = {
         "z": z,
         "x": list(pivot.columns),
         "y": list(pivot.index),
-        "colorscale": colorscale,
         "colorbar": {"title": agg},
-        "hovertemplate": "%{y} | %{x}<br>" + agg + ": %{z:.4f}<extra></extra>",
+        "hovertemplate": "%{y} | %{x}<br>" + agg + ": %{z:" + value_fmt + "}<extra></extra>",
+        **heatmap_color_kwargs(z, agg=agg, colorscale=colorscale),
     }
-    if agg == "mean_signed":
-        cabs = float(np.nanmax(np.abs(z))) or 1e-9
-        heatmap_kwargs.update(zmid=0.0, zmin=-cabs, zmax=cabs)
-    else:
-        heatmap_kwargs.update(zmin=0.0, zmax=float(np.nanmax(z)) or 1e-9)
 
     fig = go.Figure(go.Heatmap(**heatmap_kwargs))
 

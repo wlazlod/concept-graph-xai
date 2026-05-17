@@ -17,8 +17,8 @@ def concept_drift_lines(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
-    top_k: int | None = 10,
+    hide_root: bool = True,
+    max_concepts: int | None = None,
     branch_palette: Sequence[str] | None = None,
     title: str | None = None,
     layout_kwargs: dict[str, Any] | None = None,
@@ -33,12 +33,12 @@ def concept_drift_lines(
         Long-form DataFrame from :func:`attribution_drift`.
     only_concepts:
         If ``True`` (default), drop feature leaves.
-    include_root:
-        If ``False`` (default), drop the root concept row.
-    top_k:
+    hide_root:
+        If ``True`` (default), drop the root concept row.
+    max_concepts:
         If set, keep only the K concepts with the highest
-        max-across-periods value (default 10) to avoid spaghetti charts.
-        Pass ``None`` to show every concept.
+        max-across-periods value to avoid spaghetti charts. Default
+        ``None`` shows every concept.
     branch_palette:
         Custom palette for branch base hues. Defaults to the Plotly
         qualitative palette.
@@ -57,27 +57,26 @@ def concept_drift_lines(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     period_order: list[str] = df.attrs.get("period_order") or list(
         dict.fromkeys(work["period"].astype(str))
     )
 
-    pivot = work.pivot_table(
-        index="name", columns="period", values="value", aggfunc="mean"
-    )
+    pivot = work.pivot_table(index="name", columns="period", values="value", aggfunc="mean")
     pivot = pivot.reindex(columns=[p for p in period_order if p in pivot.columns])
 
-    if top_k is not None and top_k > 0:
-        max_per_concept = pivot.max(axis=1, skipna=True)
-        ordering = max_per_concept.sort_values(ascending=False).head(top_k).index
-        pivot = pivot.loc[ordering]
-    else:
-        # Sort by max-across-periods desc anyway so the legend lists the
-        # most prominent concepts first.
-        max_per_concept = pivot.max(axis=1, skipna=True)
-        pivot = pivot.loc[max_per_concept.sort_values(ascending=False).index]
+    # Always sort by max-across-periods desc so the legend lists the most
+    # prominent concepts first; then cap to max_concepts if requested.
+    max_per_concept = pivot.max(axis=1, skipna=True)
+    pivot = pivot.loc[max_per_concept.sort_values(ascending=False).index]
+    # Remember the pre-cap row count so the title suffix can say
+    # "top K of N" honestly. After head(K), len(pivot) == K, which would
+    # always trip the `max_concepts < len(pivot)` check to False.
+    n_total = len(pivot)
+    if max_concepts is not None and max_concepts > 0:
+        pivot = pivot.head(max_concepts)
 
     if pivot.empty:
         raise ValueError("no concept rows to plot after filtering")
@@ -97,16 +96,23 @@ def concept_drift_lines(
                 line={"color": color, "width": 2},
                 marker={"size": 7, "color": color},
                 name=str(name),
-                hovertemplate=(
-                    f"{name}<br>period: %{{x}}<br>{agg}: %{{y:.4f}}<extra></extra>"
-                ),
+                hovertemplate=(f"{name}<br>period: %{{x}}<br>{agg}: %{{y:.4f}}<extra></extra>"),
             )
         )
 
-    suffix = f" — top {top_k} concepts" if top_k is not None and top_k < len(pivot) else ""
+    suffix = (
+        f" — top {max_concepts} of {n_total} concepts"
+        if max_concepts is not None and max_concepts < n_total
+        else ""
+    )
     fig.update_layout(
         title=title or f"Concept SHAP drift across periods ({agg}){suffix}",
-        xaxis={"title": "period", "type": "category", "categoryorder": "array", "categoryarray": list(pivot.columns)},
+        xaxis={
+            "title": "period",
+            "type": "category",
+            "categoryorder": "array",
+            "categoryarray": list(pivot.columns),
+        },
         yaxis={"title": agg},
         legend={"title": "concept"},
         margin={"t": 60, "l": 70, "r": 30, "b": 60},

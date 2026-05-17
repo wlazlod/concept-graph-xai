@@ -17,9 +17,7 @@ from concept_graph_xai.metrics._common import block_boundaries
 
 @pytest.fixture
 def small_graph_and_X() -> tuple[ConceptGraph, pd.DataFrame]:
-    graph = ConceptGraph.from_dict(
-        {"Root": {"A": ["a1", "a2", "a3"], "B": ["b1", "b2"]}}
-    )
+    graph = ConceptGraph.from_dict({"Root": {"A": ["a1", "a2", "a3"], "B": ["b1", "b2"]}})
     rng = np.random.default_rng(0)
     n = 200
     a_block = rng.standard_normal((n, 3))
@@ -86,7 +84,9 @@ def test_shap_correlation_picks_up_signed_redundancy() -> None:
     rng = np.random.default_rng(2)
     n = 250
     base = rng.standard_normal(n)
-    shap_values = np.column_stack([base, base + 0.05 * rng.standard_normal(n), rng.standard_normal(n)])
+    shap_values = np.column_stack(
+        [base, base + 0.05 * rng.standard_normal(n), rng.standard_normal(n)]
+    )
     result = shap_correlation(graph, ["a1", "a2", "b"], shap_values)
     stats = result.block_stats.set_index("concept_path").to_dict("index")
     assert stats["Root/A"]["mean_abs"] > 0.9

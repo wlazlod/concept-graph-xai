@@ -10,6 +10,86 @@ import pandas as pd
 from concept_graph_xai.graph import ConceptGraph
 
 
+def per_sample_per_concept(
+    graph: ConceptGraph,
+    arr: np.ndarray,
+    name_to_idx: dict[str, int],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute per-sample summed-over-descendants values for every graph node.
+
+    Returns ``(values, feature_counts)`` where ``values`` has shape
+    ``(arr.shape[0], len(graph))`` and ``feature_counts`` has shape
+    ``(len(graph),)``. Both follow ``graph.nodes_in_order()`` ordering.
+
+    For each node, the per-sample value is
+    ``sum_{f in node.descendants ∩ name_to_idx} arr[:, name_to_idx[f]]``.
+    Nodes with no descendants in ``name_to_idx`` have a zero column and a
+    zero feature count.
+
+    Used by every "per-group per-concept" metric (``segment_importance``,
+    ``concept_disparity``, ``attribution_drift``, ``bootstrap_importance``)
+    so the inner loop lives in one place.
+    """
+
+    nodes = graph.nodes_in_order()
+    values = np.zeros((arr.shape[0], len(nodes)), dtype=float)
+    feature_counts = np.zeros(len(nodes), dtype=int)
+    for k, node in enumerate(nodes):
+        feats = [f for f in graph.descendant_features(node) if f in name_to_idx]
+        feature_counts[k] = len(feats)
+        if not feats:
+            continue
+        cols = [name_to_idx[f] for f in feats]
+        values[:, k] = arr[:, cols].sum(axis=1)
+    return values, feature_counts
+
+
+def resolve_grouping(
+    grouping: pd.Series | str,
+    X: pd.DataFrame | None,
+    n_rows: int,
+    *,
+    param_name: str = "grouping",
+) -> pd.Series:
+    """Coerce a Series-or-column-name grouping vector to an index-aligned Series.
+
+    Used by every metric that takes a row-level categorical vector
+    (segments, protected attributes, periods, cohorts).
+    """
+
+    if isinstance(grouping, str):
+        if X is None:
+            raise ValueError(
+                f"{param_name} is a column-name string; pass X=... so we can pull the column"
+            )
+        if grouping not in X.columns:
+            raise KeyError(f"{param_name} column {grouping!r} not in X.columns")
+        series = X[grouping]
+    elif isinstance(grouping, pd.Series):
+        series = grouping
+    else:
+        raise TypeError(
+            f"{param_name} must be a pandas Series or column-name str, "
+            f"got {type(grouping).__name__}"
+        )
+
+    if len(series) != n_rows:
+        raise ValueError(f"{param_name} has {len(series)} rows but the data has {n_rows}")
+    return series.reset_index(drop=True)
+
+
+def grouping_order(series: pd.Series) -> list[str]:
+    """Stable category ordering: categorical-ordered if available, else first-seen."""
+
+    if isinstance(series.dtype, pd.CategoricalDtype) and series.cat.ordered:
+        return [str(c) for c in series.cat.categories]
+    seen: list[str] = []
+    for value in series.dropna().astype(str):
+        if value not in seen:
+            seen.append(value)
+    return seen
+
+
 def aggregate_per_feature(
     values: np.ndarray,
     *,
@@ -41,6 +121,25 @@ def aggregate_per_feature(
     if agg == "sum":
         return np.asarray(arr.sum(axis=0), dtype=float)
     raise ValueError(f"unknown agg {agg!r}; expected 'mean' or 'sum'")
+
+
+def aligned_index_map(
+    graph: ConceptGraph,
+    feature_names: Sequence[str],
+    *,
+    on_unknown: str = "warn",
+) -> dict[str, int]:
+    """Return ``{graph_feature: index_in_feature_names}`` for matched features.
+
+    Convenience wrapper over :func:`align_features` for callers that only
+    need the lookup dict (and not the matched-names list or the unknown-
+    names list). Used by every metric that builds a per-sample-per-concept
+    aggregate from a (N, F) array — five call sites were each constructing
+    this dict inline.
+    """
+
+    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
+    return {name: idx for name, idx in zip(matched, indices, strict=True)}
 
 
 def align_features(

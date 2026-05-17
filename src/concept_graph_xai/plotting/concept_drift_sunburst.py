@@ -16,9 +16,9 @@ import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
 from concept_graph_xai.plotting._layout import (
-    graph_to_arrays,
+    build_sunburst_figure,
     hover_text,
-    reindex_to_paths,
+    sunburst_layout,
 )
 
 
@@ -70,18 +70,16 @@ def concept_drift_sunburst(
         if required not in df.columns:
             raise KeyError(f"required column {required!r} missing from DataFrame")
 
-    arrays = graph_to_arrays(graph, hide_root=hide_root)
-    ordered = reindex_to_paths(df, arrays["ids"])
+    arrays, ordered, sizes = sunburst_layout(graph, df, value=value, hide_root=hide_root)
 
-    sizes = ordered[value].fillna(0).to_numpy(dtype=float)
     delta_vals = ordered[delta_col].to_numpy(dtype=float)
+    if np.all(np.isnan(delta_vals)):
+        raise ValueError(
+            f"all values in {delta_col!r} are NaN; nothing to colour. "
+            "Pass at least one period with a defined value."
+        )
     delta_for_color = np.where(np.isnan(delta_vals), 0.0, delta_vals)
-
-    cmax = (
-        1.0
-        if np.all(np.isnan(delta_vals))
-        else float(np.nanmax(np.abs(delta_vals))) or 1e-9
-    )
+    cmax = float(np.nanmax(np.abs(delta_vals))) or 1e-9
 
     hover_cols = [c for c in ("baseline", "target", delta_col, value) if c in ordered.columns]
     hover = hover_text(
@@ -96,32 +94,19 @@ def concept_drift_sunburst(
     if baseline_label and target_label:
         auto_title += f" — {baseline_label} -> {target_label}"
 
-    fig = go.Figure(
-        go.Sunburst(
-            ids=arrays["ids"],
-            labels=arrays["labels"],
-            parents=arrays["parents"],
-            values=sizes,
-            branchvalues="total",
-            marker={
-                "colors": delta_for_color,
-                "colorscale": colorscale,
-                "cmid": 0.0,
-                "cmin": -cmax,
-                "cmax": cmax,
-                "showscale": True,
-                "colorbar": {"title": delta_col},
-                "line": {"width": 0.5, "color": "white"},
-            },
-            hovertext=hover,
-            hovertemplate="<b>%{label}</b><br>%{hovertext}<extra></extra>",
-            insidetextorientation="radial",
-        )
-    )
-    fig.update_layout(
+    return build_sunburst_figure(
+        arrays,
+        sizes,
+        marker={
+            "colors": delta_for_color,
+            "colorscale": colorscale,
+            "cmid": 0.0,
+            "cmin": -cmax,
+            "cmax": cmax,
+            "showscale": True,
+            "colorbar": {"title": delta_col},
+        },
+        hover=hover,
         title=title or auto_title,
-        margin={"t": 40, "l": 0, "r": 0, "b": 0},
+        layout_kwargs=layout_kwargs,
     )
-    if layout_kwargs:
-        fig.update_layout(**layout_kwargs)
-    return fig

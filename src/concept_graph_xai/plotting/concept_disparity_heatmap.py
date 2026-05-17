@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.plotting._layout import heatmap_color_kwargs
 
 SortBy = Literal["max_abs", "depth"]
 
@@ -18,12 +18,12 @@ def concept_disparity_heatmap(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
+    hide_root: bool = True,
     include_reference: bool = True,
     sort_by: SortBy | None = "max_abs",
     max_concepts: int | None = None,
     title: str | None = None,
-    colorscale: str = "RdBu",
+    colorscale: str = "RdBu_r",
     layout_kwargs: dict[str, Any] | None = None,
 ) -> go.Figure:
     """Render a concept × protected-group disparity heatmap.
@@ -41,8 +41,8 @@ def concept_disparity_heatmap(
         Long-form output of :func:`concept_disparity`.
     only_concepts:
         If ``True`` (default), drop feature leaves from the chart.
-    include_root:
-        If ``False`` (default), drop the root concept row.
+    hide_root:
+        If ``True`` (default), drop the root concept row.
     include_reference:
         If ``True`` (default), keep the reference group's all-zero
         column as a visible baseline. Pass ``False`` to drop it for a
@@ -59,7 +59,10 @@ def concept_disparity_heatmap(
         Figure title. Defaults to ``"Concept SHAP disparity vs
         <reference>"`` using the reference label from ``df.attrs``.
     colorscale:
-        Plotly diverging colorscale name. Default ``"RdBu"``.
+        Plotly diverging colorscale name. Default ``"RdBu_r"`` so a
+        positive gap (the model over-relies on this concept for the
+        protected group) renders red — same convention as
+        ``concept_drift_sunburst``.
     layout_kwargs:
         Passed verbatim to ``fig.update_layout``.
     """
@@ -73,7 +76,7 @@ def concept_disparity_heatmap(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     reference_group = df.attrs.get("reference_group")
@@ -90,9 +93,11 @@ def concept_disparity_heatmap(
     pivot = pivot.reindex(columns=[g for g in protected_order if g in pivot.columns])
 
     if sort_by == "max_abs":
-        pivot = pivot.assign(_max=pivot.abs().max(axis=1)).sort_values(
-            "_max", ascending=False
-        ).drop(columns="_max")
+        pivot = (
+            pivot.assign(_max=pivot.abs().max(axis=1))
+            .sort_values("_max", ascending=False)
+            .drop(columns="_max")
+        )
     elif sort_by == "depth":
         dfs_order = [n for n in graph.nodes_in_order() if n in set(pivot.index)]
         pivot = pivot.reindex(index=dfs_order)
@@ -107,9 +112,16 @@ def concept_disparity_heatmap(
 
     agg = df.attrs.get("agg", "mean_abs")
     z = pivot.to_numpy(dtype=float)
-    cmax = float(np.nanmax(np.abs(z))) or 1e-9
+    # Disparity is always signed — force diverging behaviour regardless of
+    # df.attrs["agg"], because a magnitude-vs-magnitude gap can still go
+    # negative (group < reference) and deserves a centred palette.
+    color_kwargs = heatmap_color_kwargs(z, agg="mean_signed", colorscale=colorscale)
 
-    auto_title = f"Concept SHAP disparity vs {reference_group}" if reference_group else "Concept SHAP disparity"
+    auto_title = (
+        f"Concept SHAP disparity vs {reference_group}"
+        if reference_group
+        else "Concept SHAP disparity"
+    )
     auto_title += f" ({agg})"
 
     fig = go.Figure(
@@ -117,12 +129,9 @@ def concept_disparity_heatmap(
             z=z,
             x=list(pivot.columns),
             y=list(pivot.index),
-            colorscale=colorscale,
-            zmid=0.0,
-            zmin=-cmax,
-            zmax=cmax,
             colorbar={"title": f"{agg} gap"},
             hovertemplate="%{y} | %{x}<br>gap: %{z:+.4f}<extra></extra>",
+            **color_kwargs,
         )
     )
 

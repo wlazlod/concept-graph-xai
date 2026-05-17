@@ -31,16 +31,18 @@ def column_missing_rate(graph: ConceptGraph, X: pd.DataFrame) -> pd.DataFrame:
     n_rows = len(X)
     for node in graph.nodes_in_order():
         feats = [f for f in graph.descendant_features(node) if f in X.columns]
-        if not feats:
-            column_rate.append(0.0)
-            any_rate.append(0.0)
+        if not feats or n_rows == 0:
+            # No features for this node, or no rows in X — both are
+            # genuinely undefined, surface as NaN rather than 0.0.
+            column_rate.append(float("nan") if n_rows == 0 else 0.0)
+            any_rate.append(float("nan") if n_rows == 0 else 0.0)
             continue
         sub = X.loc[:, feats].isna()
         if graph.kind(node) == "feature":
-            column_rate.append(float(sub.iloc[:, 0].mean()) if n_rows else 0.0)
+            column_rate.append(float(sub.iloc[:, 0].mean()))
         else:
-            column_rate.append(float(sub.mean().mean()) if n_rows else 0.0)
-        any_rate.append(float(sub.any(axis=1).mean()) if n_rows else 0.0)
+            column_rate.append(float(sub.mean().mean()))
+        any_rate.append(float(sub.any(axis=1).mean()))
     df["column_missing_rate"] = column_rate
     df["any_missing_rate"] = any_rate
     df["feature_count"] = [len(graph.descendant_features(n)) for n in graph.nodes_in_order()]

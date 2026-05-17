@@ -10,21 +10,12 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from concept_graph_xai.graph import ConceptGraph
+from concept_graph_xai.plotting._layout import DEFAULT_QUALITATIVE_PALETTE
 
-# Plotly qualitative palette, inlined so a Pareto chart's segment colours
-# are independent of the branch palette (segments != tree branches).
-_DEFAULT_SEGMENT_PALETTE: tuple[str, ...] = (
-    "#636EFA",
-    "#EF553B",
-    "#00CC96",
-    "#AB63FA",
-    "#FFA15A",
-    "#19D3F3",
-    "#FF6692",
-    "#B6E880",
-    "#FF97FF",
-    "#FECB52",
-)
+# Segments and tree branches are conceptually different axes, but both
+# use the same default qualitative palette. Share the constant so future
+# palette tweaks land in one place.
+_DEFAULT_SEGMENT_PALETTE = DEFAULT_QUALITATIVE_PALETTE
 
 
 def concept_pareto(
@@ -32,7 +23,7 @@ def concept_pareto(
     df: pd.DataFrame,
     *,
     only_concepts: bool = True,
-    include_root: bool = False,
+    hide_root: bool = True,
     segment_palette: Sequence[str] | None = None,
     show_equality_line: bool = True,
     title: str | None = None,
@@ -60,8 +51,8 @@ def concept_pareto(
         ``name``, ``kind``, ``segment``, ``value``.
     only_concepts:
         If ``True`` (default), drop feature leaves before ranking.
-    include_root:
-        If ``False`` (default), drop the root concept row (it aggregates
+    hide_root:
+        If ``True`` (default), drop the root concept row (it aggregates
         every feature and would distort the curve).
     segment_palette:
         Custom palette for per-segment colours. Defaults to the Plotly
@@ -83,7 +74,7 @@ def concept_pareto(
     work = df.copy()
     if only_concepts:
         work = work[work["kind"] == "concept"]
-    if not include_root:
+    if hide_root:
         work = work[work["name"] != graph.root]
 
     segment_order: list[str] = df.attrs.get("segment_order") or list(

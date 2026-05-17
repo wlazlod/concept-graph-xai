@@ -41,6 +41,11 @@ def test_sunburst_importance_sum_with_colorscale(graph, toy) -> None:
     df = importance_sum(graph, toy.feature_names, importances)
     fig = sunburst(graph, df, value="importance_sum", colorscale="Viridis")
     assert fig.data[0].marker.colorscale is not None
+    # marker.colors must carry one continuous value per sector and the
+    # colorbar should be visible for a colorscale plot.
+    sectors = len(fig.data[0].labels)
+    assert sectors == len(fig.data[0].marker.colors)
+    assert fig.data[0].marker.showscale is True
 
 
 def test_sunburst_branch_colors_by_default(graph, toy) -> None:

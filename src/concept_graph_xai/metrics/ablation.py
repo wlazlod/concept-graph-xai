@@ -67,9 +67,7 @@ def _features_in_x(
     if isinstance(X, pd.DataFrame):
         return list(X.columns)
     if len(feature_names) != X.shape[1]:
-        raise ValueError(
-            f"feature_names length {len(feature_names)} != X.shape[1] {X.shape[1]}"
-        )
+        raise ValueError(f"feature_names length {len(feature_names)} != X.shape[1] {X.shape[1]}")
     return list(feature_names)
 
 

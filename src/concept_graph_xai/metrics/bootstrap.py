@@ -1,14 +1,21 @@
-"""Bootstrap confidence intervals on per-concept signed SHAP (P2)."""
+"""Bootstrap confidence intervals on per-concept SHAP (P2)."""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Literal
 
 import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import align_features, empty_concept_frame
+from concept_graph_xai.metrics._common import (
+    aligned_index_map,
+    empty_concept_frame,
+    per_sample_per_concept,
+)
+
+BootstrapAgg = Literal["mean_signed", "mean_abs"]
 
 
 def bootstrap_importance(
@@ -19,16 +26,16 @@ def bootstrap_importance(
     n_bootstrap: int = 200,
     ci: float = 0.95,
     random_state: int | None = None,
-    signed: bool = True,
+    agg: BootstrapAgg = "mean_signed",
     on_unknown: str = "warn",
 ) -> pd.DataFrame:
-    """Bootstrap-resampled per-concept summed SHAP with percentile CI.
+    """Bootstrap-resampled per-concept SHAP with percentile CI.
 
     For each concept, the per-sample value is the sum of SHAP across the
-    concept's descendant features (signed by default). The statistic is the
-    mean of those per-sample values across the held-out set. The bootstrap
-    resamples row indices with replacement ``n_bootstrap`` times and reports
-    the mean and the symmetric percentile CI bounds for each concept.
+    concept's descendant features. The statistic is the mean of those
+    per-sample values across the held-out set. The bootstrap resamples row
+    indices with replacement ``n_bootstrap`` times and reports the mean
+    plus percentile confidence-interval bounds.
 
     Parameters
     ----------
@@ -44,21 +51,25 @@ def bootstrap_importance(
         Confidence level in ``(0, 1)``. Default ``0.95`` → 2.5% / 97.5%.
     random_state:
         Seed for the resampler.
-    signed:
-        If ``True`` (default), the per-sample concept value is the *signed*
-        sum across descendants (so cancellation can shrink it). If ``False``,
-        the per-sample value is the sum of ``|SHAP|`` (always non-negative).
+    agg:
+        ``"mean_signed"`` (default) uses the signed per-sample sum
+        (cancellation can shrink the magnitude). ``"mean_abs"`` uses
+        ``sum(|SHAP|)`` and is always non-negative. Naming matches the
+        v0.5/v0.6 family (``segment_importance``, ``concept_disparity``,
+        ``attribution_drift``, ``concept_interaction_matrix``).
     on_unknown:
-        Behaviour when ``feature_names`` contains entries not present in the
-        graph: ``"warn"`` (default), ``"ignore"``, ``"raise"``.
+        Behaviour when ``feature_names`` contains entries not in the graph.
 
     Returns
     -------
     pandas.DataFrame
         Indexed by concept-path with columns ``name``, ``kind``, ``depth``,
-        ``parent``, ``mean_signed_shap`` (or ``mean_abs_shap`` when
-        ``signed=False``), ``ci_lo``, ``ci_hi``, ``feature_count``.
+        ``parent``, the value column (``mean_signed_shap`` or
+        ``mean_abs_shap``), ``ci_lo``, ``ci_hi``, ``feature_count``.
     """
+
+    if agg not in ("mean_signed", "mean_abs"):
+        raise ValueError(f"unknown agg {agg!r}; expected 'mean_signed' or 'mean_abs'")
 
     arr = np.asarray(shap_values, dtype=float)
     if arr.ndim != 2:
@@ -72,23 +83,15 @@ def bootstrap_importance(
     if n_bootstrap < 1:
         raise ValueError(f"n_bootstrap must be >= 1; got {n_bootstrap}")
 
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
     nodes = graph.nodes_in_order()
     n_samples, _ = arr.shape
-    per_sample_per_node = np.zeros((n_samples, len(nodes)), dtype=float)
-    feature_counts = np.zeros(len(nodes), dtype=int)
-    for k, node in enumerate(nodes):
-        feats = [f for f in graph.descendant_features(node) if f in name_to_idx]
-        feature_counts[k] = len(feats)
-        if not feats:
-            continue
-        idxs = [name_to_idx[f] for f in feats]
-        sub = arr[:, idxs]
-        if not signed:
-            sub = np.abs(sub)
-        per_sample_per_node[:, k] = sub.sum(axis=1)
+    # For mean_abs we want |SHAP| summed (cancellation does NOT shrink), so
+    # we feed the absolute array into the per-sample helper. For mean_signed
+    # we feed the signed array.
+    source = np.abs(arr) if agg == "mean_abs" else arr
+    per_sample_per_node, feature_counts = per_sample_per_concept(graph, source, name_to_idx)
 
     rng = np.random.default_rng(random_state)
     boot_means = np.empty((n_bootstrap, len(nodes)), dtype=float)
@@ -102,12 +105,12 @@ def bootstrap_importance(
     mean_estimate = boot_means.mean(axis=0)
 
     df = empty_concept_frame(graph)
-    value_col = "mean_signed_shap" if signed else "mean_abs_shap"
+    value_col = "mean_signed_shap" if agg == "mean_signed" else "mean_abs_shap"
     df[value_col] = mean_estimate
     df["ci_lo"] = ci_lo
     df["ci_hi"] = ci_hi
     df["feature_count"] = feature_counts
     df.attrs["ci"] = ci
     df.attrs["n_bootstrap"] = n_bootstrap
-    df.attrs["signed"] = signed
+    df.attrs["agg"] = agg
     return df

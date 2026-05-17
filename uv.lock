@@ -353,7 +353,7 @@ wheels = [
 
 [[package]]
 name = "concept-graph-xai"
-version = "0.6.0"
+version = "0.6.1"
 source = { editable = "." }
 dependencies = [
     { name = "networkx" },
@@ -408,9 +408,9 @@ requires-dist = [
     { name = "ipykernel", marker = "extra == 'notebook'", specifier = ">=6.29" },
     { name = "jupyter", marker = "extra == 'notebook'", specifier = ">=1.0" },
     { name = "kagglehub", marker = "extra == 'notebook'", specifier = ">=0.3" },
-    { name = "kaleido", marker = "extra == 'dev'", specifier = "==0.2.1" },
-    { name = "kaleido", marker = "extra == 'notebook'", specifier = "==0.2.1" },
-    { name = "kaleido", marker = "extra == 'png'", specifier = "==0.2.1" },
+    { name = "kaleido", marker = "extra == 'dev'", specifier = ">=0.2.1,<1" },
+    { name = "kaleido", marker = "extra == 'notebook'", specifier = ">=0.2.1,<1" },
+    { name = "kaleido", marker = "extra == 'png'", specifier = ">=0.2.1,<1" },
     { name = "lightgbm", marker = "extra == 'dev'", specifier = ">=4.3" },
     { name = "lightgbm", marker = "extra == 'lightgbm'", specifier = ">=4.3" },
     { name = "lightgbm", marker = "extra == 'notebook'", specifier = ">=4.3" },

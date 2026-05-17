@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from concept_graph_xai.graph import ConceptGraph
-from concept_graph_xai.metrics._common import align_features
+from concept_graph_xai.metrics._common import aligned_index_map
 
 InteractionAgg = Literal["mean_abs", "mean_signed"]
 
@@ -66,9 +66,7 @@ def concept_interaction_matrix(
 
     arr = np.asarray(shap_interaction_values, dtype=float)
     if arr.ndim != 3:
-        raise ValueError(
-            f"shap_interaction_values must be 3D (N, F, F); got shape {arr.shape}"
-        )
+        raise ValueError(f"shap_interaction_values must be 3D (N, F, F); got shape {arr.shape}")
     if arr.shape[1] != arr.shape[2]:
         raise ValueError(
             f"shap_interaction_values must have square last two dims; got {arr.shape[1:]}"
@@ -79,8 +77,7 @@ def concept_interaction_matrix(
             f"{len(feature_names)}"
         )
 
-    matched, indices, _missing = align_features(graph, feature_names, on_unknown=on_unknown)
-    name_to_idx = {name: idx for name, idx in zip(matched, indices, strict=True)}
+    name_to_idx = aligned_index_map(graph, feature_names, on_unknown=on_unknown)
 
     nodes: list[str] = []
     for node in graph.nodes_in_order():

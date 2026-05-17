@@ -16,9 +16,7 @@ from concept_graph_xai import (
 
 @pytest.fixture
 def small_graph() -> ConceptGraph:
-    return ConceptGraph.from_dict(
-        {"Root": {"A": ["f1", "f2"], "B": ["f3", "f4"]}}
-    )
+    return ConceptGraph.from_dict({"Root": {"A": ["f1", "f2"], "B": ["f3", "f4"]}})
 
 
 def test_feature_counts_aggregates_descendants(small_graph: ConceptGraph) -> None:
@@ -86,9 +84,7 @@ def test_auc_drop_root_feature_count_matches_total(graph, fitted_model, toy) -> 
     )
     root_count = int(df.loc[df["name"] == graph.root, "feature_count"].iloc[0])
     direct_children = [c for c in graph.children_of(graph.root)]
-    children_sum = int(
-        df.loc[df["name"].isin(direct_children), "feature_count"].sum()
-    )
+    children_sum = int(df.loc[df["name"].isin(direct_children), "feature_count"].sum())
     assert root_count == children_sum
     assert root_count > 0
 

@@ -17,6 +17,120 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First-class `ProtectedAttribute` object on the graph with per-node sensitive-flag metadata.
 - Multiple-reference baselines (compare every group against the population mean instead of one group).
 
+## [0.6.1] — 2026-05-17
+
+Internal refactor + API polish. The package has a single consumer
+(this repo's notebook), so the parameter renames listed under
+**Changed (API)** below are **straight breaking changes** — no
+deprecation aliases. Callers of the previous parameter names will get
+a `TypeError`.
+
+### Fixed
+
+- `ConceptGraph.graph` property now returns a defensive copy. Previously
+  external code could mutate the internal `nx.DiGraph` and silently
+  corrupt the path cache + DFS order.
+- `metrics.column_missing_rate` returns `NaN` (not `0.0`) for empty input
+  — `0.0` falsely meant "nothing missing" on a zero-row DataFrame.
+- `metrics.feature_correlation` accepts both `pd.DataFrame` and
+  `np.ndarray` (with `feature_names=`), matching `shap_correlation`.
+- `plotting.concept_drift_sunburst` now raises `ValueError` when every
+  delta is NaN, instead of silently rendering a neutral colorbar with
+  `cmax=1.0`.
+- `plotting.concept_drift_lines` title suffix now reports "top K of N
+  concepts" honestly. The previous check compared `max_concepts`
+  against `len(pivot)` *after* `pivot.head(max_concepts)`, so the
+  suffix never rendered.
+- All three adapters (`from_shap_explanation`, `from_permutation_importance`,
+  `from_feature_importances_`) now reject NaN / Inf at the boundary with
+  a clear error. Previously a zero-variance feature could push NaN
+  through the entire pipeline silently.
+
+### Changed (API — BREAKING)
+
+- `bootstrap_importance(signed: bool = True)` → `agg: "mean_signed" | "mean_abs" = "mean_signed"`.
+  `df.attrs["signed"]` is gone; use `df.attrs["agg"]`.
+- `segment_concept_heatmap(include_root: bool = False)` →
+  `hide_root: bool = True`.
+- `concept_disparity_heatmap(include_root: bool = False)` →
+  `hide_root: bool = True`.
+- `concept_pareto(include_root: bool = False)` →
+  `hide_root: bool = True`.
+- `concept_drift_lines(include_root: bool = False, top_k: int | None = 10)` →
+  `hide_root: bool = True, max_concepts: int | None = None`. The new
+  default shows every concept; the old default silently capped to 10.
+- `concept_disparity_heatmap` default colorscale is now `"RdBu_r"`
+  (was `"RdBu"`) so positive gap renders red, matching
+  `concept_drift_sunburst`'s "growing magnitude = red" convention.
+
+### Changed (internal — no caller-visible effect)
+
+- `_layout._hex_to_rgb` / `_rgb_to_hex` promoted to public
+  `hex_to_rgb` / `rgb_to_hex` — `concept_sankey` already imported them
+  across the privacy boundary.
+- Six sunburst plots share a common skeleton via `_layout.sunburst_layout`
+  + `_layout.build_sunburst_figure`. Three heatmaps share their
+  colorscale + zmid logic via `_layout.heatmap_color_kwargs`. Four
+  metrics share the per-sample-per-concept aggregation via
+  `metrics._common.per_sample_per_concept`. Two grouping helpers
+  (`_resolve_segments`, `_segment_order`) promoted to `_common` as
+  `resolve_grouping` / `grouping_order`. The repeated
+  `name_to_idx` dict comprehension after `align_features` is now a
+  single `aligned_index_map(...)` call. `DEFAULT_QUALITATIVE_PALETTE`
+  in `_layout` replaces a byte-identical private copy in
+  `concept_pareto`. Net effect: ~−500 lines of duplication.
+- Dead `_ = skip_root` no-op removed from `correlation_block`.
+- Confusing double `.attrs.get()` fallback simplified to a single call
+  in `coherence_importance_scatter`.
+- Hover-format inconsistency fixed: signed columns use `+.4f`,
+  magnitude-only columns use `.4f` (`segment_concept_heatmap`,
+  `concept_interaction_heatmap`).
+- Redundant empty-check after `breakdown()` removed from
+  `prediction_explainer.waterfall`.
+
+### Tooling
+
+- `pyproject.toml` ruff config now enforces the 100-char line limit
+  (`E501` dropped from the ignore list); ran `ruff format .` across
+  the codebase as a one-time wrapping pass.
+- `kaleido` pin loosened from `==0.2.1` to `>=0.2.1,<1` (stays on the
+  0.x line; avoids the 1.x process-model breaking change).
+
+### Tests
+
+- New `tests/test_edge_cases.py` parametrises every public
+  SHAP-aggregation metric over the unhappy paths (empty input,
+  single sample, all-NaN segments, single-feature concepts,
+  single-period drift, all-zero SHAP).
+- New adapter NaN/Inf-rejection tests.
+- `test_regulatory_tag_overlay` gains an explicit tag-to-colour mapping
+  test (was only checking "at least 2 distinct colours").
+- `simple_graph`, `shap_arr`, and `segments_series` fixtures hoisted to
+  `tests/conftest.py` (were duplicated across 7–10 files); local
+  `graph` fixtures renamed to `simple_graph` so they no longer shadow
+  the conftest's session-scoped credit-risk `graph`.
+- Three plotting smoke tests strengthened with real numeric
+  assertions (colorscale + marker counts; correlation `z ∈ [-1, 1]`;
+  `diag(z) == 1`).
+- New regression test for the drift-lines "top K of N" title suffix.
+- Test files renamed to drop the `_v0X_` release-version prefix
+  (`test_v05_bootstrap.py` → `test_bootstrap.py`, etc) — they now
+  describe what they test, not when they were added.
+
+### Notebook
+
+- Reorganised `examples/01_credit_risk_walkthrough.ipynb` from
+  history-order (Part A setup, B global, C diagnostics, D local, F
+  uncertainty, G cohort, H drift, I fairness, E export — tacked-on as
+  features landed) into workflow-order: A setup → B structure (the
+  former feature_count / utilization / sunburst trio merged into a
+  single section with bootstrap CIs) → C composition (interaction
+  matrix + Sankey) → D per-prediction → E concept-design diagnostics
+  → F cohort → G fairness → H robustness & drift (AUC ablation lives
+  here now, not under "global", since it's a what-if question) → I
+  static PNG export. No new content; same figures, sensible reading
+  order.
+
 ## [0.6.0] — 2026-05-16
 
 Fairness — concept-level disparity vs a reference protected group.
@@ -125,7 +239,8 @@ Minimum viable release.
 - Adapters: `from_shap_explanation`, `from_permutation_importance`, `from_feature_importances_`.
 - Tests, mypy strict, README quickstart, end-to-end notebook on the Give Me Some Credit Kaggle dataset.
 
-[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/wlazlod/concept-graph-xai/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.6.1
 [0.6.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.6.0
 [0.5.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wlazlod/concept-graph-xai/releases/tag/v0.4.0

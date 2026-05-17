@@ -54,7 +54,14 @@ class ConceptGraph:
 
     @property
     def graph(self) -> nx.DiGraph:
-        return self._graph
+        """Return a snapshot copy of the underlying NetworkX DiGraph.
+
+        The copy preserves all node attributes (``kind``, ``metadata``) and
+        edges, but mutations to the returned object never reach back into
+        the ConceptGraph — preventing accidental cache / order corruption.
+        """
+
+        return self._graph.copy()
 
     def __len__(self) -> int:
         return int(self._graph.number_of_nodes())
@@ -179,7 +186,9 @@ class ConceptGraph:
         if isinstance(value, list):
             for leaf in value:
                 if not isinstance(leaf, str):
-                    raise ValueError(f"Feature leaf under {parent!r} must be a string, got {leaf!r}")
+                    raise ValueError(
+                        f"Feature leaf under {parent!r} must be a string, got {leaf!r}"
+                    )
                 if leaf in graph:
                     raise ValueError(f"Duplicate node name: {leaf!r}")
                 graph.add_node(leaf, kind="feature", metadata={})
@@ -193,7 +202,9 @@ class ConceptGraph:
                 graph.add_edge(parent, name)
                 ConceptGraph._build_subtree(graph, name, sub)
             return
-        raise ValueError(f"Subtree under {parent!r} must be a mapping or a list, got {type(value).__name__}")
+        raise ValueError(
+            f"Subtree under {parent!r} must be a mapping or a list, got {type(value).__name__}"
+        )
 
     # ------------------------------------------------------------------ #
     # Validation

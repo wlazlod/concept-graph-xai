@@ -84,8 +84,9 @@ def _block_aggregates(
 
 def feature_correlation(
     graph: ConceptGraph,
-    X: pd.DataFrame,
+    X: pd.DataFrame | np.ndarray,
     *,
+    feature_names: Sequence[str] | None = None,
     method: CorrelationMethod = "spearman",
 ) -> CorrelationResult:
     """Block-structured correlation matrix on feature *values* (P14).
@@ -93,14 +94,34 @@ def feature_correlation(
     Diagonal blocks reveal *within-concept coherence*; off-diagonal blocks
     reveal *boundary leakage* (features in different concepts that turn out to
     be highly correlated).
+
+    Accepts either a ``pd.DataFrame`` (column names taken from
+    ``X.columns``) or an ``np.ndarray`` of shape ``(N, F)`` (column names
+    must be supplied via ``feature_names``).
     """
 
-    if not isinstance(X, pd.DataFrame):
-        raise TypeError("feature_correlation requires a pandas DataFrame X")
-    feats = _ordered_feature_names(graph, list(X.columns))
+    if isinstance(X, pd.DataFrame):
+        df_X = X
+    elif isinstance(X, np.ndarray):
+        if feature_names is None:
+            raise ValueError("feature_correlation needs feature_names= when X is a numpy array")
+        arr = np.asarray(X, dtype=float)
+        if arr.ndim != 2:
+            raise ValueError(f"X must be 2D (N, F); got shape {arr.shape}")
+        if arr.shape[1] != len(feature_names):
+            raise ValueError(
+                f"X has {arr.shape[1]} columns but feature_names has {len(feature_names)}"
+            )
+        df_X = pd.DataFrame(arr, columns=list(feature_names))
+    else:
+        raise TypeError(
+            f"feature_correlation requires a DataFrame or 2D ndarray, got {type(X).__name__}"
+        )
+
+    feats = _ordered_feature_names(graph, list(df_X.columns))
     if not feats:
         raise ValueError("no overlap between graph features and X columns")
-    sub = X.loc[:, feats]
+    sub = df_X.loc[:, feats]
     matrix = sub.corr(method=method)
     blocks = block_boundaries(graph, feature_names=feats)
     block_stats = _block_aggregates(matrix.to_numpy(), blocks)

@@ -37,4 +37,6 @@ def from_permutation_importance(
         raise ValueError(
             f"shape mismatch: values has {values.shape[0]} entries, names has {len(names)}"
         )
+    if not np.all(np.isfinite(values)):
+        raise ValueError(f"{use!r} contains NaN or Inf; check the permutation_importance run")
     return values, names
