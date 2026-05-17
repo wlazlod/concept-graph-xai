@@ -9,7 +9,7 @@ In v1 every node is either a `concept` (internal) or a `feature` (leaf):
 * the tree has **exactly one root** and the root is a concept;
 * every leaf is a feature, every concept has at least one descendant feature;
 * node names are unique across the whole graph;
-* every node may carry an arbitrary `metadata` dict (used by the [regulatory tag overlay](plotting.md#regulatory-tag-overlay)).
+* every node may carry an arbitrary `metadata` dict (used by `regulatory_tag_overlay`; see the [API reference](../api/plotting.md)).
 
 These invariants are enforced at construction time. DAGs (a feature mapped to multiple parents) are reserved for v1.0 — see the [roadmap](../roadmap.md).
 
@@ -61,7 +61,7 @@ graph = ConceptGraph.from_yaml("concepts.yaml")
 
 ### From NetworkX
 
-If you already have a `networkx.DiGraph` with `kind` and `metadata` attributes set per node, you can use it directly. This is the path you take when the tree is generated from another tool (e.g. an ontology library) and when you want to attach metadata for the [regulatory tag overlay](plotting.md#regulatory-tag-overlay):
+If you already have a `networkx.DiGraph` with `kind` and `metadata` attributes set per node, you can use it directly. This is the path you take when the tree is generated from another tool (e.g. an ontology library) and when you want to attach metadata for `regulatory_tag_overlay` (see the [API reference](../api/plotting.md)):
 
 ```python
 import networkx as nx
@@ -83,7 +83,7 @@ Every node has a `metadata: dict[str, Any]` slot. The package uses one well-know
 
 | Key | Used by | Meaning |
 |-----|---------|---------|
-| `tag` | [`regulatory_tag_overlay`](plotting.md#regulatory-tag-overlay) | A categorical label such as `"PII"`, `"financial"`, `"behavioural"`. |
+| `tag` | `regulatory_tag_overlay` (see the [API reference](../api/plotting.md)) | A categorical label such as `"PII"`, `"financial"`, `"behavioural"`. |
 
 You can store anything else (regulatory tags, owner names, descriptions) — it travels with the graph but does not affect any metric.
 

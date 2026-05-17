@@ -40,10 +40,13 @@ nav:
   - Getting Started: getting-started.md
   - User Guide:
     - Concept Graphs: user-guide/concept-graphs.md
-    - Metrics: user-guide/metrics.md
-    - Plotting: user-guide/plotting.md
-    - Ablation Strategies: user-guide/ablation.md
-    - Concept-Design Diagnostics: user-guide/diagnostics.md
+    - What does my model rely on?: user-guide/structure.md
+    - How does the signal compose?: user-guide/composition.md
+    - Why this prediction?: user-guide/per-prediction.md
+    - Is my concept tree any good?: user-guide/concept-design.md
+    - Does importance differ across cohorts?: user-guide/cohort.md
+    - Where does the model behave differently across protected groups?: user-guide/fairness.md
+    - What if data goes missing or drifts?: user-guide/robustness.md
   - API Reference:
     - api/index.md
     - ConceptGraph: api/graph.md

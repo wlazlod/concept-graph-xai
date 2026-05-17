@@ -145,7 +145,7 @@ drop_df = auc_drop(
 auc_drop_map(graph, drop_df).show()
 ```
 
-The three strategies are explained in [Ablation Strategies](user-guide/ablation.md).
+The three strategies are explained in [What if data goes missing or drifts?](user-guide/robustness.md).
 
 ### 6. Concept-design diagnostics (v0.3)
 
@@ -173,7 +173,7 @@ coh_df = coherence_importance(graph, X_test, feature_names, shap_values)
 coherence_importance_scatter(coh_df).show()
 ```
 
-See [Concept-Design Diagnostics](user-guide/diagnostics.md) for the full workflow.
+See [Is my concept tree any good?](user-guide/concept-design.md) for the full workflow.
 
 ## Static PNG export
 
@@ -187,6 +187,6 @@ Requires the `[png]` extra (`kaleido==0.2.1` to avoid Chrome dependency).
 ## What's next?
 
 - Read [Concept Graphs](user-guide/concept-graphs.md) to understand the graph model.
-- See all [metrics](user-guide/metrics.md) and [plots](user-guide/plotting.md).
+- Walk through the [Tour](tour.md) for the full narrated workflow.
 - Browse the [API Reference](api/index.md).
 - Walk through the example notebook in [`examples/01_credit_risk_walkthrough.ipynb`](https://github.com/wlazlod/concept-graph-xai/blob/main/examples/01_credit_risk_walkthrough.ipynb) — runs end-to-end on the Give Me Some Credit Kaggle dataset.

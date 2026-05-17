@@ -546,8 +546,8 @@ auc_drop_map(graph, drop).show()
 
 > Notebook cell: *H.1*. Three strategies are available — `permutation`
 > (cheap, model-agnostic, the default), `retrain` (most faithful, most
-> expensive), `shap_marginal` (approximation, almost free). The
-> robustness user-guide page covers the trade-offs in full.
+> expensive), `shap_marginal` (approximation, almost free). See the
+> [robustness page](user-guide/robustness.md) for the trade-offs.
 
 ### H.2 + H.3 Drift across periods
 
@@ -606,9 +606,16 @@ is what produced every image on this page.
 
 ## Where to go next
 
-- **Pick a question** to dig into from the [User Guide](user-guide/concept-graphs.md)
-  — each page is one of the workflow questions above, with the API in
-  full and the common pitfalls flagged.
+- **Pick a question** to dig into from the User Guide — each page is
+  one of the workflow questions above, with the API in full and the
+  common pitfalls flagged:
+    - [What does my model rely on?](user-guide/structure.md)
+    - [How does the signal compose?](user-guide/composition.md)
+    - [Why this prediction?](user-guide/per-prediction.md)
+    - [Is my concept tree any good?](user-guide/concept-design.md)
+    - [Does importance differ across cohorts?](user-guide/cohort.md)
+    - [Where does the model behave differently across protected groups?](user-guide/fairness.md)
+    - [What if data goes missing or drifts?](user-guide/robustness.md)
 - **Bring your own graph** following the
   [Concept Graphs](user-guide/concept-graphs.md) reference.
 - **API browse** at the [API Reference](api/index.md).
