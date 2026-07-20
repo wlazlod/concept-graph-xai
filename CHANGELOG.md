@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation restructured into a flat treecf-style layout: the guided tour
+  becomes a narrative "How it works" page with a pipeline schema, user-guide
+  pages move under Concepts, the API pages consolidate into one, and a FAQ is
+  added; stale code samples corrected to the real API signatures.
+
 ### Planned
 
 - **v1.0** — DAG support with optional per-edge weights; backwards compatible for tree users.

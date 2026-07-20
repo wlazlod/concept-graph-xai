@@ -21,8 +21,8 @@ from raw column to decision.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`concept_interaction_matrix`](../api/metrics-correlation.md) + [`concept_interaction_heatmap`](../api/plotting.md) | Concept × concept SHAP interaction matrix | "Do these two concepts have a non-additive signal?" |
-| [`concept_shap_sankey`](../api/plotting.md) | Three-column Sankey | "Where does the signal flow?" |
+| [`concept_interaction_matrix`](../api.md#correlation) + [`concept_interaction_heatmap`](../api.md#plotting) | Concept × concept SHAP interaction matrix | "Do these two concepts have a non-additive signal?" |
+| [`concept_sankey`](../api.md#plotting) | Multi-tier Sankey | "Where does the signal flow?" |
 
 The interaction matrix needs a `(N, F, F)` SHAP interaction tensor —
 expensive. The Sankey needs only `(N, F)` standard SHAP.
@@ -32,7 +32,7 @@ expensive. The Sankey needs only `(N, F)` standard SHAP.
 ```python
 from concept_graph_xai import (
     concept_interaction_heatmap, concept_interaction_matrix,
-    concept_shap_sankey,
+    concept_sankey,
 )
 
 # Concept × concept interactions (needs interaction tensor)
@@ -41,7 +41,7 @@ inter = concept_interaction_matrix(graph, feature_names,
 concept_interaction_heatmap(inter).show()
 
 # Feature → concept → ±outcome flow (needs standard SHAP)
-concept_shap_sankey(graph, feature_names, shap_values).show()
+concept_sankey(graph, feature_names, shap_values).show()
 ```
 
 ![Concept × concept interaction matrix](../img/interaction_matrix.png){ width="560" }
@@ -70,15 +70,19 @@ concepts — which is exactly what the tree was set up to find.
 
 ### SHAP Sankey
 
-Three columns. Left: features. Middle: concepts, ordered top-to-bottom
-in DFS preorder so siblings sit together. Right: the ±outcome bucket.
+Left: features. Middle: one tier per concept level, ordered
+top-to-bottom in DFS preorder so siblings sit together — deep trees
+produce multiple intermediate tiers (`feature → sub-concept →
+top-level concept`). Right: the ±outcome bucket.
 
 - Link **width** = summed magnitude of SHAP contribution along that
   edge.
 - Link **colour** = inherits the top-level branch hue, so a single
   branch's flow is visually one stream from feature to outcome.
-- Features and concepts that push the prediction *up* terminate at
-  `+outcome`; those that push it *down* terminate at `-outcome`.
+- Top-level concepts split their flow between `+outcome` and
+  `-outcome`: the rows where the concept's summed contribution pushes
+  the prediction *up* feed the `+` band, the rows where it pushes
+  *down* feed the `-` band.
 - Concepts are placed at explicit `(x, y)` coordinates so vertical
   order is deterministic (not the Plotly auto-arrange, which would
   re-order to minimise crossings).
@@ -101,18 +105,14 @@ in DFS preorder so siblings sit together. Right: the ±outcome bucket.
   is usually enough for the matrix to stabilise) or use
   [`shap.utils.sample`](https://shap.readthedocs.io/en/latest/) to
   build a representative subset.
-- **Sankey "shows only the feature and top concept".** This was a v0.5
-  bug — the walker did not fully traverse multi-level hierarchies.
-  Fixed in v0.5.1; if you are still on v0.5.0 upgrade before relying
-  on the chart.
-- **Per-row Sankey misleads.** `concept_shap_sankey` aggregates over
-  all rows. For a single-row Sankey, use
-  [`concept_waterfall`](per-prediction.md) instead — it answers the
+- **Per-row Sankey misleads.** `concept_sankey` aggregates over
+  all rows. For a single-row view, use the
+  [concept waterfall](per-prediction.md) instead — it answers the
   same question for one prediction.
 
 ## Related
 
 - [Per-prediction](per-prediction.md) — the same composition at the
   row level, where row-specific interactions become visible.
-- [Tour, Part C](../tour.md#part-c-how-does-the-signal-compose) — the
+- [How it works, Part C](../how-it-works.md#part-c-how-does-the-signal-compose) — the
   same answers in narrative form.

@@ -4,8 +4,14 @@ site_url: https://wlazlod.github.io/concept-graph-xai/
 repo_url: https://github.com/wlazlod/concept-graph-xai
 repo_name: wlazlod/concept-graph-xai
 
+strict: true
+
 theme:
   name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -21,45 +27,6 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-  features:
-    - content.code.copy
-    - content.code.annotate
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
-    - search.suggest
-    - search.highlight
-    - toc.follow
-  icon:
-    repo: fontawesome/brands/github
-
-nav:
-  - Home: index.md
-  - Tour: tour.md
-  - Getting Started: getting-started.md
-  - User Guide:
-    - Concept Graphs: user-guide/concept-graphs.md
-    - What does my model rely on?: user-guide/structure.md
-    - How does the signal compose?: user-guide/composition.md
-    - Why this prediction?: user-guide/per-prediction.md
-    - Is my concept tree any good?: user-guide/concept-design.md
-    - Does importance differ across cohorts?: user-guide/cohort.md
-    - Where does the model behave differently across protected groups?: user-guide/fairness.md
-    - What if data goes missing or drifts?: user-guide/robustness.md
-  - API Reference:
-    - api/index.md
-    - ConceptGraph: api/graph.md
-    - Adapters: api/adapters.md
-    - Counts: api/metrics-counts.md
-    - Importance: api/metrics-importance.md
-    - Utilization: api/metrics-utilization.md
-    - Ablation: api/metrics-ablation.md
-    - Correlation: api/metrics-correlation.md
-    - Missingness: api/metrics-missingness.md
-    - Coherence: api/metrics-coherence.md
-    - Plotting: api/plotting.md
-  - Roadmap: roadmap.md
 
 plugins:
   - search
@@ -84,27 +51,34 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - attr_list
   - pymdownx.details
-  - pymdownx.superfences
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.arithmatex:
       generic: true
-  - tables
-  - attr_list
-  - md_in_html
   - toc:
       permalink: true
 
 extra_javascript:
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
-extra:
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/wlazlod/concept-graph-xai
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - How it works: how-it-works.md
+  - Concepts:
+      - Concept graphs: concepts/concept-graphs.md
+      - What does my model rely on?: concepts/structure.md
+      - How does the signal compose?: concepts/composition.md
+      - Why this prediction?: concepts/per-prediction.md
+      - Is my concept tree any good?: concepts/concept-design.md
+      - Does importance differ across cohorts?: concepts/cohort.md
+      - Where does the model differ across protected groups?: concepts/fairness.md
+      - What if data goes missing or drifts?: concepts/robustness.md
+  - API reference: api.md
+  - FAQ: faq.md

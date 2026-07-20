@@ -20,10 +20,10 @@ that.
 
 | Function | Operates on | Diagnoses |
 |---|---|---|
-| [`feature_correlation`](../api/metrics-correlation.md) + [`correlation_block`](../api/plotting.md) | Raw `X` | Within-concept coherence; concept-boundary leakage. |
-| [`nullity_correlation`](../api/metrics-correlation.md) + [`correlation_block`](../api/plotting.md) | `X.isna()` | Do features inside a concept go missing together? |
-| [`shap_correlation`](../api/metrics-correlation.md) + [`correlation_block`](../api/plotting.md) | `shap_values` | Does the model treat features inside a concept as substitutes? |
-| [`coherence_importance`](../api/metrics-coherence.md) + [`coherence_importance_scatter`](../api/plotting.md) | `X` + `shap_values` | The single chart: well-designed vs kitchen-sink vs redundant vs noise. |
+| [`feature_correlation`](../api.md#correlation) + [`correlation_block`](../api.md#plotting) | Raw `X` | Within-concept coherence; concept-boundary leakage. |
+| [`nullity_correlation`](../api.md#correlation) + [`correlation_block`](../api.md#plotting) | `X.isna()` | Do features inside a concept go missing together? |
+| [`shap_correlation`](../api.md#correlation) + [`correlation_block`](../api.md#plotting) | `shap_values` | Does the model treat features inside a concept as substitutes? |
+| [`coherence_importance`](../api.md#coherence) + [`coherence_importance_scatter`](../api.md#plotting) | `X` + `shap_values` | The single chart: well-designed vs kitchen-sink vs redundant vs noise. |
 
 All four return either a `CorrelationResult` (block matrix +
 per-block stats) or a `DataFrame` consumed by the same family of
@@ -152,15 +152,15 @@ operational-risk register.
 
 ## Related
 
-- [`feature_correlation`](../api/metrics-correlation.md),
-  [`shap_correlation`](../api/metrics-correlation.md),
-  [`nullity_correlation`](../api/metrics-correlation.md),
-  [`coherence_importance`](../api/metrics-coherence.md),
-  [`joint_missing_rate`](../api/metrics-missingness.md) — API
+- [`feature_correlation`](../api.md#correlation),
+  [`shap_correlation`](../api.md#correlation),
+  [`nullity_correlation`](../api.md#correlation),
+  [`coherence_importance`](../api.md#coherence),
+  [`joint_missing_rate`](../api.md#missingness) — API
   reference.
 - [Structure](structure.md) — the importance and utilization views
   that operate *on* the tree you validate here.
 - [Robustness](robustness.md) — the AUC-drop view that the
   joint-missing-rate calibrates.
-- [Tour, Part E](../tour.md#part-e-is-my-concept-tree-any-good) — the
+- [How it works, Part E](../how-it-works.md#part-e-is-my-concept-tree-any-good) — the
   same answers in narrative form.

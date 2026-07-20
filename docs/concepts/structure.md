@@ -19,9 +19,9 @@ actually trustworthy on your sample size.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`feature_counts`](../api/metrics-counts.md) | Per-node feature count (model-free) | Sizing the structural backbone. |
-| [`utilization`](../api/metrics-utilization.md) | Per-concept `is_used` flag + importance | Greying out the parts of the tree the model ignores. |
-| [`importance_sum`](../api/metrics-importance.md) | Per-concept summed mean&#124;SHAP&#124; | Ranking the concepts the model uses. |
+| [`feature_counts`](../api.md#counts) | Per-node feature count (model-free) | Sizing the structural backbone. |
+| [`utilization`](../api.md#utilization) | Per-concept `is_used` flag + importance | Greying out the parts of the tree the model ignores. |
+| [`importance_sum`](../api.md#importance) | Per-concept summed mean&#124;SHAP&#124; | Ranking the concepts the model uses. |
 
 All three return a `pandas.DataFrame` indexed by the concept's
 `/`-joined path. They join trivially on `path` for composite views.
@@ -30,8 +30,8 @@ All three return a `pandas.DataFrame` indexed by the concept's
 
 ```python
 from concept_graph_xai import (
-    bootstrap_importance, bootstrap_importance_bar,
-    importance_sum, sunburst, utilization, utilization_map,
+    bootstrap_importance, importance_sum, signed_concept_bar,
+    sunburst, utilization, utilization_map,
 )
 
 # 1. Which parts does the model actually use?
@@ -44,8 +44,8 @@ sunburst(graph, imp, value="importance_sum").show()
 
 # 3. Is that ranking statistically separable on this sample size?
 boot = bootstrap_importance(graph, feature_names, shap_values,
-                            n_boot=1000, ci=0.95, random_state=42)
-bootstrap_importance_bar(boot).show()
+                            n_bootstrap=1000, ci=0.95, random_state=42)
+signed_concept_bar(graph, boot).show()
 ```
 
 ![Concept importance sunburst](../img/importance.png){ width="520" }
@@ -58,11 +58,11 @@ bootstrap_importance_bar(boot).show()
 
 ### Utilization map
 
-Saturated sectors are concepts whose descendant features hit at least
-one `|SHAP|` value above `threshold`. Grey sectors are *defined* in
+Saturated sectors are concepts whose aggregated `|SHAP|` (mean across
+rows, by default) exceeds `threshold`. Grey sectors are *defined* in
 the tree but invisible at inference time. The root is hidden so the
 top-level branches form the centre ring (the
-[`sunburst_layout`](../api/plotting.md) helper handles the re-parenting
+[`sunburst_layout`](../api.md#plotting) helper handles the re-parenting
 when `hide_root=True`, the default).
 
 Common causes of an unexpectedly grey sector:
@@ -81,13 +81,13 @@ Each sector's area is `sum_{f in concept.descendants} mean_n(|SHAP[n,
 f]|)`. Hover shows the exact value and the `feature_count` carried in
 that subtree. Colour follows the top-level branch and is progressively
 lightened with depth (see
-[`branch_colors`](../api/plotting.md)) so a *Behaviour > Delinquency*
+[`branch_colors`](../api.md#plotting)) so a *Behaviour > Delinquency*
 leaf is a paler shade of the same hue as its parent.
 
 ### Bootstrap bar
 
 Horizontal bars are bootstrap percentile confidence intervals (default
-`n_boot=1000`, `ci=0.95`). A bar that overlaps the next-ranked
+`n_bootstrap=200`, `ci=0.95`). A bar that overlaps the next-ranked
 concept's interval means the ranking is **not** statistically
 separable at this sample size. Quote "comparable", not "ranked", in
 the report.
@@ -113,20 +113,20 @@ the report.
   vs negative contribution) — keep in mind that signed values can
   cancel inside a concept, making it look unimportant when it is in
   fact strongly bidirectional.
-- **Bootstrap cost.** `n_boot=1000` is the default. For
+- **Bootstrap cost.** The default is `n_bootstrap=200`. For
   > 10k rows × 200 features, 1000 resamples can run for minutes —
-  start at `n_boot=200` during exploration and bump up before the
+  stay at the default during exploration and bump up before the
   final report.
 
 ## Related
 
-- [`feature_counts`](../api/metrics-counts.md),
-  [`importance_sum`](../api/metrics-importance.md),
-  [`utilization`](../api/metrics-utilization.md),
-  [`bootstrap_importance`](../api/metrics-importance.md) — API
+- [`feature_counts`](../api.md#counts),
+  [`importance_sum`](../api.md#importance),
+  [`utilization`](../api.md#utilization),
+  [`bootstrap_importance`](../api.md#importance) — API
   reference.
 - [Composition](composition.md) — once you know which concepts matter,
   how do they combine?
 - [Cohort](cohort.md) — does this ranking change across segments?
-- [Tour, Part B](../tour.md#part-b-what-does-my-model-rely-on) — the
+- [How it works, Part B](../how-it-works.md#part-b-what-does-my-model-rely-on) — the
   same answers in narrative form.

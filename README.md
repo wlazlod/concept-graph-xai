@@ -27,10 +27,10 @@ The metric layer (`concept_graph_xai.metrics.*`) returns plain
 those DataFrames and a `ConceptGraph` and returns
 `plotly.graph_objects.Figure`s, exportable to PNG via `kaleido`.
 
-📖 The [**Tour**](https://wlazlod.github.io/concept-graph-xai/tour/)
+📖 [**How it works**](https://wlazlod.github.io/concept-graph-xai/how-it-works/)
 walks one realistic credit-risk scenario end-to-end. The
-[**User Guide**](https://wlazlod.github.io/concept-graph-xai/user-guide/concept-graphs/)
-indexes the workflow as one page per question.
+[**Concepts**](https://wlazlod.github.io/concept-graph-xai/concepts/concept-graphs/)
+section indexes the workflow as one page per question.
 
 ## Install
 

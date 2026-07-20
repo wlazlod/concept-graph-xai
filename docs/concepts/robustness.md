@@ -20,8 +20,8 @@ overall metrics look stable.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`auc_drop`](../api/metrics-ablation.md) + [`auc_drop_map`](../api/plotting.md) | Per-concept AUC drop (or any metric drop) under ablation | "What does the model lose if concept X disappears?" |
-| [`attribution_drift`](../api/metrics-importance.md) + [`concept_drift_lines`](../api/plotting.md) + [`concept_drift_sunburst`](../api/plotting.md) | Per-(period, concept) mean&#124;SHAP&#124;; line + delta-sunburst views | "Across periods, where is the concept-level drift?" |
+| [`auc_drop`](../api.md#ablation) + [`auc_drop_map`](../api.md#plotting) | Per-concept AUC drop (or any metric drop) under ablation | "What does the model lose if concept X disappears?" |
+| [`attribution_drift`](../api.md#importance) + [`concept_drift_lines`](../api.md#plotting) + [`concept_drift_sunburst`](../api.md#plotting) | Per-(period, concept) mean&#124;SHAP&#124;; line + delta-sunburst views | "Across periods, where is the concept-level drift?" |
 
 ## Ablation: three strategies
 
@@ -132,7 +132,7 @@ gets pure noise / nothing", which by definition tanks the score.
 
 `skip_root=True` (the default) leaves the root row in the DataFrame
 with `auc_drop_mean = NaN` so it does not pollute the colour scale of
-[`auc_drop_map`](../api/plotting.md). The structural columns
+[`auc_drop_map`](../api.md#plotting). The structural columns
 (`feature_count`, etc.) are still populated — required so the parent
 sunburst sector is not smaller than its children.
 
@@ -140,7 +140,7 @@ sunburst sector is not smaller than its children.
 
 `auc_drop` tells you *what would happen* if a concept went missing.
 To answer *how often that actually happens*, pair with
-[`joint_missing_rate`](../api/metrics-missingness.md):
+[`joint_missing_rate`](../api.md#missingness):
 
 ```python
 import pandas as pd
@@ -166,24 +166,33 @@ different fusion rules, and the join is one line.
 ## Drift across periods
 
 `attribution_drift` aggregates SHAP per (period, concept) and returns
-a long-form DataFrame the drift plots consume. Periods can be
-anything categorical: calendar quarters, model versions, geographies,
-a before/after-launch flag.
+a long-form DataFrame the drift plots consume. Each period is one
+`(label, shap_values, feature_names)` tuple — the labels can be
+anything: calendar quarters, model versions, geographies, a
+before/after-launch flag.
 
 ```python
 from concept_graph_xai import (
-    attribution_drift, concept_drift_lines, concept_drift_sunburst,
+    attribution_drift, concept_drift_delta, concept_drift_lines,
+    concept_drift_sunburst,
 )
 
-dr = attribution_drift(graph, feature_names, shap_values,
-                       periods="period_label", X=X)
+# One tuple per period, in the order you want them plotted.
+periods = [
+    ("2024Q1", shap_q1, feature_names),
+    ("2024Q2", shap_q2, feature_names),
+    ("2024Q4", shap_q4, feature_names),
+]
+
+dr = attribution_drift(graph, periods)
 
 # Line chart — "did each concept's contribution stay stable?"
-concept_drift_lines(dr, max_concepts=8).show()
+concept_drift_lines(graph, dr, max_concepts=8).show()
 
 # Delta sunburst — "where in the tree is the drift concentrated?"
-concept_drift_sunburst(graph, dr,
-                       baseline="2024Q1", target="2024Q4").show()
+delta = concept_drift_delta(graph, periods,
+                            baseline="2024Q1", target="2024Q4")
+concept_drift_sunburst(graph, delta).show()
 ```
 
 ![Concept drift across periods (lines)](../img/drift_lines.png){ width="720" }
@@ -192,7 +201,7 @@ concept_drift_sunburst(graph, dr,
 
 ### Reading the lines
 
-One line per concept, x = period in stable order, y = mean|SHAP| for
+One line per concept, x = period in the order you supplied, y = mean|SHAP| for
 that concept in that period. Lines are sorted by max-across-periods
 so the most prominent concepts list first; `max_concepts=` caps the
 chart at the top-K to avoid spaghetti.
@@ -227,22 +236,22 @@ sunburst answers *where*, the lines answer *how monotonically*.
   preprocessing (e.g. categorical encoders that learned categories
   from the training set), wrap that inside `train_fn` so the
   ablation actually reflects retraining-from-scratch.
-- **Drift period order.** Set `pd.CategoricalDtype` with explicit
-  category order on the `periods` column for chronological ordering.
-  First-seen ordering will mis-sort if the data is shuffled.
+- **Drift period order.** Periods are plotted in the order of the
+  supplied list of `(label, shap_values, feature_names)` tuples —
+  pass them chronologically, or the lines will mis-sort.
 
 ## Related
 
-- [`auc_drop`](../api/metrics-ablation.md),
-  [`attribution_drift`](../api/metrics-importance.md),
-  [`concept_drift_lines`](../api/plotting.md),
-  [`concept_drift_sunburst`](../api/plotting.md),
-  [`joint_missing_rate`](../api/metrics-missingness.md) — API
+- [`auc_drop`](../api.md#ablation),
+  [`attribution_drift`](../api.md#importance),
+  [`concept_drift_lines`](../api.md#plotting),
+  [`concept_drift_sunburst`](../api.md#plotting),
+  [`joint_missing_rate`](../api.md#missingness) — API
   reference.
 - [Concept-design](concept-design.md) — the joint-missing-rate
   sunburst that calibrates the realism of the AUC-drop scenario.
 - [Cohort](cohort.md) and [Fairness](fairness.md) — drift across
   segments or protected groups is often the right level at which to
   notice a problem.
-- [Tour, Part H](../tour.md#part-h-what-if-data-goes-missing-or-my-model-has-drifted)
+- [How it works, Part H](../how-it-works.md#part-h-what-if-data-goes-missing-or-my-model-has-drifted)
   — the same answers in narrative form.

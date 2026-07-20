@@ -19,8 +19,8 @@ This page covers the two per-prediction plots.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`concept_violin`](../api/plotting.md) | Per-concept distribution of row-level SHAP | "How concentrated vs. spread is each concept's contribution?" |
-| [`ConceptPredictionExplainer.waterfall`](../api/plotting.md) | Single-row contribution cascade | "Why this specific prediction?" |
+| [`concept_violin`](../api.md#plotting) | Per-concept distribution of row-level SHAP | "How concentrated vs. spread is each concept's contribution?" |
+| [`ConceptPredictionExplainer.waterfall`](../api.md#plotting) | Single-row contribution cascade | "Why this specific prediction?" |
 
 `concept_violin` is a population-level summary that prepares you to
 read individual rows. `waterfall` is the actual single-row chart.
@@ -36,20 +36,15 @@ from concept_graph_xai import (
 concept_violin(graph, feature_names, shap_values).show()
 
 # Single-row explanation
-explainer = ConceptPredictionExplainer(graph, feature_names,
-                                       shap_values,
+explainer = ConceptPredictionExplainer(graph, model, X, shap_values,
                                        base_value=expected_value)
 
-# Full-depth waterfall for the highest-risk row
+# Top-level waterfall for the highest-risk row (depth=1 is the default)
 highest_risk_idx = predictions.argmax()
-explainer.waterfall(row_idx=highest_risk_idx).show()
+explainer.waterfall(highest_risk_idx).show()
 
-# Same row, but capped at depth=2 (the C-suite version)
-explainer.waterfall(row_idx=highest_risk_idx, depth=2).show()
-
-# Drill into one branch
-explainer.waterfall(row_idx=highest_risk_idx,
-                    sub_tree="Behaviour").show()
+# Same row, one level deeper (Delinquency vs Utilization instead of Behaviour)
+explainer.waterfall(highest_risk_idx, depth=2).show()
 ```
 
 ![Concept violin — per-concept distribution of row-level SHAP](../img/violin.png){ width="640" }
@@ -65,7 +60,7 @@ of rows with that concept-level SHAP contribution. A long thin tail
 means the concept is normally quiet but occasionally swings the
 prediction by a lot. A tight cluster around zero means the concept
 rarely matters at the row level even if its
-[importance_sum](../api/metrics-importance.md) is non-zero.
+[importance_sum](../api.md#importance) is non-zero.
 
 Reading order matters: concepts are sorted by mean|SHAP|
 (highest first) so the top violin is the dominant population-level
@@ -77,32 +72,28 @@ The classic SHAP waterfall, lifted to the concept level:
 
 - **Top bar** = the model's base value (the expected log-odds before
   any feature is observed).
-- **Each bar** = one concept's (or feature's) row-level signed
-  contribution.
-- **Bottom bar** = the model's prediction for this row.
+- **Each bar** = one concept's row-level signed contribution (its
+  descendant features' SHAP values summed).
+- **Bottom bar** = the model's predicted logit for this row.
 
-`depth=None` (the default) expands the full tree. `depth=2` stops at
-the second level — useful when the adjudication audience cares about
-*Income vs Behaviour* but not *Behaviour > Delinquency vs Behaviour >
-Utilization*. `sub_tree="X"` shows only the cascade under concept `X`
-and is the right call for "explain why Behaviour was the dominant
-driver".
+`depth` picks the tree level to roll up to: `depth=1` (the default)
+shows the top-level concepts — useful when the adjudication audience
+cares about *Income vs Behaviour*; `depth=2` descends one level, to
+*Behaviour > Delinquency vs Behaviour > Utilization*, and is the right
+call for the follow-up "why was Behaviour so dominant?".
 
-The colour convention is the SHAP standard (red = pushes prediction
-up, blue = pushes down) so the chart drops into any document already
-using SHAP figures.
+Green bars push the prediction up, red bars push it down.
 
 ## What to do with the answer
 
-1. Use `depth=2` waterfalls in the adjudication packet — they read
+1. Use `depth=1` waterfalls in the adjudication packet — they read
    naturally as a one-paragraph English sentence: *"the model
    declined this loan because Behaviour was the dominant push, with
    Income partially offsetting"*.
-2. Use full-depth waterfalls for the regulatory case file where the
-   underlying features must be cited.
-3. Use `sub_tree=` when the reviewer asks a follow-up: *"why was
-   Behaviour so dominant?"*.
-4. Validate the chart on the extreme rows first
+2. Use deeper `depth` values for the regulatory case file where the
+   finer-grained concepts must be cited, or when the reviewer asks a
+   follow-up: *"why was Behaviour so dominant?"*.
+3. Validate the chart on the extreme rows first
    (`predictions.argmax()`, `predictions.argmin()`) — if the
    explanation reads oddly at the extremes, the tree is probably
    mis-shaped and the [concept-design](concept-design.md) diagnostics
@@ -114,14 +105,15 @@ using SHAP figures.
   SHAP explainer returned (e.g. `explainer.expected_value`). The
   waterfall is meaningless without it because the base + sum-of-bars
   identity is what makes SHAP additive.
-- **Row index vs row position.** `row_idx` is the *positional* index
-  into `shap_values`, not a pandas label. If `X` has a non-default
-  index, use `X.index.get_loc(label)` to convert.
+- **Row index vs row label.** An `int` `row` is the *positional* index
+  into `X` / `shap_values`; a string `row` is looked up as a label in
+  `X.index`. An out-of-range position raises `IndexError`; an unknown
+  or non-unique label raises `KeyError`.
 - **Categorical features.** If your model trained on one-hot
-  encodings, each level appears as a separate feature in the
-  waterfall. Group them in the concept tree by giving the category as
-  a concept and the levels as its features — the waterfall will then
-  collapse them at the concept level.
+  encodings, each level is a separate feature carrying its own SHAP
+  value. Group the levels in the concept tree by giving the category
+  as a concept and the levels as its features — the waterfall will
+  then report them as one concept bar.
 
 ## Related
 
@@ -130,5 +122,5 @@ using SHAP figures.
 - [Cohort](cohort.md) — when an explanation looks unusual, the cohort
   view often reveals it as a segment-specific behaviour rather than a
   bug.
-- [Tour, Part D](../tour.md#part-d-why-this-prediction) — the same
+- [How it works, Part D](../how-it-works.md#part-d-why-this-prediction) — the same
   answers in narrative form.
