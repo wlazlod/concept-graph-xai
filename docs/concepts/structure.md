@@ -1,4 +1,4 @@
-# What does my model rely on?
+# Structure and importance
 
 The first question after training a model is the same every time:
 *which concepts does the model lean on, and which ones is it

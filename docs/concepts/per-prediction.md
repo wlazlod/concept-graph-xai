@@ -1,4 +1,4 @@
-# Why this prediction?
+# Per-prediction explanations
 
 Adjudication, adverse-action notices, and individual-case audits all
 need explanations for *one specific row*, not the population average.

@@ -1,4 +1,4 @@
-# How often does data actually go missing?
+# Missing values
 
 The [robustness](robustness.md) ablation tells you what the model
 *would* lose if a concept's data disappeared. That number is only as

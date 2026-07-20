@@ -61,22 +61,22 @@ next review meeting.
 
 - **Structure** — which concepts the model uses and how much each carries:
   utilization and importance sunbursts, plus bootstrap confidence intervals on the
-  ranking ([what does my model rely on?](concepts/structure.md)).
+  ranking ([structure and importance](concepts/structure.md)).
 - **Composition** — concept × concept SHAP-interaction matrix and a
   feature → concept → ±outcome Sankey
-  ([how does the signal compose?](concepts/composition.md)).
+  ([composition](concepts/composition.md)).
 - **Per-prediction** — concept violins and single-row concept waterfalls for
   adjudication and adverse-action notices
-  ([why this prediction?](concepts/per-prediction.md)).
+  ([per-prediction explanations](concepts/per-prediction.md)).
 - **Concept-design diagnostics** — block-structured correlation matrices and the
   coherence-vs-importance quadrant scatter that says whether the tree itself is
-  defensible ([is my concept tree any good?](concepts/concept-design.md)).
+  defensible ([concept design](concepts/concept-design.md)).
 - **Cohort and fairness views** — segment × concept heatmaps, per-cohort Pareto
   curves, and a concept disparity heatmap against a reference protected group
   ([cohorts](concepts/cohort.md), [fairness](concepts/fairness.md)).
 - **Robustness** — AUC drop under whole-branch ablation (three strategies) and
   concept-level drift across periods
-  ([what if data goes missing or drifts?](concepts/robustness.md)).
+  ([robustness and drift](concepts/robustness.md)).
 - **Strict layering** — metrics return plain `pandas.DataFrame`s and never import
   plotly; plots take a `ConceptGraph` plus a DataFrame and return
   `plotly.graph_objects.Figure`s, exportable to PNG via `kaleido`

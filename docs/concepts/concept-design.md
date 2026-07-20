@@ -1,4 +1,4 @@
-# Is my concept tree any good?
+# Concept design
 
 The most important question this library answers, and the one that
 per-feature SHAP cannot ask at all. When someone hands you a concept

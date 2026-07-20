@@ -77,14 +77,14 @@ nav:
   - How it works: how-it-works.md
   - Concepts:
       - Concept graphs: concepts/concept-graphs.md
-      - What does my model rely on?: concepts/structure.md
-      - How does the signal compose?: concepts/composition.md
-      - Why this prediction?: concepts/per-prediction.md
-      - Is my concept tree any good?: concepts/concept-design.md
-      - Does importance differ across cohorts?: concepts/cohort.md
-      - Where does the model differ across protected groups?: concepts/fairness.md
-      - How often does data actually go missing?: concepts/missing-values.md
-      - What if data goes missing or drifts?: concepts/robustness.md
+      - Structure and importance: concepts/structure.md
+      - Composition: concepts/composition.md
+      - Per-prediction explanations: concepts/per-prediction.md
+      - Concept design: concepts/concept-design.md
+      - Cohorts and segments: concepts/cohort.md
+      - Fairness: concepts/fairness.md
+      - Missing values: concepts/missing-values.md
+      - Robustness and drift: concepts/robustness.md
   - Tutorials:
       - Credit-risk walkthrough: notebooks/01_credit_risk_walkthrough.ipynb
   - API reference: api.md

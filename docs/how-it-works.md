@@ -602,14 +602,14 @@ produced every image on this page.
 
 - **Pick a question** to dig into from the Concepts section — each page is one of the
   workflow questions above, with the API in full and the common pitfalls flagged:
-    - [What does my model rely on?](concepts/structure.md)
-    - [How does the signal compose?](concepts/composition.md)
-    - [Why this prediction?](concepts/per-prediction.md)
-    - [Is my concept tree any good?](concepts/concept-design.md)
-    - [Does importance differ across cohorts?](concepts/cohort.md)
-    - [Where does the model behave differently across protected groups?](concepts/fairness.md)
-    - [How often does data actually go missing?](concepts/missing-values.md)
-    - [What if data goes missing or drifts?](concepts/robustness.md)
+    - [Structure and importance](concepts/structure.md)
+    - [Composition](concepts/composition.md)
+    - [Per-prediction explanations](concepts/per-prediction.md)
+    - [Concept design](concepts/concept-design.md)
+    - [Cohorts and segments](concepts/cohort.md)
+    - [Fairness](concepts/fairness.md)
+    - [Missing values](concepts/missing-values.md)
+    - [Robustness and drift](concepts/robustness.md)
 - **Bring your own graph** following the
   [concept graphs](concepts/concept-graphs.md) reference.
 - [API reference](api.md).

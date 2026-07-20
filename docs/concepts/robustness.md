@@ -1,4 +1,4 @@
-# What if data goes missing or my model has drifted?
+# Robustness and drift
 
 Two failure modes that are not visible at training time but matter
 the moment the model is in production: a whole concept's data going

@@ -1,4 +1,4 @@
-# Where does the model behave differently across protected groups?
+# Fairness
 
 Fairness review needs a chart that says, for each concept, how
 differently the model treated group A vs. group B. Per-feature

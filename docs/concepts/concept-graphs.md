@@ -1,4 +1,4 @@
-# Concept Graphs
+# Concept graphs
 
 A `ConceptGraph` is a **tree** of business concepts whose leaves are model features.
 

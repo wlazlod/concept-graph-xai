@@ -1,4 +1,4 @@
-# How does the signal compose?
+# Composition
 
 [Structure](structure.md) answered *which concepts* the model relies
 on. Composition answers *how those concepts work together* — which

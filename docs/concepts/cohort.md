@@ -1,4 +1,4 @@
-# Does importance differ across cohorts?
+# Cohorts and segments
 
 The model has one global behaviour described in [structure](structure.md).
 Operationally, it has *several* behaviours — one per segment (age
