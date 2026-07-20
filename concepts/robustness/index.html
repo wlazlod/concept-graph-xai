@@ -1,0 +1,1580 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation and design diagnostics.">
+      
+      
+      
+        <link rel="canonical" href="https://wlazlod.github.io/concept-graph-xai/concepts/robustness/">
+      
+      
+        <link rel="prev" href="../missing-values/">
+      
+      
+        <link rel="next" href="../../notebooks/01_credit_risk_walkthrough/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Robustness and drift - concept-graph-xai</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#robustness-and-drift" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="concept-graph-xai" class="md-header__button md-logo" aria-label="concept-graph-xai" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            concept-graph-xai
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Robustness and drift
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wlazlod/concept-graph-xai" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wlazlod/concept-graph-xai
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="concept-graph-xai" class="md-nav__button md-logo" aria-label="concept-graph-xai" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    concept-graph-xai
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wlazlod/concept-graph-xai" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wlazlod/concept-graph-xai
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-it-works/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concept-graphs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept graphs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Structure and importance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../composition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../per-prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-prediction explanations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concept-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cohort/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cohorts and segments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fairness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fairness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../missing-values/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Missing values
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robustness and drift
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robustness and drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use this
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two views
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ablation-three-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ablation: three strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ablation: three strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#permutation-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        permutation (default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retrain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shap_marginal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shap_marginal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#picking-a-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Picking a strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-scoring-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom scoring metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-skip_root-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What skip_root does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#realism-does-this-scenario-actually-happen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Realism — does this scenario actually happen?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drift-across-periods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Drift across periods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Drift across periods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-delta-sunburst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the delta sunburst
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-to-do-with-the-answer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to do with the answer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common pitfalls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/01_credit_risk_walkthrough/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    concept-graph-xai — credit-risk walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use this
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two views
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ablation-three-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ablation: three strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ablation: three strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#permutation-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        permutation (default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retrain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shap_marginal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shap_marginal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#picking-a-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Picking a strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-scoring-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom scoring metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-skip_root-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What skip_root does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#realism-does-this-scenario-actually-happen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Realism — does this scenario actually happen?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drift-across-periods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Drift across periods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Drift across periods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the lines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-delta-sunburst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the delta sunburst
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-to-do-with-the-answer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to do with the answer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common pitfalls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="robustness-and-drift">Robustness and drift<a class="headerlink" href="#robustness-and-drift" title="Permanent link">&para;</a></h1>
+<p>Two failure modes that are not visible at training time but matter
+the moment the model is in production: a whole concept's data going
+missing (vendor outage, upstream feed cutoff, geography change), and
+the concept-level contributions shifting across periods even when
+overall metrics look stable.</p>
+<h2 id="when-to-use-this">When to use this<a class="headerlink" href="#when-to-use-this" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Before promoting a model to production, to write the
+  operational-risk row "what if concept X goes missing?".</li>
+<li>After a vendor outage or feed change, to quantify what the model
+  actually lost.</li>
+<li>Quarterly (or whenever the model is rescored on fresh data), to
+  monitor concept-level drift before the global AUC tells you
+  something is wrong.</li>
+</ul>
+<h2 id="the-two-views">The two views<a class="headerlink" href="#the-two-views" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Returns</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../api/#ablation"><code>auc_drop</code></a> + <a href="../../api/#plotting"><code>auc_drop_map</code></a></td>
+<td>Per-concept AUC drop (or any metric drop) under ablation</td>
+<td>"What does the model lose if concept X disappears?"</td>
+</tr>
+<tr>
+<td><a href="../../api/#drift"><code>attribution_drift</code></a> + <a href="../../api/#plotting"><code>concept_drift_lines</code></a> + <a href="../../api/#plotting"><code>concept_drift_sunburst</code></a></td>
+<td>Per-(period, concept) mean&#124;SHAP&#124;; line + delta-sunburst views</td>
+<td>"Across periods, where is the concept-level drift?"</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ablation-three-strategies">Ablation: three strategies<a class="headerlink" href="#ablation-three-strategies" title="Permanent link">&para;</a></h2>
+<p><code>auc_drop</code> answers <em>"how much performance do I lose if a whole
+concept's data goes missing?"</em> with three different definitions of
+"missing", trading off accuracy for cost.</p>
+<h3 id="permutation-default"><code>permutation</code> (default)<a class="headerlink" href="#permutation-default" title="Permanent link">&para;</a></h3>
+<p>For each concept, <strong>shuffle</strong> the values of its features across rows
+and re-score on the held-out set, repeated <code>n_repeats</code> times.</p>
+<ul>
+<li>Cheap — no retraining.</li>
+<li>Model-agnostic — works for any model with <code>predict_proba</code> /
+  <code>decision_function</code>.</li>
+<li>The model still <em>expects</em> the features to be there; it just sees
+  decorrelated values. This is an upper bound on "what would happen
+  if the data became uninformative", <strong>not</strong> "what would happen if
+  the column was deleted".</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">auc_drop</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+         <span class="n">feature_names</span><span class="o">=</span><span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+         <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;permutation&quot;</span><span class="p">,</span>
+         <span class="n">n_repeats</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</code></pre></div>
+<p>Output columns: <code>auc_drop_mean</code>, <code>auc_drop_std</code> (across repeats),
+<code>ablated_score_mean</code>, <code>baseline_score</code>, <code>feature_count</code>, <code>strategy</code>.</p>
+<h3 id="retrain"><code>retrain</code><a class="headerlink" href="#retrain" title="Permanent link">&para;</a></h3>
+<p>For each concept, <strong>drop</strong> its features from the training set,
+retrain, score on the held-out set with the same columns dropped.</p>
+<ul>
+<li>Most faithful to "this column will not exist in production".</li>
+<li>Most expensive: one retrain per concept.</li>
+<li>Requires a user-supplied <code>train_fn(X_train, y_train) -&gt;
+  fitted_estimator</code> callable so the package can rebuild the model
+  exactly the way you want.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_lgb</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">lgb</span><span class="o">.</span><span class="n">LGBMClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">m</span>
+
+<span class="n">auc_drop</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+         <span class="n">feature_names</span><span class="o">=</span><span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+         <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;retrain&quot;</span><span class="p">,</span>
+         <span class="n">train_fn</span><span class="o">=</span><span class="n">train_lgb</span><span class="p">,</span>
+         <span class="n">X_train</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">)</span>
+</code></pre></div>
+<p><code>auc_drop_std</code> is <code>NaN</code> (single retrain, no spread across repeats).</p>
+<h3 id="shap_marginal"><code>shap_marginal</code><a class="headerlink" href="#shap_marginal" title="Permanent link">&para;</a></h3>
+<p>Cheapest. <strong>Subtract</strong> the concept's SHAP contributions from the
+prediction logits, apply the link function, re-score.</p>
+<ul>
+<li>Almost free once you have SHAP values.</li>
+<li>An approximation under SHAP additivity. Treats each concept's
+  contribution as independently subtractable, which is exact only for
+  additive models.</li>
+<li>Useful as a sanity check or for fast iteration; not for regulatory
+  submissions.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">auc_drop</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+         <span class="n">feature_names</span><span class="o">=</span><span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+         <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;shap_marginal&quot;</span><span class="p">,</span>
+         <span class="n">shap_values</span><span class="o">=</span><span class="n">shap_values</span><span class="p">,</span>
+         <span class="n">base_predictions</span><span class="o">=</span><span class="n">p_test</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="picking-a-strategy">Picking a strategy<a class="headerlink" href="#picking-a-strategy" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick iteration, "is this branch important?"</td>
+<td><code>permutation</code></td>
+</tr>
+<tr>
+<td>Sanity check, you already have SHAP values</td>
+<td><code>shap_marginal</code></td>
+</tr>
+<tr>
+<td>Regulatory submission, "what happens if Equifax goes down?"</td>
+<td><code>retrain</code></td>
+</tr>
+<tr>
+<td>Comparison study (run all three, look for disagreements)</td>
+<td>All three with the same graph</td>
+</tr>
+</tbody>
+</table>
+<p>A common pattern: run <code>permutation</code> first to identify the top-k
+concepts, then <code>retrain</code> only on those k.</p>
+<h3 id="custom-scoring-metrics">Custom scoring metrics<a class="headerlink" href="#custom-scoring-metrics" title="Permanent link">&para;</a></h3>
+<p><code>auc_drop</code> accepts any sklearn-compatible scoring callable via the
+<code>metric</code> argument.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_loss</span>
+
+<span class="n">auc_drop</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">)</span>                  <span class="c1"># built-in</span>
+<span class="n">auc_drop</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="o">-</span><span class="n">log_loss</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>  <span class="c1"># any callable</span>
+</code></pre></div>
+<p>The function name (<code>auc_drop</code>) is historical; the implementation is
+metric-agnostic.</p>
+<h3 id="what-skip_root-does">What <code>skip_root</code> does<a class="headerlink" href="#what-skip_root-does" title="Permanent link">&para;</a></h3>
+<p>The root concept covers <em>every</em> feature; ablating it means "the model
+gets pure noise / nothing", which by definition tanks the score.</p>
+<p><code>skip_root=True</code> (the default) leaves the root row in the DataFrame
+with <code>auc_drop_mean = NaN</code> so it does not pollute the colour scale of
+<a href="../../api/#plotting"><code>auc_drop_map</code></a>. The structural columns
+(<code>feature_count</code>, etc.) are still populated — required so the parent
+sunburst sector is not smaller than its children.</p>
+<h3 id="realism-does-this-scenario-actually-happen">Realism — does this scenario actually happen?<a class="headerlink" href="#realism-does-this-scenario-actually-happen" title="Permanent link">&para;</a></h3>
+<p><code>auc_drop</code> tells you <em>what would happen</em> if a concept went missing.
+To answer <em>how often that actually happens</em>, pair with
+<a href="../../api/#missingness"><code>joint_missing_rate</code></a> (covered in depth on the
+<a href="../missing-values/">missing-values page</a>):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">drop</span> <span class="o">=</span> <span class="n">auc_drop</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+                <span class="n">feature_names</span><span class="o">=</span><span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;permutation&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">jmr</span>  <span class="o">=</span> <span class="n">joint_missing_rate</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+<span class="n">risk</span> <span class="o">=</span> <span class="p">(</span><span class="n">drop</span><span class="p">[[</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;auc_drop_mean&quot;</span><span class="p">]]</span>
+        <span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">jmr</span><span class="p">[[</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;joint_missing_rate&quot;</span><span class="p">]],</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">realism_weighted</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;auc_drop_mean&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;joint_missing_rate&quot;</span><span class="p">]))</span>
+</code></pre></div>
+<p>The package deliberately does <strong>not</strong> bake <code>realism_weighted</code> into
+<code>auc_drop</code> (see decision <strong>D2</strong> in the
+<a href="../../roadmap/">roadmap decision log</a>) — different teams want
+different fusion rules, and the join is one line.</p>
+<p><img alt="AUC drop per concept (permutation)" src="../../img/auc_drop_permutation.png" width="560" /></p>
+<h2 id="drift-across-periods">Drift across periods<a class="headerlink" href="#drift-across-periods" title="Permanent link">&para;</a></h2>
+<p><code>attribution_drift</code> aggregates SHAP per (period, concept) and returns
+a long-form DataFrame the drift plots consume. Each period is one
+<code>(label, shap_values, feature_names)</code> tuple — the labels can be
+anything: calendar quarters, model versions, geographies, a
+before/after-launch flag.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">attribution_drift</span><span class="p">,</span> <span class="n">concept_drift_delta</span><span class="p">,</span> <span class="n">concept_drift_lines</span><span class="p">,</span>
+    <span class="n">concept_drift_sunburst</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># One tuple per period, in the order you want them plotted.</span>
+<span class="n">periods</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;2024Q1&quot;</span><span class="p">,</span> <span class="n">shap_q1</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;2024Q2&quot;</span><span class="p">,</span> <span class="n">shap_q2</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;2024Q4&quot;</span><span class="p">,</span> <span class="n">shap_q4</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">dr</span> <span class="o">=</span> <span class="n">attribution_drift</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">periods</span><span class="p">)</span>
+
+<span class="c1"># Line chart — &quot;did each concept&#39;s contribution stay stable?&quot;</span>
+<span class="n">concept_drift_lines</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="n">max_concepts</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Delta sunburst — &quot;where in the tree is the drift concentrated?&quot;</span>
+<span class="n">delta</span> <span class="o">=</span> <span class="n">concept_drift_delta</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span>
+                            <span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;2024Q1&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;2024Q4&quot;</span><span class="p">)</span>
+<span class="n">concept_drift_sunburst</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="Concept drift across periods (lines)" src="../../img/drift_lines.png" width="720" /></p>
+<p><img alt="Concept SHAP drift delta sunburst" src="../../img/drift_sunburst.png" width="520" /></p>
+<h3 id="reading-the-lines">Reading the lines<a class="headerlink" href="#reading-the-lines" title="Permanent link">&para;</a></h3>
+<p>One line per concept, x = period in the order you supplied, y = mean|SHAP| for
+that concept in that period. Lines are sorted by max-across-periods
+so the most prominent concepts list first; <code>max_concepts=</code> caps the
+chart at the top-K to avoid spaghetti.</p>
+<h3 id="reading-the-delta-sunburst">Reading the delta sunburst<a class="headerlink" href="#reading-the-delta-sunburst" title="Permanent link">&para;</a></h3>
+<p>Sector area = the concept's total contribution. Colour = signed
+change <code>target - baseline</code> (diverging palette). Red sectors got more
+important; blue sectors got less. Pair with the line chart: the
+sunburst answers <em>where</em>, the lines answer <em>how monotonically</em>.</p>
+<h3 id="what-to-do-with-the-answer">What to do with the answer<a class="headerlink" href="#what-to-do-with-the-answer" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Define a <strong>retraining trigger</strong> in concept terms (e.g. <em>"retrain
+   if any top-3 concept's mean|SHAP| moves by more than X across two
+   consecutive quarters"</em>). This is what the drift sunburst is for.</li>
+<li>Cross-reference drift with the disparity heatmap from
+   <a href="../fairness/">fairness</a>: drift that lands in protected-group
+   concepts is the most urgent kind.</li>
+<li>Quote ablation numbers <strong>weighted by joint-missing-rate</strong> when
+   pushing them into operational-risk; the raw AUC drop is a
+   "what-if", the realism-weighted version is an "expected loss".</li>
+</ol>
+<h2 id="common-pitfalls">Common pitfalls<a class="headerlink" href="#common-pitfalls" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Permutation can show positive AUC drops on noise.</strong> If
+  <code>auc_drop_mean</code> is negative for some concept, the permutation
+  improved the score — which usually means the feature was injecting
+  noise the model latched onto. Worth investigating, not a bug.</li>
+<li><strong>Retrain identity.</strong> The retrain strategy will rebuild the model
+  exactly as <code>train_fn</code> defines. If your training pipeline includes
+  preprocessing (e.g. categorical encoders that learned categories
+  from the training set), wrap that inside <code>train_fn</code> so the
+  ablation actually reflects retraining-from-scratch.</li>
+<li><strong>Drift period order.</strong> Periods are plotted in the order of the
+  supplied list of <code>(label, shap_values, feature_names)</code> tuples —
+  pass them chronologically, or the lines will mis-sort.</li>
+</ul>
+<h2 id="related">Related<a class="headerlink" href="#related" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../api/#ablation"><code>auc_drop</code></a>,
+  <a href="../../api/#drift"><code>attribution_drift</code></a>,
+  <a href="../../api/#plotting"><code>concept_drift_lines</code></a>,
+  <a href="../../api/#plotting"><code>concept_drift_sunburst</code></a>,
+  <a href="../../api/#missingness"><code>joint_missing_rate</code></a> — API
+  reference.</li>
+<li><a href="../missing-values/">Missing values</a> — the joint-missing-rate
+  sunburst that calibrates the realism of the AUC-drop scenario.</li>
+<li><a href="../cohort/">Cohort</a> and <a href="../fairness/">Fairness</a> — drift across
+  segments or protected groups is often the right level at which to
+  notice a problem.</li>
+<li><a href="../../how-it-works/#part-h-what-if-data-goes-missing-or-my-model-has-drifted">How it works, Part H</a>
+  — the same answers in narrative form.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2095 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Concept-graph aware visualisation of model feature usage and importance, with concept-level ablation and design diagnostics.">
+      
+      
+      
+        <link rel="canonical" href="https://wlazlod.github.io/concept-graph-xai/how-it-works/">
+      
+      
+        <link rel="prev" href="../getting-started/">
+      
+      
+        <link rel="next" href="../concepts/concept-graphs/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>How it works - concept-graph-xai</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-concept-graph-xai-works" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="concept-graph-xai" class="md-header__button md-logo" aria-label="concept-graph-xai" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            concept-graph-xai
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              How it works
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/wlazlod/concept-graph-xai" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wlazlod/concept-graph-xai
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="concept-graph-xai" class="md-nav__button md-logo" aria-label="concept-graph-xai" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    concept-graph-xai
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/wlazlod/concept-graph-xai" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    wlazlod/concept-graph-xai
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it works
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup-notebook-part-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup (notebook part A)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-what-does-my-model-rely-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — What does my model rely on?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part B — What does my model rely on?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#b1-concept-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.1 Concept utilization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b2-concept-importance-with-bootstrap-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.2 Concept importance with bootstrap intervals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-how-does-the-signal-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — How does the signal compose?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part C — How does the signal compose?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#c1-concept-concept-interaction-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C.1 Concept × concept interaction matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c2-feature-concept-outcome-sankey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C.2 Feature → concept → ±outcome Sankey
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-d-why-this-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part D — Why this prediction?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part D — Why this prediction?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#d1-concept-violin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D.1 Concept violin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d2-concept-waterfall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D.2 Concept waterfall
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-e-is-my-concept-tree-any-good" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part E — Is my concept tree any good?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part E — Is my concept tree any good?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e1-block-structured-feature-correlation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.1 Block-structured feature correlation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e2-e3-whole-branch-missingness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.2 + E.3 Whole-branch missingness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e4-concept-coherence-vs-concept-importance-scatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.4 Concept-coherence vs concept-importance scatter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e5-e6-shap-correlation-and-the-regulatory-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.5 + E.6 SHAP correlation and the regulatory overlay
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-f-does-importance-differ-across-cohorts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part F — Does importance differ across cohorts?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part F — Does importance differ across cohorts?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#f1-segment-concept-heatmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F.1 Segment × concept heatmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f2-concept-importance-pareto-per-cohort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F.2 Concept-importance Pareto per cohort
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-g-where-does-the-model-behave-differently-across-protected-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part G — Where does the model behave differently across protected groups?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part G — Where does the model behave differently across protected groups?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#g1-concept-disparity-heatmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        G.1 Concept disparity heatmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-h-what-if-data-goes-missing-or-my-model-has-drifted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part H — What if data goes missing, or my model has drifted?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part H — What if data goes missing, or my model has drifted?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#h1-auc-drop-under-whole-branch-ablation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H.1 AUC drop under whole-branch ablation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#h2-h3-drift-across-periods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H.2 + H.3 Drift across periods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-i-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part I — Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/concept-graphs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept graphs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Structure and importance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/composition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/per-prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-prediction explanations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/concept-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/cohort/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cohorts and segments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/fairness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fairness
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/missing-values/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Missing values
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/robustness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robustness and drift
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/01_credit_risk_walkthrough/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    concept-graph-xai — credit-risk walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup-notebook-part-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup (notebook part A)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-what-does-my-model-rely-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — What does my model rely on?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part B — What does my model rely on?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#b1-concept-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.1 Concept utilization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b2-concept-importance-with-bootstrap-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B.2 Concept importance with bootstrap intervals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-how-does-the-signal-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — How does the signal compose?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part C — How does the signal compose?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#c1-concept-concept-interaction-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C.1 Concept × concept interaction matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c2-feature-concept-outcome-sankey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C.2 Feature → concept → ±outcome Sankey
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-d-why-this-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part D — Why this prediction?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part D — Why this prediction?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#d1-concept-violin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D.1 Concept violin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d2-concept-waterfall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D.2 Concept waterfall
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-e-is-my-concept-tree-any-good" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part E — Is my concept tree any good?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part E — Is my concept tree any good?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e1-block-structured-feature-correlation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.1 Block-structured feature correlation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e2-e3-whole-branch-missingness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.2 + E.3 Whole-branch missingness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e4-concept-coherence-vs-concept-importance-scatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.4 Concept-coherence vs concept-importance scatter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e5-e6-shap-correlation-and-the-regulatory-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E.5 + E.6 SHAP correlation and the regulatory overlay
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-f-does-importance-differ-across-cohorts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part F — Does importance differ across cohorts?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part F — Does importance differ across cohorts?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#f1-segment-concept-heatmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F.1 Segment × concept heatmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f2-concept-importance-pareto-per-cohort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F.2 Concept-importance Pareto per cohort
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-g-where-does-the-model-behave-differently-across-protected-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part G — Where does the model behave differently across protected groups?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part G — Where does the model behave differently across protected groups?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#g1-concept-disparity-heatmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        G.1 Concept disparity heatmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-h-what-if-data-goes-missing-or-my-model-has-drifted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part H — What if data goes missing, or my model has drifted?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part H — What if data goes missing, or my model has drifted?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#h1-auc-drop-under-whole-branch-ablation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H.1 AUC drop under whole-branch ablation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#h2-h3-drift-across-periods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H.2 + H.3 Drift across periods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-i-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part I — Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="how-concept-graph-xai-works">How concept-graph-xai works<a class="headerlink" href="#how-concept-graph-xai-works" title="Permanent link">&para;</a></h1>
+<p><code>concept-graph-xai</code>'s promise is that every per-feature interpretability signal your
+stack already produces can be re-told at the level your committee actually argues:
+business concepts. This article walks one realistic credit-risk scenario end to end —
+the same scenario as the
+<a href="../notebooks/01_credit_risk_walkthrough/">credit-risk walkthrough notebook</a>,
+narrated as prose. Each section follows the same shape:</p>
+<ol>
+<li><strong>The question</strong> — what you are actually trying to learn.</li>
+<li><strong>The chart</strong> — what <code>concept-graph-xai</code> renders.</li>
+<li><strong>Reading it</strong> — what each colour, axis, sector means.</li>
+<li><strong>What to do with the answer</strong> — the action the chart is supposed to unlock.</li>
+<li><strong>Code</strong> — the minimum call to reproduce.</li>
+</ol>
+<p>The notebook cell references (e.g. <em>B.1</em>) point to the matching section in the live
+walkthrough so you can switch between prose and a running kernel.</p>
+<div class="admonition example">
+<p class="admonition-title">Running example</p>
+<p>The dataset is Kaggle's "Give Me Some Credit" — 150k borrowers, the target is
+90-day-plus delinquency. The model is a default-tuned <code>LGBMClassifier</code>. The
+interpreter is <code>shap.TreeExplainer</code>. None of that is special to this library; you
+bring your own. What <em>is</em> special is the third object: a <strong>concept graph</strong>
+describing how the eleven input features roll up into business concepts.</p>
+</div>
+<p>The pipeline, end to end — the graph is built once, every metric consumes it together
+with the per-feature values your interpreter produced, and every plot consumes a metric
+DataFrame:</p>
+<pre class="mermaid"><code>flowchart TD
+    T["concept hierarchy&lt;br/&gt;dict / YAML / NetworkX"] --&gt; G["ConceptGraph&lt;br/&gt;validated tree, deterministic DFS preorder"]
+    M["fitted model / SHAP explainer"] --&gt;|"adapters/*"| V["canonical (values, feature_names)"]
+    G --&gt; MET["metrics/*&lt;br/&gt;tidy DataFrame per concept path"]
+    V --&gt; MET
+    X["X, y (held-out)"] --&gt; MET
+    G --&gt; P["plotting/*&lt;br/&gt;plotly Figure"]
+    MET --&gt; P
+    P --&gt; PNG["static PNG via kaleido&lt;br/&gt;([png] extra)"]</code></pre>
+<h2 id="setup-notebook-part-a">Setup <em>(notebook part A)</em><a class="headerlink" href="#setup-notebook-part-a" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConceptGraph</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">ConceptGraph</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+    <span class="s2">&quot;RiskProfile&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Demographics&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Age&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">],</span> <span class="s2">&quot;Family&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;n_dependents&quot;</span><span class="p">]},</span>
+        <span class="s2">&quot;Income&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;monthly_income&quot;</span><span class="p">,</span> <span class="s2">&quot;debt_ratio&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Behaviour&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;Delinquency&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;n_30_59_dpd&quot;</span><span class="p">,</span> <span class="s2">&quot;n_60_89_dpd&quot;</span><span class="p">,</span> <span class="s2">&quot;n_90_plus_dpd&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;Utilization&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;revolving_utilization&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>The tree is small but already opinionated. <code>Behaviour &gt; Delinquency</code> groups three
+columns the lender thinks of as <em>one</em> signal at three time horizons. <code>Income</code> covers
+two distinct features that the credit committee will discuss together.
+<code>Demographics &gt; Age</code> carries a PII flag that fairness review cares about.</p>
+<p>Most of the library's functions take this <code>graph</code> plus the per-feature output your
+interpreter already produced (<code>shap_values</code>, <code>feature_names</code>) and roll it up.</p>
+<blockquote>
+<p>Notebook cells: <em>A.1</em> (imports), <em>A.2</em> (data), <em>A.3</em> (graph), <em>A.4</em> (LightGBM
+training), <em>A.5</em> (SHAP).</p>
+</blockquote>
+<hr />
+<h2 id="part-b-what-does-my-model-rely-on">Part B — What does my model rely on?<a class="headerlink" href="#part-b-what-does-my-model-rely-on" title="Permanent link">&para;</a></h2>
+<p>The first question after training is always the same: which concepts move the
+decision, and which ones are dead weight.</p>
+<h3 id="b1-concept-utilization">B.1 Concept utilization<a class="headerlink" href="#b1-concept-utilization" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept utilization sunburst" src="../img/utilization.png" width="560" /></p>
+<p><strong>The question.</strong> Which branches of the concept tree did the model actually use? Which
+ones are present in the schema but invisible at inference time?</p>
+<p><strong>Reading it.</strong> Saturated sectors are concepts whose aggregated importance clears the
+<code>threshold</code>. Grey sectors are <em>defined</em> in the tree but the model effectively ignored
+them — either because the underlying feature is constant in this data, or because the
+tree expanded it once and pruned it. The root sector is hidden so that the top-level
+branches occupy the centre ring.</p>
+<p><strong>What to do with the answer.</strong> Greyed-out concepts are a coverage question for the
+data team (<em>is this feature actually populated?</em>) and a scope question for the model
+team (<em>do we still need this column at all?</em>). Saturated sectors are the ones the next
+sections will explain.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">utilization</span><span class="p">,</span> <span class="n">utilization_map</span>
+
+<span class="n">util</span> <span class="o">=</span> <span class="n">utilization</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">utilization_map</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">util</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>B.1</em>.</p>
+</blockquote>
+<h3 id="b2-concept-importance-with-bootstrap-intervals">B.2 Concept importance with bootstrap intervals<a class="headerlink" href="#b2-concept-importance-with-bootstrap-intervals" title="Permanent link">&para;</a></h3>
+<p><img alt="Importance sum sunburst" src="../img/importance.png" width="560" /></p>
+<p><img alt="Bootstrap-CI bar chart" src="../img/bootstrap_bar.png" width="640" /></p>
+<p><strong>The question.</strong> Of the concepts the model uses, how much of the total mean|SHAP| does
+each one carry — and is that point estimate trustworthy or is it sample noise?</p>
+<p><strong>Reading the sunburst.</strong> Each concept's sector area is its summed mean|SHAP|:</p>
+<div class="arithmatex">\[
+\mathrm{importance}(c) \;=\; \sum_{f \,\in\, \mathrm{desc}(c)} \frac{1}{N} \sum_{n=1}^{N} \bigl|\, \phi_{n,f} \,\bigr|
+\]</div>
+<p>where <span class="arithmatex">\(\phi_{n,f}\)</span> is the SHAP value of feature <span class="arithmatex">\(f\)</span> on row <span class="arithmatex">\(n\)</span>. Hover for the exact
+value and the <code>feature_count</code> carried in that subtree. The colour follows the top-level
+branch, lightened with depth, so a <em>Behaviour &gt; Delinquency</em> leaf is a paler shade of
+the same hue as its parent.</p>
+<p><strong>Reading the bar chart.</strong> The horizontal bars are bootstrap percentile confidence
+intervals (1000 resamples here; the default is <code>n_bootstrap=200</code> at a 95% CI). A bar
+that crosses the next-ranked concept's interval means the ordering is not statistically
+separable on this sample — the committee should not insist on a "Behaviour is bigger
+than Income" claim from the point estimate alone.</p>
+<p><strong>What to do with the answer.</strong> Lock the ordering you can defend. Promote concepts
+with tight intervals to the executive summary; flag the ones with overlapping
+intervals as "comparable" rather than "ranked".</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">bootstrap_importance</span><span class="p">,</span> <span class="n">importance_sum</span><span class="p">,</span> <span class="n">signed_concept_bar</span><span class="p">,</span> <span class="n">sunburst</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sunburst</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">importance_sum</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">),</span>
+         <span class="n">value</span><span class="o">=</span><span class="s2">&quot;importance_sum&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">boot</span> <span class="o">=</span> <span class="n">bootstrap_importance</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">,</span>
+                            <span class="n">n_bootstrap</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">signed_concept_bar</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">boot</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>B.2</em>.</p>
+</blockquote>
+<hr />
+<h2 id="part-c-how-does-the-signal-compose">Part C — How does the signal compose?<a class="headerlink" href="#part-c-how-does-the-signal-compose" title="Permanent link">&para;</a></h2>
+<p>Part B told you <em>which</em> concepts matter. Part C asks <em>how they work together</em> — which
+pairs interact, and how does each row's prediction flow through the tree.</p>
+<h3 id="c1-concept-concept-interaction-matrix">C.1 Concept × concept interaction matrix<a class="headerlink" href="#c1-concept-concept-interaction-matrix" title="Permanent link">&para;</a></h3>
+<p><img alt="SHAP interaction heatmap (concept × concept)" src="../img/interaction_matrix.png" width="560" /></p>
+<p><strong>The question.</strong> Does the model use concepts independently, or does <em>Income</em> and
+<em>Behaviour</em> together carry a non-additive signal that neither carries alone?</p>
+<p><strong>Reading it.</strong> The matrix aggregates SHAP interaction values up the tree. Diagonal
+cells are the within-concept self-interaction (a non-zero value means the concept's
+features interact with each other); off-diagonal cells are between-concept
+interactions. Both halves are rendered (the matrix is symmetric) so the visual is
+unambiguous.</p>
+<p><strong>What to do with the answer.</strong> A large off-diagonal cell — <em>Income × Behaviour</em>, say
+— means a univariate "what does Income contribute" answer is incomplete; the
+contribution depends on the behavioural context. That belongs in the model report.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">concept_interaction_heatmap</span><span class="p">,</span> <span class="n">concept_interaction_matrix</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">inter</span> <span class="o">=</span> <span class="n">concept_interaction_matrix</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span>
+                                   <span class="n">shap_interaction_values</span><span class="p">)</span>
+<span class="n">concept_interaction_heatmap</span><span class="p">(</span><span class="n">inter</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>C.1</em>. SHAP interaction values are expensive (<code>O(F²)</code>); compute them
+once and cache.</p>
+</blockquote>
+<h3 id="c2-feature-concept-outcome-sankey">C.2 Feature → concept → ±outcome Sankey<a class="headerlink" href="#c2-feature-concept-outcome-sankey" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept SHAP Sankey" src="../img/sankey.png" width="720" /></p>
+<p><strong>The question.</strong> For the average prediction, where does the signal <em>enter</em> the tree
+(which feature contributes most), where does it <em>aggregate</em> (which mid-level concept
+absorbs that contribution), and which direction does it push the outcome?</p>
+<p><strong>Reading it.</strong> Left: features. Middle: one tier per concept level, nested
+top-to-bottom in DFS preorder so siblings sit together — for deep trees this produces
+multiple intermediate tiers (<code>feature → sub-concept → top-level concept</code>). Right: the
+±outcome bucket. Link width is summed magnitude; link colour inherits the source
+feature's branch hue. Each top-level concept splits its flow between <code>+outcome</code> and
+<code>-outcome</code>: rows where its summed contribution pushes the prediction <em>up</em> feed the <code>+</code>
+band, rows where it pushes <em>down</em> feed the <code>-</code> band.</p>
+<p><strong>What to do with the answer.</strong> This is the chart for the model narrative — the one
+slide that shows a non-technical audience how the signal physically moves from raw
+column to decision.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">concept_sankey</span>
+
+<span class="n">concept_sankey</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>C.2</em>.</p>
+</blockquote>
+<hr />
+<h2 id="part-d-why-this-prediction">Part D — Why this prediction?<a class="headerlink" href="#part-d-why-this-prediction" title="Permanent link">&para;</a></h2>
+<p>Parts B-C describe the model's average behaviour. Adjudication and adverse-action
+notices need single-row explanations.</p>
+<h3 id="d1-concept-violin">D.1 Concept violin<a class="headerlink" href="#d1-concept-violin" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept violin" src="../img/violin.png" width="640" /></p>
+<p><strong>The question.</strong> For each concept, what is the <em>distribution</em> of its contribution
+across all predictions — is it usually a small nudge or occasionally a large one?</p>
+<p><strong>Reading it.</strong> Each violin shows the per-sample concept-level SHAP (summed over
+descendant features) for one concept. Width at a given y-value is the density of rows
+with that contribution. Long thin tails mean the concept is normally quiet but
+occasionally swings the prediction by a lot.</p>
+<p><strong>What to do with the answer.</strong> Concepts with long tails are the ones to inspect at
+the row level — typical adjudication cases happen in the tail. Concepts with tight
+central mass are background contributors and rarely surface in single-row
+explanations.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">concept_violin</span>
+
+<span class="n">concept_violin</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>D.1</em>.</p>
+</blockquote>
+<h3 id="d2-concept-waterfall">D.2 Concept waterfall<a class="headerlink" href="#d2-concept-waterfall" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept waterfall (high-risk row)" src="../img/waterfall_high.png" width="640" /></p>
+<p><strong>The question.</strong> For <em>this specific prediction</em>, which concepts pushed it up, which
+pushed it down, and what was the net?</p>
+<p><strong>Reading it.</strong> A standard SHAP waterfall, except the bars are concepts rather than
+only features. Top: model base value. Each bar adds or subtracts the concept's
+row-level contribution (green = pushes the prediction up, red = pushes it down).
+Bottom: the model's predicted logit for this row. The <code>depth</code> parameter controls how
+deep into the tree to roll up; <code>depth=1</code> keeps the explanation at the level
+Income/Behaviour, <code>depth=2</code> descends to Delinquency vs Utilization.</p>
+<p><strong>What to do with the answer.</strong> This is the chart the adjudicator sees. The reviewer
+answers "the model declined this loan because <em>Behaviour &gt; Delinquency</em> was the
+dominant push, with <em>Income</em> partially offsetting" — a sentence the regulator's
+expected formulation.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConceptPredictionExplainer</span>
+
+<span class="n">explainer</span> <span class="o">=</span> <span class="n">ConceptPredictionExplainer</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">,</span>
+                                       <span class="n">base_value</span><span class="o">=</span><span class="n">expected_value</span><span class="p">)</span>
+<span class="n">explainer</span><span class="o">.</span><span class="n">waterfall</span><span class="p">(</span><span class="n">highest_risk_idx</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">explainer</span><span class="o">.</span><span class="n">waterfall</span><span class="p">(</span><span class="n">highest_risk_idx</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cells: <em>D.2a</em> (highest), <em>D.2b</em> (lowest), <em>D.2c</em> (depth-2 roll-up).</p>
+</blockquote>
+<hr />
+<h2 id="part-e-is-my-concept-tree-any-good">Part E — Is my concept tree any good?<a class="headerlink" href="#part-e-is-my-concept-tree-any-good" title="Permanent link">&para;</a></h2>
+<p>Parts B-D assumed the tree was sensible. This section interrogates the tree itself
+before the review meeting where someone else will.</p>
+<h3 id="e1-block-structured-feature-correlation">E.1 Block-structured feature correlation<a class="headerlink" href="#e1-block-structured-feature-correlation" title="Permanent link">&para;</a></h3>
+<p><img alt="Block-structured feature correlation" src="../img/feature_correlation.png" width="640" /></p>
+<p><strong>The question.</strong> Are features inside a concept correlated with each other
+(within-concept coherence)? Are concept boundaries leaky (off-diagonal correlation
+across siblings)?</p>
+<p><strong>Reading it.</strong> A Spearman correlation matrix, but features are ordered along the
+graph's DFS preorder so every concept forms a <em>contiguous block</em>. Each diagonal block
+is annotated with its within-block mean|ρ|. Black separator lines bound the top-level
+concepts.</p>
+<p><strong>What to do with the answer.</strong> A diagonal block that is uniformly white means "these
+features are not really related" — the concept may be a kitchen-sink grouping. A high
+off-diagonal block between two sibling concepts means "the boundary is in the wrong
+place" — that pair of concepts probably wants to be merged or re-cut.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">correlation_block</span><span class="p">,</span> <span class="n">feature_correlation</span>
+
+<span class="n">fc</span> <span class="o">=</span> <span class="n">feature_correlation</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;spearman&quot;</span><span class="p">)</span>
+<span class="n">correlation_block</span><span class="p">(</span><span class="n">fc</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Feature correlation&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>E.1</em>. The same <code>correlation_block</code> plot is reused for nullity
+(<em>E.2</em>) and SHAP (<em>E.5</em>) — different input, same shape.</p>
+</blockquote>
+<h3 id="e2-e3-whole-branch-missingness">E.2 + E.3 Whole-branch missingness<a class="headerlink" href="#e2-e3-whole-branch-missingness" title="Permanent link">&para;</a></h3>
+<p><img alt="Joint-missing-rate sunburst" src="../img/joint_missing.png" width="560" /></p>
+<p><strong>The question.</strong> If a concept's data went missing in production (upstream feed
+outage, vendor cutoff), would it tend to go missing as a <em>whole block</em>, or just one
+feature at a time?</p>
+<p><strong>Reading it.</strong> The sunburst sizes each sector by the fraction of rows where <em>every</em>
+descendant feature was simultaneously null. A large sector means whole-branch outages
+are realistic; a small sector means single-feature outages dominate.</p>
+<p><strong>What to do with the answer.</strong> This calibrates how seriously to take the ablation
+results in Part H. If joint-missing-rate is near zero, the "concept goes missing"
+simulation is pessimistic — the real operational risk is per-feature gaps. If
+joint-missing-rate is high, the simulation reflects reality and the AUC-drop numbers
+belong in the operational-risk register.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">joint_missing_map</span><span class="p">,</span> <span class="n">joint_missing_rate</span>
+
+<span class="n">joint_missing_map</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">joint_missing_rate</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cells: <em>E.2</em> (nullity correlation block), <em>E.3</em> (joint missing-rate
+sunburst).</p>
+</blockquote>
+<h3 id="e4-concept-coherence-vs-concept-importance-scatter">E.4 Concept-coherence vs concept-importance scatter<a class="headerlink" href="#e4-concept-coherence-vs-concept-importance-scatter" title="Permanent link">&para;</a></h3>
+<p><img alt="Coherence / importance scatter" src="../img/coherence_importance.png" width="640" /></p>
+<p><strong>The question.</strong> Is each concept <em>both</em> coherent (its features cluster together in
+the data) <em>and</em> important (the model leans on it)?</p>
+<p><strong>Reading it.</strong> One point per concept. X = within-concept mean(|ρ|); Y = summed
+|SHAP|. Dashed lines at the medians cut the plane into four quadrants:</p>
+<table>
+<thead>
+<tr>
+<th>Quadrant</th>
+<th>Read</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top-right (high coherence, high importance)</td>
+<td>"Well-designed"</td>
+<td>Keep. Document.</td>
+</tr>
+<tr>
+<td>Top-left (low coherence, high importance)</td>
+<td>"Kitchen sink"</td>
+<td>Split. The model relies on this concept but the concept itself is heterogeneous.</td>
+</tr>
+<tr>
+<td>Bottom-right (high coherence, low importance)</td>
+<td>"Redundant"</td>
+<td>Merge or drop. Coherent but unused.</td>
+</tr>
+<tr>
+<td>Bottom-left (low coherence, low importance)</td>
+<td>"Noise"</td>
+<td>Drop. Adds bookkeeping cost without explanatory value.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What to do with the answer.</strong> This is the slide for the tree-design review. A
+concept in the kitchen-sink quadrant is the most important kind of finding — the model
+<em>needs</em> this signal, but the way the signal has been <em>named</em> is misleading.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">coherence_importance</span><span class="p">,</span> <span class="n">coherence_importance_scatter</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">coh</span> <span class="o">=</span> <span class="n">coherence_importance</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">)</span>
+<span class="n">coherence_importance_scatter</span><span class="p">(</span><span class="n">coh</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>E.4</em>. The thresholds default to the medians across concepts; pass
+<code>coherence_threshold=</code> / <code>importance_threshold=</code> for absolute cutoffs.</p>
+</blockquote>
+<h3 id="e5-e6-shap-correlation-and-the-regulatory-overlay">E.5 + E.6 SHAP correlation and the regulatory overlay<a class="headerlink" href="#e5-e6-shap-correlation-and-the-regulatory-overlay" title="Permanent link">&para;</a></h3>
+<p><em>E.5</em> (SHAP correlation block, same plot as E.1 but on <code>shap_values</code> instead of <code>X</code>)
+answers a different question: <em>does the model treat two features as substitutes
+regardless of how correlated they are in the data?</em> Two raw-uncorrelated features can
+be SHAP-redundant; two raw-correlated features can be SHAP-different. Disagreement
+between <em>E.1</em> and <em>E.5</em> is informative.</p>
+<p><em>E.6</em> (regulatory tag overlay) is a single sunburst whose sectors are coloured by
+<code>metadata["tag"]</code> on each node — PII vs. financial vs. behavioural vs.
+bureau-supplied. The chart visually answers "what fraction of the model's importance
+flows through PII?" in one glance.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">correlation_block</span><span class="p">,</span> <span class="n">importance_sum</span><span class="p">,</span> <span class="n">regulatory_tag_overlay</span><span class="p">,</span> <span class="n">shap_correlation</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sc</span> <span class="o">=</span> <span class="n">shap_correlation</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">)</span>
+<span class="n">correlation_block</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;SHAP correlation&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">imp</span> <span class="o">=</span> <span class="n">importance_sum</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">)</span>
+<span class="n">regulatory_tag_overlay</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">imp</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;importance_sum&quot;</span><span class="p">,</span> <span class="n">tag_key</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cells: <em>E.5</em>, <em>E.6</em>.</p>
+</blockquote>
+<hr />
+<h2 id="part-f-does-importance-differ-across-cohorts">Part F — Does importance differ across cohorts?<a class="headerlink" href="#part-f-does-importance-differ-across-cohorts" title="Permanent link">&para;</a></h2>
+<p>The model has one global behaviour described in Part B. Operationally, it has
+<em>several</em> behaviours — one per segment.</p>
+<h3 id="f1-segment-concept-heatmap">F.1 Segment × concept heatmap<a class="headerlink" href="#f1-segment-concept-heatmap" title="Permanent link">&para;</a></h3>
+<p><img alt="Segment × concept importance heatmap" src="../img/segment_heatmap.png" width="640" /></p>
+<p><strong>The question.</strong> For each (segment, concept) pair, what is the mean|SHAP|
+contribution of that concept in that segment?</p>
+<p><strong>Reading it.</strong> Rows are concepts (DFS preorder), columns are segments (e.g. age
+buckets, geography, channel), colour is mean|SHAP|. A row that is uniformly red means
+"this concept always matters"; a row with a single dark column means "this concept
+matters <em>only</em> for that segment". Hover shows the per-cell value and the
+<code>feature_count</code> of the concept.</p>
+<p><strong>What to do with the answer.</strong> A concept that matters in one segment and not others
+is a place to look for a segment-specific failure mode — a missing-data pattern, a
+label-shift, a sub-population the training data under-represented.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">segment_concept_heatmap</span><span class="p">,</span> <span class="n">segment_importance</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">seg</span> <span class="o">=</span> <span class="n">segment_importance</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">,</span>
+                         <span class="n">segments</span><span class="o">=</span><span class="s2">&quot;age_bucket&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+<span class="n">segment_concept_heatmap</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">seg</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>F.1</em>. <code>segments=</code> accepts either a pandas Series aligned to
+<code>shap_values</code> rows or a column-name string referencing <code>X</code>.</p>
+</blockquote>
+<h3 id="f2-concept-importance-pareto-per-cohort">F.2 Concept-importance Pareto per cohort<a class="headerlink" href="#f2-concept-importance-pareto-per-cohort" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept-importance Pareto" src="../img/pareto.png" width="640" /></p>
+<p><strong>The question.</strong> Within each cohort, do a few concepts carry most of the explanation
+(steep Pareto) or is the importance spread across many (flat Pareto)?</p>
+<p><strong>Reading it.</strong> One curve per cohort. X = concept rank within cohort. Y = cumulative
+share of that cohort's total |SHAP|. A steep curve means the model is <em>concentrated</em>
+on a few concepts for that cohort; a flat curve means it spreads its attention.</p>
+<p><strong>What to do with the answer.</strong> Concentration is fragility: a model that depends on
+three concepts for the senior cohort is more brittle to those three concepts shifting
+than a model that depends on ten. This becomes the "diversification" axis of the
+operational-risk view.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">concept_pareto</span>
+
+<span class="n">concept_pareto</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">seg</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>F.2</em>.</p>
+</blockquote>
+<hr />
+<h2 id="part-g-where-does-the-model-behave-differently-across-protected-groups">Part G — Where does the model behave differently across protected groups?<a class="headerlink" href="#part-g-where-does-the-model-behave-differently-across-protected-groups" title="Permanent link">&para;</a></h2>
+<p>Fairness review needs a chart that says, for each concept, how differently the model
+treated group A vs. group B.</p>
+<h3 id="g1-concept-disparity-heatmap">G.1 Concept disparity heatmap<a class="headerlink" href="#g1-concept-disparity-heatmap" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept disparity heatmap" src="../img/disparity.png" width="640" /></p>
+<p><strong>The question.</strong> For each (concept, protected-group) pair, what is the disparity in
+mean|SHAP| against a reference group? Where in the tree does the model treat seniors
+differently from non-seniors?</p>
+<p><strong>Reading it.</strong> Rows are concepts; columns are protected groups, each compared against
+the explicit <code>reference</code> group (whose own column is exactly zero, kept as a visible
+baseline). Cell colour encodes the signed gap (diverging palette around zero). A red
+cell means that group received a larger mean|SHAP| contribution from that concept than
+the reference; a blue cell is the reverse.</p>
+<p><strong>What to do with the answer.</strong> Large-magnitude cells flag <em>concepts in which the
+model behaves differently across groups</em>. Whether that difference is a fairness issue
+depends on the legal framing — for some attributes any disparity is reportable; for
+others, only disparities that cannot be justified by an upstream business necessity.
+Either way, this is the chart for the conversation.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">concept_disparity</span><span class="p">,</span> <span class="n">concept_disparity_heatmap</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">disp</span> <span class="o">=</span> <span class="n">concept_disparity</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">shap_values</span><span class="p">,</span>
+                         <span class="n">protected</span><span class="o">=</span><span class="s2">&quot;senior_flag&quot;</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="s2">&quot;non_senior&quot;</span><span class="p">,</span>
+                         <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+<span class="n">concept_disparity_heatmap</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">disp</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>G.1</em>.</p>
+</blockquote>
+<hr />
+<h2 id="part-h-what-if-data-goes-missing-or-my-model-has-drifted">Part H — What if data goes missing, or my model has drifted?<a class="headerlink" href="#part-h-what-if-data-goes-missing-or-my-model-has-drifted" title="Permanent link">&para;</a></h2>
+<p>Two failure modes that are not visible at training time.</p>
+<h3 id="h1-auc-drop-under-whole-branch-ablation">H.1 AUC drop under whole-branch ablation<a class="headerlink" href="#h1-auc-drop-under-whole-branch-ablation" title="Permanent link">&para;</a></h3>
+<p><img alt="AUC drop per concept (permutation)" src="../img/auc_drop_permutation.png" width="560" /></p>
+<p><strong>The question.</strong> If a whole concept's data went missing in production, how much AUC
+would the model lose?</p>
+<p><strong>Reading it.</strong> A sunburst where each sector's size is its AUC drop (mean of ten
+permutation repeats by default). A large sector is a concept the model <em>cannot afford
+to lose</em>. The root sector is suppressed: ablating the root means "the model gets pure
+noise" and trivially tanks the score, which would dominate the colour scale.</p>
+<p><strong>What to do with the answer.</strong> Cross-reference with the joint-missing-rate sunburst
+from <em>E.3</em>. A concept that is both high-AUC-drop <em>and</em> high-joint-missing-rate is a
+real operational risk and belongs in the runbook. A concept that is high-AUC-drop but
+low-joint-missing-rate is a <em>theoretical</em> risk worth watching but not necessarily
+worth mitigating.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="n">auc_drop</span><span class="p">,</span> <span class="n">auc_drop_map</span>
+
+<span class="n">drop</span> <span class="o">=</span> <span class="n">auc_drop</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span>
+                <span class="n">feature_names</span><span class="o">=</span><span class="n">X_test</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;permutation&quot;</span><span class="p">,</span> <span class="n">n_repeats</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">auc_drop_map</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">drop</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cell: <em>H.1</em>. Three strategies are available — <code>permutation</code> (cheap,
+model-agnostic, the default), <code>retrain</code> (most faithful, most expensive),
+<code>shap_marginal</code> (approximation, almost free). See the
+<a href="../concepts/robustness/">robustness page</a> for the trade-offs.</p>
+</blockquote>
+<h3 id="h2-h3-drift-across-periods">H.2 + H.3 Drift across periods<a class="headerlink" href="#h2-h3-drift-across-periods" title="Permanent link">&para;</a></h3>
+<p><img alt="Concept drift across periods (lines)" src="../img/drift_lines.png" width="720" /></p>
+<p><img alt="Concept SHAP drift delta sunburst" src="../img/drift_sunburst.png" width="560" /></p>
+<p><strong>The question.</strong> Across two or more time periods (or model versions, or
+geographies), is each concept's contribution stable? Where is the drift concentrated?</p>
+<p><strong>Reading the lines.</strong> One line per concept, x = period in the order you supplied,
+y = <code>mean|SHAP|</code> for that concept in that period. Lines are sorted by
+max-across-periods so the most prominent concepts list first; an optional
+<code>max_concepts=</code> cap keeps the chart legible.</p>
+<p><strong>Reading the sunburst.</strong> A delta view: baseline period vs. target period. Sector
+area = concept's total contribution; colour = <em>direction and magnitude of change</em>
+(diverging palette). Red sectors got more important; blue sectors got less.</p>
+<p><strong>What to do with the answer.</strong> Lines tell you <em>whether</em> drift happened. The sunburst
+tells you <em>where</em> in the tree the drift is — which is the right format for retraining
+decisions ("we will retrain when <em>Behaviour &gt; Delinquency</em> moves by more than X
+mean|SHAP|").</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">concept_graph_xai</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">attribution_drift</span><span class="p">,</span> <span class="n">concept_drift_delta</span><span class="p">,</span> <span class="n">concept_drift_lines</span><span class="p">,</span>
+    <span class="n">concept_drift_sunburst</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># One (label, shap_values, feature_names) tuple per period, in order.</span>
+<span class="n">periods</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;2024Q1&quot;</span><span class="p">,</span> <span class="n">shap_q1</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;2024Q4&quot;</span><span class="p">,</span> <span class="n">shap_q4</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">dr</span> <span class="o">=</span> <span class="n">attribution_drift</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">periods</span><span class="p">)</span>
+<span class="n">concept_drift_lines</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">dr</span><span class="p">,</span> <span class="n">max_concepts</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">delta</span> <span class="o">=</span> <span class="n">concept_drift_delta</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span>
+                            <span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;2024Q1&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;2024Q4&quot;</span><span class="p">)</span>
+<span class="n">concept_drift_sunburst</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<blockquote>
+<p>Notebook cells: <em>H.2</em> (lines), <em>H.3</em> (sunburst).</p>
+</blockquote>
+<hr />
+<h2 id="part-i-export">Part I — Export<a class="headerlink" href="#part-i-export" title="Permanent link">&para;</a></h2>
+<p>Every plot returns a <code>plotly.graph_objects.Figure</code>, so static-PNG export is a
+one-liner via <code>kaleido</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="s2">&quot;importance.png&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<p>The <a href="../notebooks/01_credit_risk_walkthrough/">walkthrough notebook</a>'s <em>Part I</em>
+dumps the full set into an <code>out/</code> directory next to the notebook, which is what
+produced every image on this page.</p>
+<hr />
+<h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Pick a question</strong> to dig into from the Concepts section — each page is one of the
+  workflow questions above, with the API in full and the common pitfalls flagged:<ul>
+<li><a href="../concepts/structure/">Structure and importance</a></li>
+<li><a href="../concepts/composition/">Composition</a></li>
+<li><a href="../concepts/per-prediction/">Per-prediction explanations</a></li>
+<li><a href="../concepts/concept-design/">Concept design</a></li>
+<li><a href="../concepts/cohort/">Cohorts and segments</a></li>
+<li><a href="../concepts/fairness/">Fairness</a></li>
+<li><a href="../concepts/missing-values/">Missing values</a></li>
+<li><a href="../concepts/robustness/">Robustness and drift</a></li>
+</ul>
+</li>
+<li><strong>Bring your own graph</strong> following the
+  <a href="../concepts/concept-graphs/">concept graphs</a> reference.</li>
+<li><a href="../api/">API reference</a>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
