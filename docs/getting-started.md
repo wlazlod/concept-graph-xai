@@ -1,7 +1,8 @@
-# Getting Started
+# Getting started
 
 The shortest path from install to first sunburst. Once you have it
-working, the [Tour](tour.md) walks the full credit-risk scenario.
+working, [How it works](how-it-works.md) walks the full credit-risk
+scenario.
 
 ## Requirements
 
@@ -82,22 +83,23 @@ sunburst(graph, imp, value="importance_sum",
 If you see a three-sector sunburst (*Demographics*, *Income*,
 *Behaviour*) with *Income* dominating, you are set up.
 
-## Where to go next
+## Where next
 
-- **[Tour](tour.md)** — the same scenario the example notebook
-  walks, narrated end-to-end (training, SHAP, all eight question
-  views, PNG export).
-- **[Concept Graphs](user-guide/concept-graphs.md)** — the data
+- **[How it works](how-it-works.md)** — the same scenario the example
+  notebook walks, narrated end-to-end (training, SHAP, all eight
+  question views, PNG export).
+- **[Concept graphs](concepts/concept-graphs.md)** — the data
   model: dicts, YAML, NetworkX, metadata, validation.
-- **User Guide** — one page per workflow question
-  ([structure](user-guide/structure.md),
-  [composition](user-guide/composition.md),
-  [per-prediction](user-guide/per-prediction.md),
-  [concept-design](user-guide/concept-design.md),
-  [cohort](user-guide/cohort.md),
-  [fairness](user-guide/fairness.md),
-  [robustness](user-guide/robustness.md)).
-- **[API Reference](api/index.md)** — full function-level docs.
+- **Concepts** — one page per workflow question
+  ([structure](concepts/structure.md),
+  [composition](concepts/composition.md),
+  [per-prediction](concepts/per-prediction.md),
+  [concept-design](concepts/concept-design.md),
+  [cohort](concepts/cohort.md),
+  [fairness](concepts/fairness.md),
+  [robustness](concepts/robustness.md)).
+- **[API reference](api.md)** — full function-level docs.
+- **[FAQ](faq.md)** — the common gotchas.
 - **Example notebook** —
   [`examples/01_credit_risk_walkthrough.ipynb`](https://github.com/wlazlod/concept-graph-xai/blob/main/examples/01_credit_risk_walkthrough.ipynb)
   runs end-to-end on the Give Me Some Credit Kaggle dataset.

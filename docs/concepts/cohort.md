@@ -19,8 +19,8 @@ differences.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`segment_importance`](../api/metrics-importance.md) + [`segment_concept_heatmap`](../api/plotting.md) | Long-form (concept, segment) → value | "Which concepts matter in which segments?" |
-| [`segment_importance`](../api/metrics-importance.md) + [`concept_pareto`](../api/plotting.md) | Cumulative-importance curves per segment | "Is the model concentrated on a few concepts in this cohort or spread across many?" |
+| [`segment_importance`](../api.md#importance) + [`segment_concept_heatmap`](../api.md#plotting) | Long-form (concept, segment) → value | "Which concepts matter in which segments?" |
+| [`segment_importance`](../api.md#importance) + [`concept_pareto`](../api.md#plotting) | Cumulative-importance curves per segment | "Is the model concentrated on a few concepts in this cohort or spread across many?" |
 
 Both use the same `segment_importance` metric; the difference is in
 the plot.
@@ -41,10 +41,10 @@ seg = segment_importance(graph, feature_names, shap_values,
                          segments="age_bucket", X=X)
 
 # Heatmap — full-grid view.
-segment_concept_heatmap(seg).show()
+segment_concept_heatmap(graph, seg).show()
 
 # Pareto — concentration vs. spread.
-concept_pareto(seg).show()
+concept_pareto(graph, seg).show()
 ```
 
 ![Segment × concept importance heatmap](../img/segment_heatmap.png){ width="640" }
@@ -109,15 +109,15 @@ than a model that depends on ten. The Pareto chart is the natural
   are legitimate business segments (age, geography, channel). For
   *protected* attributes (sex, race, marital status), the
   [fairness](fairness.md) view (`concept_disparity`) is the right call
-  — its disparity computation is signed and pair-wise rather than
-  mean across cells.
+  — its disparity computation is signed and measured against an
+  explicit reference group rather than a mean across cells.
 
 ## Related
 
-- [`segment_importance`](../api/metrics-importance.md),
-  [`segment_concept_heatmap`](../api/plotting.md),
-  [`concept_pareto`](../api/plotting.md) — API reference.
+- [`segment_importance`](../api.md#importance),
+  [`segment_concept_heatmap`](../api.md#plotting),
+  [`concept_pareto`](../api.md#plotting) — API reference.
 - [Fairness](fairness.md) — the same row/column shape, different
   question.
-- [Tour, Part F](../tour.md#part-f-does-importance-differ-across-cohorts)
+- [How it works, Part F](../how-it-works.md#part-f-does-importance-differ-across-cohorts)
   — the same answers in narrative form.
