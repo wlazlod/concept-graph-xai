@@ -21,7 +21,7 @@ from raw column to decision.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`concept_interaction_matrix`](../api.md#correlation) + [`concept_interaction_heatmap`](../api.md#plotting) | Concept × concept SHAP interaction matrix | "Do these two concepts have a non-additive signal?" |
+| [`concept_interaction_matrix`](../api.md#interaction) + [`concept_interaction_heatmap`](../api.md#plotting) | Concept × concept SHAP interaction matrix | "Do these two concepts have a non-additive signal?" |
 | [`concept_sankey`](../api.md#plotting) | Multi-tier Sankey | "Where does the signal flow?" |
 
 The interaction matrix needs a `(N, F, F)` SHAP interaction tensor —

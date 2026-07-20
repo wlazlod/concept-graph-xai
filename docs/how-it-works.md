@@ -3,8 +3,8 @@
 `concept-graph-xai`'s promise is that every per-feature interpretability signal your
 stack already produces can be re-told at the level your committee actually argues:
 business concepts. This article walks one realistic credit-risk scenario end to end —
-the same scenario as the notebook
-[`examples/01_credit_risk_walkthrough.ipynb`](https://github.com/wlazlod/concept-graph-xai/blob/main/examples/01_credit_risk_walkthrough.ipynb),
+the same scenario as the
+[credit-risk walkthrough notebook](notebooks/01_credit_risk_walkthrough.ipynb),
 narrated as prose. Each section follows the same shape:
 
 1. **The question** — what you are actually trying to learn.
@@ -592,7 +592,8 @@ one-liner via `kaleido`:
 fig.write_image("importance.png", scale=2)
 ```
 
-The notebook's *Part I* dumps the full set into `examples/out/`, which is what
+The [walkthrough notebook](notebooks/01_credit_risk_walkthrough.ipynb)'s *Part I*
+dumps the full set into an `out/` directory next to the notebook, which is what
 produced every image on this page.
 
 ---
@@ -607,6 +608,7 @@ produced every image on this page.
     - [Is my concept tree any good?](concepts/concept-design.md)
     - [Does importance differ across cohorts?](concepts/cohort.md)
     - [Where does the model behave differently across protected groups?](concepts/fairness.md)
+    - [How often does data actually go missing?](concepts/missing-values.md)
     - [What if data goes missing or drifts?](concepts/robustness.md)
 - **Bring your own graph** following the
   [concept graphs](concepts/concept-graphs.md) reference.

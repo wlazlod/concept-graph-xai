@@ -88,7 +88,10 @@ next review meeting.
    minute.
 2. [How it works](how-it-works.md) — one realistic credit-risk scenario end-to-end,
    from training a model to defending its concept structure.
-3. [Concepts](concepts/concept-graphs.md) — the data model, then one page per workflow
+3. [Credit-risk walkthrough](notebooks/01_credit_risk_walkthrough.ipynb) — the same
+   scenario as a runnable notebook, executed end-to-end on the Give Me Some Credit
+   dataset.
+4. [Concepts](concepts/concept-graphs.md) — the data model, then one page per workflow
    question.
 
 ## Project

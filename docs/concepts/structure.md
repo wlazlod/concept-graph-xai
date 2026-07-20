@@ -61,9 +61,8 @@ signed_concept_bar(graph, boot).show()
 Saturated sectors are concepts whose aggregated `|SHAP|` (mean across
 rows, by default) exceeds `threshold`. Grey sectors are *defined* in
 the tree but invisible at inference time. The root is hidden so the
-top-level branches form the centre ring (the
-[`sunburst_layout`](../api.md#plotting) helper handles the re-parenting
-when `hide_root=True`, the default).
+top-level branches form the centre ring (an internal layout helper
+handles the re-parenting when `hide_root=True`, the default).
 
 Common causes of an unexpectedly grey sector:
 
@@ -80,8 +79,7 @@ Common causes of an unexpectedly grey sector:
 Each sector's area is `sum_{f in concept.descendants} mean_n(|SHAP[n,
 f]|)`. Hover shows the exact value and the `feature_count` carried in
 that subtree. Colour follows the top-level branch and is progressively
-lightened with depth (see
-[`branch_colors`](../api.md#plotting)) so a *Behaviour > Delinquency*
+lightened with depth so a *Behaviour > Delinquency*
 leaf is a paler shade of the same hue as its parent.
 
 ### Bootstrap bar
@@ -123,7 +121,7 @@ the report.
 - [`feature_counts`](../api.md#counts),
   [`importance_sum`](../api.md#importance),
   [`utilization`](../api.md#utilization),
-  [`bootstrap_importance`](../api.md#importance) — API
+  [`bootstrap_importance`](../api.md#bootstrap) — API
   reference.
 - [Composition](composition.md) — once you know which concepts matter,
   how do they combine?

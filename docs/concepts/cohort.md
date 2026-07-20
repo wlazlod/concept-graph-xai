@@ -19,8 +19,8 @@ differences.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`segment_importance`](../api.md#importance) + [`segment_concept_heatmap`](../api.md#plotting) | Long-form (concept, segment) → value | "Which concepts matter in which segments?" |
-| [`segment_importance`](../api.md#importance) + [`concept_pareto`](../api.md#plotting) | Cumulative-importance curves per segment | "Is the model concentrated on a few concepts in this cohort or spread across many?" |
+| [`segment_importance`](../api.md#segments) + [`segment_concept_heatmap`](../api.md#plotting) | Long-form (concept, segment) → value | "Which concepts matter in which segments?" |
+| [`segment_importance`](../api.md#segments) + [`concept_pareto`](../api.md#plotting) | Cumulative-importance curves per segment | "Is the model concentrated on a few concepts in this cohort or spread across many?" |
 
 Both use the same `segment_importance` metric; the difference is in
 the plot.
@@ -114,7 +114,7 @@ than a model that depends on ten. The Pareto chart is the natural
 
 ## Related
 
-- [`segment_importance`](../api.md#importance),
+- [`segment_importance`](../api.md#segments),
   [`segment_concept_heatmap`](../api.md#plotting),
   [`concept_pareto`](../api.md#plotting) — API reference.
 - [Fairness](fairness.md) — the same row/column shape, different

@@ -88,6 +88,9 @@ If you see a three-sector sunburst (*Demographics*, *Income*,
 - **[How it works](how-it-works.md)** — the same scenario the example
   notebook walks, narrated end-to-end (training, SHAP, all eight
   question views, PNG export).
+- **[Credit-risk walkthrough](notebooks/01_credit_risk_walkthrough.ipynb)** —
+  the runnable notebook, executed end-to-end on the Give Me Some
+  Credit Kaggle dataset.
 - **[Concept graphs](concepts/concept-graphs.md)** — the data
   model: dicts, YAML, NetworkX, metadata, validation.
 - **Concepts** — one page per workflow question
@@ -97,9 +100,7 @@ If you see a three-sector sunburst (*Demographics*, *Income*,
   [concept-design](concepts/concept-design.md),
   [cohort](concepts/cohort.md),
   [fairness](concepts/fairness.md),
+  [missing values](concepts/missing-values.md),
   [robustness](concepts/robustness.md)).
 - **[API reference](api.md)** — full function-level docs.
 - **[FAQ](faq.md)** — the common gotchas.
-- **Example notebook** —
-  [`examples/01_credit_risk_walkthrough.ipynb`](https://github.com/wlazlod/concept-graph-xai/blob/main/examples/01_credit_risk_walkthrough.ipynb)
-  runs end-to-end on the Give Me Some Credit Kaggle dataset.

@@ -40,7 +40,9 @@ uv add 'concept-graph-xai[shap]'  # + SHAP adapter
 uv add 'concept-graph-xai[png]'   # + kaleido for static PNG export
 ```
 
-For the example notebook:
+For the
+[credit-risk walkthrough notebook](https://wlazlod.github.io/concept-graph-xai/notebooks/01_credit_risk_walkthrough/)
+(rendered in the docs, source in `docs/notebooks/`):
 
 ```bash
 uv add 'concept-graph-xai[notebook]'

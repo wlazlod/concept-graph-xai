@@ -26,6 +26,7 @@ coverage.xml
 .ipynb_checkpoints/
 examples/out/
 examples/executed_*.ipynb
+docs/notebooks/out/
 
 # Local data
 data/
@@ -34,3 +35,4 @@ data/
 
 # Built docs
 site/
+.cache/

@@ -20,7 +20,7 @@ This page covers the two per-prediction plots.
 | Function | Returns | Use for |
 |---|---|---|
 | [`concept_violin`](../api.md#plotting) | Per-concept distribution of row-level SHAP | "How concentrated vs. spread is each concept's contribution?" |
-| [`ConceptPredictionExplainer.waterfall`](../api.md#plotting) | Single-row contribution cascade | "Why this specific prediction?" |
+| [`ConceptPredictionExplainer.waterfall`](../api.md#prediction-explainer) | Single-row contribution cascade | "Why this specific prediction?" |
 
 `concept_violin` is a population-level summary that prepares you to
 read individual rows. `waterfall` is the actual single-row chart.

@@ -19,7 +19,7 @@ heatmap rolls them up to the concept level.
 
 | Function | Returns | Use for |
 |---|---|---|
-| [`concept_disparity`](../api.md#importance) + [`concept_disparity_heatmap`](../api.md#plotting) | Long-form (concept, group) → signed gap vs a reference group | "Which concepts does the model lean on more heavily for group A than for group B?" |
+| [`concept_disparity`](../api.md#disparity) + [`concept_disparity_heatmap`](../api.md#plotting) | Long-form (concept, group) → signed gap vs a reference group | "Which concepts does the model lean on more heavily for group A than for group B?" |
 
 ## Minimal example
 
@@ -97,7 +97,7 @@ comparable between cells.
 
 ## Related
 
-- [`concept_disparity`](../api.md#importance),
+- [`concept_disparity`](../api.md#disparity),
   [`concept_disparity_heatmap`](../api.md#plotting) — API reference.
 - [Cohort](cohort.md) — same plot shape, legitimate-business-segment
   framing.

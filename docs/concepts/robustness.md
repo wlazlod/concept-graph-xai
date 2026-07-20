@@ -21,7 +21,7 @@ overall metrics look stable.
 | Function | Returns | Use for |
 |---|---|---|
 | [`auc_drop`](../api.md#ablation) + [`auc_drop_map`](../api.md#plotting) | Per-concept AUC drop (or any metric drop) under ablation | "What does the model lose if concept X disappears?" |
-| [`attribution_drift`](../api.md#importance) + [`concept_drift_lines`](../api.md#plotting) + [`concept_drift_sunburst`](../api.md#plotting) | Per-(period, concept) mean&#124;SHAP&#124;; line + delta-sunburst views | "Across periods, where is the concept-level drift?" |
+| [`attribution_drift`](../api.md#drift) + [`concept_drift_lines`](../api.md#plotting) + [`concept_drift_sunburst`](../api.md#plotting) | Per-(period, concept) mean&#124;SHAP&#124;; line + delta-sunburst views | "Across periods, where is the concept-level drift?" |
 
 ## Ablation: three strategies
 
@@ -140,7 +140,8 @@ sunburst sector is not smaller than its children.
 
 `auc_drop` tells you *what would happen* if a concept went missing.
 To answer *how often that actually happens*, pair with
-[`joint_missing_rate`](../api.md#missingness):
+[`joint_missing_rate`](../api.md#missingness) (covered in depth on the
+[missing-values page](missing-values.md)):
 
 ```python
 import pandas as pd
@@ -243,12 +244,12 @@ sunburst answers *where*, the lines answer *how monotonically*.
 ## Related
 
 - [`auc_drop`](../api.md#ablation),
-  [`attribution_drift`](../api.md#importance),
+  [`attribution_drift`](../api.md#drift),
   [`concept_drift_lines`](../api.md#plotting),
   [`concept_drift_sunburst`](../api.md#plotting),
   [`joint_missing_rate`](../api.md#missingness) — API
   reference.
-- [Concept-design](concept-design.md) — the joint-missing-rate
+- [Missing values](missing-values.md) — the joint-missing-rate
   sunburst that calibrates the realism of the AUC-drop scenario.
 - [Cohort](cohort.md) and [Fairness](fairness.md) — drift across
   segments or protected groups is often the right level at which to

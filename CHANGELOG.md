@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Credit-risk walkthrough notebook executed and published in the docs as a
+  Tutorials section (mkdocs-jupyter); API reference completed with the
+  v0.4-v0.6 modules (bootstrap, interaction, segments, disparity, drift,
+  prediction explainer, nine more plots); new missing-values concept page.
+
 ### Changed
 
 - Documentation restructured into a flat treecf-style layout: the guided tour

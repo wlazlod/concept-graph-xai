@@ -121,7 +121,10 @@ AUC-drop view should be taken seriously. If they are light,
 single-feature outages are far more common than block outages and the
 simulation is overly pessimistic — the action is to weight the
 AUC-drop numbers by joint-missing-rate before quoting them in the
-operational-risk register.
+operational-risk register. The
+[missing-values page](missing-values.md) covers the underlying rates
+(`column_missing_rate`, `joint_missing_rate`) and the joint-missing
+sunburst in detail.
 
 ## What to do with the answer
 
@@ -160,6 +163,8 @@ operational-risk register.
   reference.
 - [Structure](structure.md) — the importance and utilization views
   that operate *on* the tree you validate here.
+- [Missing values](missing-values.md) — the missingness rates behind
+  the nullity views, in detail.
 - [Robustness](robustness.md) — the AUC-drop view that the
   joint-missing-rate calibrates.
 - [How it works, Part E](../how-it-works.md#part-e-is-my-concept-tree-any-good) — the

@@ -48,6 +48,10 @@ plugins:
             separate_signature: true
             signature_crossrefs: true
             show_signature_annotations: true
+  - mkdocs-jupyter:
+      include: ["notebooks/*.ipynb"]
+      ignore: ["*.md"]  # keep jupytext's pandoc probe away from mkdocstrings ::: directives
+      execute: false  # notebook is committed executed
 
 markdown_extensions:
   - admonition
@@ -79,6 +83,9 @@ nav:
       - Is my concept tree any good?: concepts/concept-design.md
       - Does importance differ across cohorts?: concepts/cohort.md
       - Where does the model differ across protected groups?: concepts/fairness.md
+      - How often does data actually go missing?: concepts/missing-values.md
       - What if data goes missing or drifts?: concepts/robustness.md
+  - Tutorials:
+      - Credit-risk walkthrough: notebooks/01_credit_risk_walkthrough.ipynb
   - API reference: api.md
   - FAQ: faq.md
