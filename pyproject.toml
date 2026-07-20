@@ -83,7 +83,7 @@ include = [
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["examples", "dist", "build"]
+extend-exclude = ["examples", "docs/notebooks", "dist", "build"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
